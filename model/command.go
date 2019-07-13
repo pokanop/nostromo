@@ -2,12 +2,12 @@ package model
 
 // Command is a scope for running one or more commands
 type Command struct {
-	Name     string
-	Alias    string
-	Comment  string
-	Commands map[string]*Command
-	Subs     map[string]*Substitution
-	Code     *Code
+	Name     string                   `json:"name"`
+	Alias    string                   `json:"alias"`
+	Comment  string                   `json:"comment"`
+	Commands map[string]*Command      `json:"commands"`
+	Subs     map[string]*Substitution `json:"subs"`
+	Code     *Code                    `json:"code"`
 }
 
 // NewCommand returns a newly initialized command
