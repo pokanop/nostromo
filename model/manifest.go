@@ -13,3 +13,23 @@ func NewManifest() *Manifest {
 		Commands: map[string]*Command{},
 	}
 }
+
+func (m *Manifest) AddCommand(keyPath, command string) error {
+	return nil
+}
+
+func (m *Manifest) RemoveCommand(keyPath string) error {
+	return nil
+}
+
+func (m *Manifest) AddSubstitution(keyPath, name, sub string) error {
+	return nil
+}
+
+func (m *Manifest) RemoveSubstitution(keyPath, name string) error {
+	return nil
+}
+
+func (m *Manifest) Find(args []string) *Command {
+	return nil
+}

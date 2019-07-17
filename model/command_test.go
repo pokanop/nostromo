@@ -7,6 +7,29 @@ import (
 
 var depthKeys = []string{"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
 
+func TestNewCommand(t *testing.T) {
+	tests := []struct {
+		name     string
+		cmdName  string
+		alias    string
+		comment  string
+		code     *Code
+		expected *Command
+	}{
+		{"empty alias", "cmd", "", "", nil, &Command{nil, "cmd", "cmd", "cmd", "", map[string]*Command{}, map[string]*Substitution{}, nil}},
+		{"valid alias", "cmd", "cmd-alias", "comment", nil, &Command{nil, "cmd", "cmd", "cmd-alias", "comment", map[string]*Command{}, map[string]*Substitution{}, nil}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual := NewCommand(test.cmdName, test.alias, test.comment, test.code)
+			if !reflect.DeepEqual(test.expected, actual) {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
 func TestAddCommand(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -21,7 +44,7 @@ func TestAddCommand(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.command.AddCommand(test.add)
-			if test.add != nil && test.command.Commands[test.add.Name] == nil {
+			if test.add != nil && test.command.Commands[test.add.Alias] == nil {
 				t.Errorf("expected command to be added but was not")
 			}
 		})
@@ -42,14 +65,14 @@ func TestRemoveCommand(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.command.RemoveCommand(test.remove)
-			if test.remove != nil && test.command.Commands[test.remove.Name] != nil {
+			if test.remove != nil && test.command.Commands[test.remove.Alias] != nil {
 				t.Errorf("expected command to be removed but was not")
 			}
 		})
 	}
 }
 
-func TestAddSub(t *testing.T) {
+func TestAddSubstitution(t *testing.T) {
 	tests := []struct {
 		name    string
 		command *Command
@@ -62,15 +85,15 @@ func TestAddSub(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.command.AddSub(test.add)
-			if test.add != nil && test.command.Subs[test.add.Name] == nil {
+			test.command.AddSubstitution(test.add)
+			if test.add != nil && test.command.Subs[test.add.Alias] == nil {
 				t.Errorf("expected sub to be added but was not")
 			}
 		})
 	}
 }
 
-func TestRemoveSub(t *testing.T) {
+func TestRemoveSubstitution(t *testing.T) {
 	tests := []struct {
 		name    string
 		command *Command
@@ -83,8 +106,8 @@ func TestRemoveSub(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.command.RemoveSub(test.remove)
-			if test.remove != nil && test.command.Subs[test.remove.Name] != nil {
+			test.command.RemoveSubstitution(test.remove)
+			if test.remove != nil && test.command.Subs[test.remove.Alias] != nil {
 				t.Errorf("expected sub to be removed but was not")
 			}
 		})
@@ -100,9 +123,9 @@ func TestFind(t *testing.T) {
 	}{
 		{"empty key path", fakeCommand(1), "", nil},
 		{"wrong key path", fakeCommand(1), "wrong", nil},
-		{"valid key path first level", fakeCommand(1), "one", fakeCommand(1)},
-		{"valid key path nth level", fakeCommand(4), "one.two.three", fakeCommand(4).Commands["two"].Commands["three"]},
-		{"valid key path last level", fakeCommand(7), "one.two.three.four.five.six.seven", fakeCommand(7).Commands["two"].Commands["three"].Commands["four"].Commands["five"].Commands["six"].Commands["seven"]},
+		{"valid key path first level", fakeCommand(1), "one-alias", fakeCommand(1)},
+		{"valid key path nth level", fakeCommand(4), "one-alias.two-alias.three-alias", fakeCommand(4).Commands["two-alias"].Commands["three-alias"]},
+		{"valid key path last level", fakeCommand(7), "one-alias.two-alias.three-alias.four-alias.five-alias.six-alias.seven-alias", fakeCommand(7).Commands["two-alias"].Commands["three-alias"].Commands["four-alias"].Commands["five-alias"].Commands["six-alias"].Commands["seven-alias"]},
 	}
 
 	for _, test := range tests {
@@ -125,10 +148,10 @@ func TestShortestKeyPath(t *testing.T) {
 		{"empty key path", fakeCommand(1), "", ""},
 		{"missing key path", fakeCommand(1), "missing", ""},
 		{"missing long key path", fakeCommand(1), "this.is.missing", ""},
-		{"valid key path first level", fakeCommand(1), "one", "one"},
-		{"valid key path nth level", fakeCommand(3), "one.two", "one.two"},
-		{"valid key path last level", fakeCommand(4), "one.two.three.four", "one.two.three.four"},
-		{"valid key path shortened", fakeCommand(2), "one.two.three.four", "one.two"},
+		{"valid key path first level", fakeCommand(1), "one-alias", "one-alias"},
+		{"valid key path nth level", fakeCommand(3), "one-alias.two-alias", "one-alias.two-alias"},
+		{"valid key path last level", fakeCommand(4), "one-alias.two-alias.three-alias.four-alias", "one-alias.two-alias.three-alias.four-alias"},
+		{"valid key path shortened", fakeCommand(2), "one-alias.two-alias.three-alias.four-alias", "one-alias.two-alias"},
 	}
 
 	for _, test := range tests {
@@ -151,8 +174,9 @@ func TestExecutionString(t *testing.T) {
 		{"one level empty args", fakeCommand(1), []string{}, "sh -c one"},
 		{"one level no dot arg", fakeCommand(1), []string{"arg"}, "sh -c one arg"},
 		{"one level dot arg", fakeCommand(1), []string{"arg.1"}, "sh -c one arg.1"},
-		{"n level no dot args", fakeCommand(3).Commands["two"].Commands["three"], []string{"arg1", "arg2"}, "sh -c one two three arg1 arg2"},
-		{"n level dot args", fakeCommand(4).Commands["two"], []string{"arg.1", "arg2", "arg.3"}, "sh -c one two arg.1 arg2 arg.3"},
+		{"n level no dot args", fakeCommand(3).Commands["two-alias"].Commands["three-alias"], []string{"arg1", "arg2"}, "sh -c one two three arg1 arg2"},
+		{"n level dot args", fakeCommand(4).Commands["two-alias"], []string{"arg.1", "arg2", "arg.3"}, "sh -c one two arg.1 arg2 arg.3"},
+		{"n level dot sub args", fakeCommand(4).Commands["two-alias"], []string{"arg.1", "one-sub", "two-sub"}, "sh -c one two arg.1 one two"},
 	}
 
 	for _, test := range tests {
@@ -171,7 +195,7 @@ func fakeCommand(depth int) *Command {
 	for i := 0; i < depth; i++ {
 		name := depthKeys[i+1]
 		cmd = NewCommand(name, name+"-alias", "", nil)
-		cmd.AddSub(&Substitution{name, name + "-sub"})
+		cmd.AddSubstitution(&Substitution{name, name + "-sub"})
 		if lastCmd != nil {
 			lastCmd.AddCommand(cmd)
 		} else {

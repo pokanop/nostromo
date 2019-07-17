@@ -1,6 +1,11 @@
 package keypath
 
-import "strings"
+import (
+	"math"
+	"strings"
+)
+
+const delimiter = "."
 
 var subs = map[string]string{
 	".": "[#dot#]",
@@ -8,6 +13,48 @@ var subs = map[string]string{
 
 var revs = map[string]string{
 	"[#dot#]": ".",
+}
+
+func KeyPath(args []string) string {
+	return strings.Join(args, delimiter)
+}
+
+func Keys(keyPath string) []string {
+	return strings.Split(keyPath, delimiter)
+}
+
+func Get(keyPath string, n int) string {
+	keys := Keys(keyPath)
+	l := len(keys)
+	m := l
+	if m > 0 {
+		m--
+	}
+	n = clamp(n, 0, m)
+	if l > n {
+		return keys[n]
+	}
+	return ""
+}
+
+func DropFirst(keyPath string, n int) string {
+	keys := Keys(keyPath)
+	l := len(keys)
+	n = clamp(n, 0, l)
+	if l > n {
+		return KeyPath(keys[n:])
+	}
+	return ""
+}
+
+func DropLast(keyPath string, n int) string {
+	keys := Keys(keyPath)
+	l := len(keys)
+	n = clamp(n, 0, l)
+	if l > n {
+		return KeyPath(keys[:l-n])
+	}
+	return ""
 }
 
 func Encode(args []string) []string {
@@ -31,4 +78,8 @@ func swap(args []string, lookups map[string]string) []string {
 		mods[i] = a
 	}
 	return mods
+}
+
+func clamp(val, min, max int) int {
+	return int(math.Max(math.Min(float64(val), float64(max)), float64(min)))
 }

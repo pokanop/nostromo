@@ -3,6 +3,8 @@ package model
 import (
 	"fmt"
 	"strings"
+
+	"github.com/pokanop/nostromo/keypath"
 )
 
 // Command is a scope for running one or more commands
@@ -19,6 +21,11 @@ type Command struct {
 
 // NewCommand returns a newly initialized command
 func NewCommand(name, alias, comment string, code *Code) *Command {
+	// Default alias to same as command name
+	if len(alias) == 0 {
+		alias = name
+	}
+
 	return &Command{
 		KeyPath:  name,
 		Name:     name,
@@ -36,9 +43,9 @@ func (c *Command) AddCommand(cmd *Command) {
 		return
 	}
 
-	c.Commands[cmd.Name] = cmd
+	c.Commands[cmd.Alias] = cmd
 	cmd.parent = c
-	cmd.KeyPath = fmt.Sprintf("%s.%s", c.KeyPath, cmd.Name)
+	cmd.KeyPath = fmt.Sprintf("%s.%s", c.KeyPath, cmd.Alias)
 }
 
 // RemoveCommand at this scope
@@ -47,39 +54,36 @@ func (c *Command) RemoveCommand(cmd *Command) {
 		return
 	}
 
-	c.Commands[cmd.Name] = nil
+	c.Commands[cmd.Alias] = nil
 }
 
-// AddSub at this scope
-func (c *Command) AddSub(sub *Substitution) {
+// AddSubstitution at this scope
+func (c *Command) AddSubstitution(sub *Substitution) {
 	if sub == nil {
 		return
 	}
 
-	c.Subs[sub.Name] = sub
+	c.Subs[sub.Alias] = sub
 }
 
-// RemoveSub at this scope
-func (c *Command) RemoveSub(sub *Substitution) {
+// RemoveSubstitution at this scope
+func (c *Command) RemoveSubstitution(sub *Substitution) {
 	if sub == nil {
 		return
 	}
 
-	c.Subs[sub.Name] = nil
+	c.Subs[sub.Alias] = nil
 }
 
 // Find matching command for given key path
 func (c *Command) Find(keyPath string) *Command {
-	if c.Name == keyPath {
+	if c.Alias == keyPath {
 		return c
 	}
 
-	keys := strings.Split(keyPath, ".")
-	if len(keys) > 1 {
-		cmd := c.Commands[keys[1]]
-		if cmd != nil {
-			return cmd.Find(strings.Join(keys[1:], "."))
-		}
+	cmd := c.Commands[keypath.Get(keyPath, 1)]
+	if cmd != nil {
+		return cmd.Find(keypath.DropFirst(keyPath, 1))
 	}
 
 	return nil
@@ -87,9 +91,9 @@ func (c *Command) Find(keyPath string) *Command {
 
 // ShortestKeyPath valid key path
 func (c *Command) ShortestKeyPath(keyPath string) string {
-	keys := strings.Split(keyPath, ".")
-	for i := len(keys); i > 0; i-- {
-		kp := strings.Join(keys[:i], ".")
+	keys := keypath.Keys(keyPath)
+	for i := 0; i < len(keys); i++ {
+		kp := keypath.DropLast(keyPath, i)
 		cmd := c.Find(kp)
 		if cmd != nil {
 			return kp
@@ -110,7 +114,7 @@ func (c *Command) ExecutionString(args []string) string {
 
 func (c *Command) expand() string {
 	cmds := []string{}
-	c.walk(func(cmd *Command) {
+	c.walk(func(cmd *Command, stop *bool) {
 		cmds = append(cmds, cmd.Name)
 	})
 	return strings.Join(reversed(cmds), " ")
@@ -118,26 +122,31 @@ func (c *Command) expand() string {
 
 func (c *Command) substitute(arg string) string {
 	sub := arg
-	c.walk(func(cmd *Command) {
+	c.walk(func(cmd *Command, stop *bool) {
 		s := cmd.Subs[arg]
 		if s != nil {
 			sub = s.Name
+			*stop = true
 		}
 	})
 	return sub
 }
 
-func (c *Command) walk(fn func(*Command)) {
+func (c *Command) walk(fn func(*Command, *bool)) {
 	if fn == nil {
 		return
 	}
 
+	stop := false
 	cmd := c
 	for {
 		if cmd == nil {
 			break
 		}
-		fn(cmd)
+		fn(cmd, &stop)
+		if stop {
+			break
+		}
 		cmd = cmd.parent
 	}
 }
