@@ -5,7 +5,8 @@ import (
 	"strings"
 )
 
-const delimiter = "."
+// Delimiter used for key path operations
+const Delimiter = "."
 
 var subs = map[string]string{
 	".": "[#dot#]",
@@ -15,14 +16,21 @@ var revs = map[string]string{
 	"[#dot#]": ".",
 }
 
+// KeyPath for given argument list combined by `Delimiter`
+//
+// Returns `"foo.bar.baz"` for `["foo", "bar", "baz"]`
 func KeyPath(args []string) string {
-	return strings.Join(args, delimiter)
+	return strings.Join(args, Delimiter)
 }
 
+// Keys for given key path separated by `Delimiter`
+//
+// Returns `["foo", "bar", "baz"]` for `"foo.bar.baz"`
 func Keys(keyPath string) []string {
-	return strings.Split(keyPath, delimiter)
+	return strings.Split(keyPath, Delimiter)
 }
 
+// Get the nth key in the key path
 func Get(keyPath string, n int) string {
 	keys := Keys(keyPath)
 	l := len(keys)
@@ -37,6 +45,7 @@ func Get(keyPath string, n int) string {
 	return ""
 }
 
+// DropFirst n keys in the key path
 func DropFirst(keyPath string, n int) string {
 	keys := Keys(keyPath)
 	l := len(keys)
@@ -47,6 +56,7 @@ func DropFirst(keyPath string, n int) string {
 	return ""
 }
 
+// DropLast n keys in the key path
 func DropLast(keyPath string, n int) string {
 	keys := Keys(keyPath)
 	l := len(keys)
@@ -57,10 +67,12 @@ func DropLast(keyPath string, n int) string {
 	return ""
 }
 
+// Encode strings to operate safely as key paths
 func Encode(args []string) []string {
 	return swap(args, subs)
 }
 
+// Decode strings to operate outside of key paths
 func Decode(args []string) []string {
 	return swap(args, revs)
 }
