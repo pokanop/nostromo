@@ -19,15 +19,20 @@ type Command struct {
 	Code     *Code                    `json:"code"`
 }
 
-// NewCommand returns a newly initialized command
-func NewCommand(name, alias, comment string, code *Code) *Command {
+// newCommand returns a newly initialized command
+func newCommand(name, alias, comment string, code *Code) *Command {
 	// Default alias to same as command name
 	if len(alias) == 0 {
 		alias = name
 	}
 
+	// Default command to same as alias
+	if len(name) == 0 {
+		name = alias
+	}
+
 	return &Command{
-		KeyPath:  name,
+		KeyPath:  alias,
 		Name:     name,
 		Alias:    alias,
 		Comment:  comment,
@@ -37,8 +42,8 @@ func NewCommand(name, alias, comment string, code *Code) *Command {
 	}
 }
 
-// AddCommand at this scope
-func (c *Command) AddCommand(cmd *Command) {
+// addCommand at this scope
+func (c *Command) addCommand(cmd *Command) {
 	if cmd == nil {
 		return
 	}
@@ -48,8 +53,8 @@ func (c *Command) AddCommand(cmd *Command) {
 	cmd.KeyPath = fmt.Sprintf("%s.%s", c.KeyPath, cmd.Alias)
 }
 
-// RemoveCommand at this scope
-func (c *Command) RemoveCommand(cmd *Command) {
+// removeCommand at this scope
+func (c *Command) removeCommand(cmd *Command) {
 	if cmd == nil {
 		return
 	}
@@ -57,8 +62,8 @@ func (c *Command) RemoveCommand(cmd *Command) {
 	c.Commands[cmd.Alias] = nil
 }
 
-// AddSubstitution at this scope
-func (c *Command) AddSubstitution(sub *Substitution) {
+// addSubstitution at this scope
+func (c *Command) addSubstitution(sub *Substitution) {
 	if sub == nil {
 		return
 	}
@@ -66,8 +71,8 @@ func (c *Command) AddSubstitution(sub *Substitution) {
 	c.Subs[sub.Alias] = sub
 }
 
-// RemoveSubstitution at this scope
-func (c *Command) RemoveSubstitution(sub *Substitution) {
+// removeSubstitution at this scope
+func (c *Command) removeSubstitution(sub *Substitution) {
 	if sub == nil {
 		return
 	}
@@ -75,7 +80,17 @@ func (c *Command) RemoveSubstitution(sub *Substitution) {
 	c.Subs[sub.Alias] = nil
 }
 
+// count of the total number of commands including this one
+func (c *Command) count() int {
+	count := 0
+	c.forwardWalk(func(cmd *Command, stop *bool) {
+		count++
+	})
+	return count
+}
+
 // Find matching command for given key path
+// First key in path should be this command
 func (c *Command) Find(keyPath string) *Command {
 	if c.Alias == keyPath {
 		return c
@@ -89,8 +104,8 @@ func (c *Command) Find(keyPath string) *Command {
 	return nil
 }
 
-// ShortestKeyPath valid key path
-func (c *Command) ShortestKeyPath(keyPath string) string {
+// shortestKeyPath valid key path
+func (c *Command) shortestKeyPath(keyPath string) string {
 	keys := keypath.Keys(keyPath)
 	for i := 0; i < len(keys); i++ {
 		kp := keypath.DropLast(keyPath, i)
@@ -114,7 +129,7 @@ func (c *Command) ExecutionString(args []string) string {
 
 func (c *Command) expand() string {
 	cmds := []string{}
-	c.walk(func(cmd *Command, stop *bool) {
+	c.reverseWalk(func(cmd *Command, stop *bool) {
 		cmds = append(cmds, cmd.Name)
 	})
 	return strings.Join(reversed(cmds), " ")
@@ -122,7 +137,7 @@ func (c *Command) expand() string {
 
 func (c *Command) substitute(arg string) string {
 	sub := arg
-	c.walk(func(cmd *Command, stop *bool) {
+	c.reverseWalk(func(cmd *Command, stop *bool) {
 		s := cmd.Subs[arg]
 		if s != nil {
 			sub = s.Name
@@ -132,7 +147,7 @@ func (c *Command) substitute(arg string) string {
 	return sub
 }
 
-func (c *Command) walk(fn func(*Command, *bool)) {
+func (c *Command) reverseWalk(fn func(*Command, *bool)) {
 	if fn == nil {
 		return
 	}
@@ -149,6 +164,60 @@ func (c *Command) walk(fn func(*Command, *bool)) {
 		}
 		cmd = cmd.parent
 	}
+}
+
+func (c *Command) forwardWalk(fn func(*Command, *bool)) bool {
+	if fn == nil {
+		return true
+	}
+
+	stop := false
+	fn(c, &stop)
+	if stop {
+		return true
+	}
+
+	for _, cmd := range c.Commands {
+		if stop := cmd.forwardWalk(fn); stop {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *Command) build(keyPath, command string) {
+	if len(keyPath) == 0 {
+		return
+	}
+
+	cmd := c
+	keys := keypath.Keys(keyPath)
+
+	// Ensure this command is the first key
+	if cmd.Alias != keys[0] {
+		return
+	}
+
+	// Advance commands to next key and create in between
+	var last *Command
+	for i := 1; i < len(keys); i++ {
+		key := keys[i]
+		last = cmd
+		cmd = cmd.Commands[key]
+		if cmd == nil {
+			cmd = newCommand(key, key, "", nil)
+			last.addCommand(cmd)
+		}
+	}
+
+	// Swap command for alias if not specified
+	if len(command) == 0 {
+		command = cmd.Alias
+	}
+
+	// Last key will use actual command
+	cmd.Name = command
 }
 
 func reversed(strs []string) []string {
