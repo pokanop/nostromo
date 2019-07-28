@@ -200,11 +200,33 @@ func TestReverseWalk(t *testing.T) {
 		expected *Command
 	}{
 		{"nil fn", fakeCommand(1), nil, fakeCommand(1)},
+		{"stop fn", fakeCommand(1), func(cmd *Command, stop *bool) { *stop = true }, fakeCommand(1)},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.command.reverseWalk(test.fn)
+			if !reflect.DeepEqual(test.command, test.expected) {
+				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
+			}
+		})
+	}
+}
+
+func TestForwardWalk(t *testing.T) {
+	tests := []struct {
+		name     string
+		command  *Command
+		fn       func(*Command, *bool)
+		expected *Command
+	}{
+		{"nil fn", fakeCommand(1), nil, fakeCommand(1)},
+		{"stop fn", fakeCommand(1), func(cmd *Command, stop *bool) { *stop = true }, fakeCommand(1)},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.command.forwardWalk(test.fn)
 			if !reflect.DeepEqual(test.command, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
 			}

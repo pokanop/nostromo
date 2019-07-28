@@ -50,7 +50,7 @@ func (m *Manifest) RemoveCommand(keyPath string) error {
 
 	parent := cmd.parent
 	if parent == nil {
-		m.Commands[keyPath] = nil
+		delete(m.Commands, keyPath)
 		return nil
 	}
 
@@ -72,14 +72,14 @@ func (m *Manifest) AddSubstitution(keyPath, name, sub string) error {
 	return nil
 }
 
-// RemoveSubstitution at key path for given name
-func (m *Manifest) RemoveSubstitution(keyPath, name string) error {
+// RemoveSubstitution at key path for given alias
+func (m *Manifest) RemoveSubstitution(keyPath, alias string) error {
 	cmd := m.Find(keyPath)
 	if cmd == nil {
 		return fmt.Errorf("command not found")
 	}
 
-	s := &Substitution{name, ""}
+	s := &Substitution{"", alias}
 	cmd.removeSubstitution(s)
 
 	return nil

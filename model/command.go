@@ -59,7 +59,7 @@ func (c *Command) removeCommand(cmd *Command) {
 		return
 	}
 
-	c.Commands[cmd.Alias] = nil
+	delete(c.Commands, cmd.Alias)
 }
 
 // addSubstitution at this scope
@@ -77,7 +77,7 @@ func (c *Command) removeSubstitution(sub *Substitution) {
 		return
 	}
 
-	c.Subs[sub.Alias] = nil
+	delete(c.Subs, sub.Alias)
 }
 
 // count of the total number of commands including this one
