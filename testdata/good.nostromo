@@ -1,0 +1,14 @@
+{
+    "version": "1.0",
+    "commands": {
+        "alias": {
+            "keyPath": "alias",
+	        "name": "command",
+	        "alias": "alias",
+	        "comment": "",
+	        "commands": {},
+	        "subs": {},
+            "code": null
+        }
+    }
+}
