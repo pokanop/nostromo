@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/pokanop/nostromo/keypath"
@@ -93,6 +94,15 @@ func (m *Manifest) Find(keyPath string) *Command {
 		}
 	}
 	return nil
+}
+
+// AsJSON returns string representation used for storage
+func (m *Manifest) AsJSON() string {
+	b, err := json.MarshalIndent(m, "", "  ")
+	if err != nil {
+		return ""
+	}
+	return string(b)
 }
 
 // count of the total number of commands in this manifest

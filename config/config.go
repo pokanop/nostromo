@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/pokanop/nostromo/model"
+	"github.com/pokanop/nostromo/pathutil"
 )
 
 var validFileTypes = []string{".nostromo"}
@@ -27,7 +28,7 @@ func (c *Config) Parse(path string) (*model.Manifest, error) {
 		return nil, fmt.Errorf("file must be of type [%s]", strings.Join(validFileTypes, ", "))
 	}
 
-	f, err := os.Open(path)
+	f, err := os.Open(pathutil.Expand(path))
 	if err != nil {
 		return nil, err
 	}
