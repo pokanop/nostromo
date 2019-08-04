@@ -19,16 +19,21 @@ var validFileTypes = []string{".nostromo"}
 // to a manifest
 type Config struct {
 	path     string
-	manifest *model.Manifest
+	Manifest *model.Manifest
+}
+
+// NewConfig returns a new nostromo config
+func NewConfig(path string, manifest *model.Manifest) *Config {
+	return &Config{path, manifest}
 }
 
 // Parse nostromo config at path into a `Manifest` object
-func (c *Config) Parse(path string) (*model.Manifest, error) {
+func Parse(path string) (*Config, error) {
 	if !isValidFileType(path) {
 		return nil, fmt.Errorf("file must be of type [%s]", strings.Join(validFileTypes, ", "))
 	}
 
-	f, err := os.Open(pathutil.Expand(path))
+	f, err := os.Open(pathutil.Abs(path))
 	if err != nil {
 		return nil, err
 	}
@@ -45,10 +50,7 @@ func (c *Config) Parse(path string) (*model.Manifest, error) {
 		return nil, err
 	}
 
-	c.path = path
-	c.manifest = m
-
-	return m, nil
+	return NewConfig(path, m), nil
 }
 
 // Save nostromo config to file
@@ -57,21 +59,44 @@ func (c *Config) Save() error {
 		return fmt.Errorf("invalid path to save")
 	}
 
-	if c.manifest == nil {
+	if c.Manifest == nil {
 		return fmt.Errorf("manifest is nil")
 	}
 
-	b, err := json.MarshalIndent(c.manifest, "", "  ")
+	b, err := json.MarshalIndent(c.Manifest, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(c.path, b, 0644)
+	err = ioutil.WriteFile(pathutil.Abs(c.path), b, 0644)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// Delete nostromo config file
+func (c *Config) Delete() error {
+	if !c.Exists() {
+		return fmt.Errorf("invalid path to remove")
+	}
+
+	if err := os.Remove(pathutil.Abs(c.path)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Exists checks if nostromo config file exists
+func (c *Config) Exists() bool {
+	if len(c.path) == 0 {
+		return false
+	}
+
+	_, err := os.Stat(pathutil.Abs(c.path))
+	return err == nil
 }
 
 func isValidFileType(path string) bool {

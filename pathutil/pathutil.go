@@ -6,6 +6,15 @@ import (
 	"path/filepath"
 )
 
+// Abs tries to return absolute path if possible or original value
+func Abs(path string) string {
+	abspath, err := filepath.Abs(Expand(path))
+	if err != nil {
+		return path
+	}
+	return abspath
+}
+
 // HomeDir returns the home directory for the executing user.
 func HomeDir() (string, error) {
 	if home := os.Getenv("HOME"); home != "" {

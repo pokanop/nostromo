@@ -24,38 +24,45 @@ import (
 	"fmt"
 
 	"github.com/pokanop/nostromo/config"
+	"github.com/pokanop/nostromo/model"
 	"github.com/spf13/cobra"
 )
 
-// showCmd represents the show command
-var showCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show .nostromo configuration",
-	Long: `Prints .nostromo config as JSON.
-
-The config file is located at ~/.nostromo`,
+// initCmd represents the init command
+var initCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize .nostromo config file",
+	Long: `Create a .nostromo config file with defaults.
+	
+	The config file is located at ~/.nostromo`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := config.Parse("~/.nostromo")
+		cfg := config.NewConfig("~/.nostromo", model.NewManifest())
+		if cfg.Exists() {
+			fmt.Println(".nostromo config already exists")
+			return
+		}
+
+		err := cfg.Save()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		fmt.Println(cfg.Manifest.AsJSON())
+		fmt.Println("created .nostromo config")
 	},
 }
 
 func init() {
-	manifestCmd.AddCommand(showCmd)
+	manifestCmd.AddCommand(initCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// showCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// initCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// showCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }

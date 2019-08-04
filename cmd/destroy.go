@@ -27,12 +27,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// showCmd represents the show command
-var showCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show .nostromo configuration",
-	Long: `Prints .nostromo config as JSON.
-
+// destroyCmd represents the destroy command
+var destroyCmd = &cobra.Command{
+	Use:   "destroy",
+	Short: "Delete .nostromo configuration",
+	Long: `Deletes .nostromo config file.
+	
 The config file is located at ~/.nostromo`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := config.Parse("~/.nostromo")
@@ -41,21 +41,27 @@ The config file is located at ~/.nostromo`,
 			return
 		}
 
-		fmt.Println(cfg.Manifest.AsJSON())
+		err = cfg.Delete()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println("removed .nostromo config")
 	},
 }
 
 func init() {
-	manifestCmd.AddCommand(showCmd)
+	manifestCmd.AddCommand(destroyCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// showCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// destroyCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// showCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// destroyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }
