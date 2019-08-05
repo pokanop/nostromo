@@ -21,10 +21,7 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/pokanop/nostromo/config"
-	"github.com/pokanop/nostromo/model"
+	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
 )
 
@@ -36,19 +33,7 @@ var initCmd = &cobra.Command{
 	
 	The config file is located at ~/.nostromo`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg := config.NewConfig("~/.nostromo", model.NewManifest())
-		if cfg.Exists() {
-			fmt.Println(".nostromo config already exists")
-			return
-		}
-
-		err := cfg.Save()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println("created .nostromo config")
+		task.InitConfig()
 	},
 }
 

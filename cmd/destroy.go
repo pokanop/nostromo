@@ -21,9 +21,7 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/pokanop/nostromo/config"
+	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
 )
 
@@ -35,19 +33,7 @@ var destroyCmd = &cobra.Command{
 	
 The config file is located at ~/.nostromo`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := config.Parse("~/.nostromo")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = cfg.Delete()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println("removed .nostromo config")
+		task.DestroyConfig()
 	},
 }
 
