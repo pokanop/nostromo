@@ -27,7 +27,7 @@ import (
 
 // addcmdCmd represents the addcmd command
 var addcmdCmd = &cobra.Command{
-	Use:   "cmd [key.path] [command]",
+	Use:   "cmd [key.path] [alias]",
 	Short: "Add a command to nostromo manifest",
 	Long: `Add a command to nostromo manifest for a given key path.
 A key path is a '.' delimited string, e.g., "key.path" which represents

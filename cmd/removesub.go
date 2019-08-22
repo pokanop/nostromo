@@ -26,37 +26,37 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// addsubCmd represents the addsub command
-var addsubCmd = &cobra.Command{
-	Use:   "sub [key.path] [name] [alias]",
-	Short: "Add a substitution to nostromo manifest",
-	Long: `Add a substitution to nostromo manifest for a given key path and arg.
+// removesubCmd represents the removesub command
+var removesubCmd = &cobra.Command{
+	Use:   "sub [key.path] [alias]",
+	Short: "Remove a substitution from nostromo manifest",
+	Long: `Remove a substitution from nostromo manifest for a given key path and arg.
 A substitution allows any arguments as part of a command to be substituted
 by that value, e.g., "original-cmd //some/long/arg1 //some/long/arg2" can
 be substituted out with "cmd-alias sub1 sub2" by adding subs for the args.
 
-This will create the substitution for scopes beneath levels in
+This will remove the substitution for scopes beneath levels in
 the provided key path. A command scope can a tree of sub commands
 and substitutions.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !minArgs(3, cmd, args) {
+		if !minArgs(2, cmd, args) {
 			return
 		}
-		task.AddSubstitution(args[0], args[1], args[2])
+		task.RemoveSubstitution(args[0], args[1])
 	},
 }
 
 func init() {
-	addCmd.AddCommand(addsubCmd)
+	removeCmd.AddCommand(removesubCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// addsubCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// removesubCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// addsubCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// removesubCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }

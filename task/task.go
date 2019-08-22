@@ -97,8 +97,8 @@ func AddSubstitution(keyPath, name, alias string) {
 	saveConfig(cfg)
 }
 
-// RemoveSubtitution from the manifest
-func RemoveSubtitution(keyPath, name, alias string) {
+// RemoveSubstitution from the manifest
+func RemoveSubstitution(keyPath, alias string) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
