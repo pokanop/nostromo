@@ -21,18 +21,16 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
 // manifestCmd represents the manifest command
 var manifestCmd = &cobra.Command{
 	Use:   "manifest",
-	Short: "Commands to interact with the nostromo manifest",
-	Long:  "",
+	Short: "Interact with nostromo manifest",
+	Long:  "Interact with nostromo manifest",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(cmd.UsageString())
+		printUsage(cmd)
 	},
 }
 

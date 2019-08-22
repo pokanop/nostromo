@@ -26,13 +26,12 @@ func InitConfig() {
 
 // DestroyConfig deletes nostromo config file
 func DestroyConfig() {
-	cfg, err := config.Parse("~/.nostromo")
-	if err != nil {
-		fmt.Println(err)
+	cfg := checkConfig()
+	if cfg == nil {
 		return
 	}
 
-	err = cfg.Delete()
+	err := cfg.Delete()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -43,11 +42,88 @@ func DestroyConfig() {
 
 // ShowConfig for nostromo config file
 func ShowConfig() {
-	cfg, err := config.Parse("~/.nostromo")
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	fmt.Println(cfg.Manifest.AsJSON())
+}
+
+// AddCommand to the manifest
+func AddCommand(keyPath, command string) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	err := cfg.Manifest.AddCommand(keyPath, command)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println(cfg.Manifest.AsJSON())
+	saveConfig(cfg)
+}
+
+// RemoveCommand from the manifest
+func RemoveCommand(keyPath string) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	err := cfg.Manifest.RemoveCommand(keyPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	saveConfig(cfg)
+}
+
+// AddSubstitution to the manifest
+func AddSubstitution(keyPath, name, alias string) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	err := cfg.Manifest.AddSubstitution(keyPath, name, alias)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	saveConfig(cfg)
+}
+
+// RemoveSubtitution from the manifest
+func RemoveSubtitution(keyPath, name, alias string) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	err := cfg.Manifest.RemoveSubstitution(keyPath, alias)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	saveConfig(cfg)
+}
+
+func checkConfig() *config.Config {
+	cfg, err := config.Parse("~/.nostromo")
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return cfg
+}
+
+func saveConfig(cfg *config.Config) {
+	err := cfg.Save()
+	if err != nil {
+		fmt.Println(err)
+	}
 }

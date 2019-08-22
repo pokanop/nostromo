@@ -28,8 +28,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "nostromo",
@@ -62,22 +60,27 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
-
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nostromo.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" { // enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	}
-
 	viper.SetConfigName(".nostromo") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")     // adding home directory as first search path
 	viper.AutomaticEnv()             // read in environment variables that match
+}
 
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+func printUsage(cmd *cobra.Command) {
+	fmt.Println(cmd.Long)
+	fmt.Println()
+	fmt.Println(cmd.UsageString())
+}
+
+func minArgs(n int, cmd *cobra.Command, args []string) bool {
+	if len(args) < n {
+		fmt.Println("not enough arguments")
+		fmt.Println()
+		printUsage(cmd)
+		return false
 	}
+	return true
 }

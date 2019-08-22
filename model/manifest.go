@@ -61,13 +61,13 @@ func (m *Manifest) RemoveCommand(keyPath string) error {
 }
 
 // AddSubstitution with name and alias at key path
-func (m *Manifest) AddSubstitution(keyPath, name, sub string) error {
+func (m *Manifest) AddSubstitution(keyPath, name, alias string) error {
 	cmd := m.Find(keyPath)
 	if cmd == nil {
 		return fmt.Errorf("command not found")
 	}
 
-	s := &Substitution{name, sub}
+	s := &Substitution{name, alias}
 	cmd.addSubstitution(s)
 
 	return nil
