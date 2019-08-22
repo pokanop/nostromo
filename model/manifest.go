@@ -21,6 +21,16 @@ func NewManifest() *Manifest {
 	}
 }
 
+// Link a newly loaded manifest
+//
+// This must be run after parsing a manifest to walk the command
+// tree and build links.
+func (m *Manifest) Link() {
+	for _, cmd := range m.Commands {
+		cmd.link(nil)
+	}
+}
+
 // AddCommand tree up to key path
 func (m *Manifest) AddCommand(keyPath, command string) error {
 	if len(keyPath) == 0 {

@@ -186,6 +186,13 @@ func (c *Command) forwardWalk(fn func(*Command, *bool)) bool {
 	return false
 }
 
+func (c *Command) link(parent *Command) {
+	c.parent = parent
+	for _, cmd := range c.Commands {
+		cmd.link(c)
+	}
+}
+
 func (c *Command) build(keyPath, command string) {
 	if len(keyPath) == 0 {
 		return

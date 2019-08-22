@@ -49,6 +49,7 @@ func Parse(path string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	m.Link()
 
 	return NewConfig(path, m), nil
 }
