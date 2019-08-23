@@ -26,11 +26,6 @@ func newCommand(name, alias, comment string, code *Code) *Command {
 		alias = name
 	}
 
-	// Default command to same as alias
-	if len(name) == 0 {
-		name = alias
-	}
-
 	return &Command{
 		KeyPath:  alias,
 		Name:     name,
@@ -125,13 +120,15 @@ func (c *Command) ExecutionString(args []string) string {
 		subs = append(subs, c.substitute(arg))
 	}
 
-	return strings.TrimSpace(fmt.Sprintf("sh -c %s %s", cmd, strings.Join(subs, " ")))
+	return strings.TrimSpace(fmt.Sprintf("%s %s", cmd, strings.Join(subs, " ")))
 }
 
 func (c *Command) expand() string {
 	cmds := []string{}
 	c.reverseWalk(func(cmd *Command, stop *bool) {
-		cmds = append(cmds, cmd.Name)
+		if len(cmd.Name) > 0 {
+			cmds = append(cmds, cmd.Name)
+		}
 	})
 	return strings.Join(reversed(cmds), " ")
 }
@@ -214,14 +211,9 @@ func (c *Command) build(keyPath, command string) {
 		last = cmd
 		cmd = cmd.Commands[key]
 		if cmd == nil {
-			cmd = newCommand(key, key, "", nil)
+			cmd = newCommand("", key, "", nil)
 			last.addCommand(cmd)
 		}
-	}
-
-	// Swap command for alias if not specified
-	if len(command) == 0 {
-		command = cmd.Alias
 	}
 
 	// Last key will use actual command

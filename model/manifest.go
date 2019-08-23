@@ -42,7 +42,7 @@ func (m *Manifest) AddCommand(keyPath, command string) error {
 	cmd := m.Commands[key]
 	if cmd == nil {
 		// Create new command to build our the rest
-		cmd = newCommand(key, "", "", nil)
+		cmd = newCommand("", key, "", nil)
 		m.Commands[cmd.Alias] = cmd
 	}
 

@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/kr/pretty"
+
 	"github.com/pokanop/nostromo/keypath"
 )
 
@@ -20,7 +22,7 @@ func TestNewCommand(t *testing.T) {
 		expected *Command
 	}{
 		{"empty alias", "cmd", "", "", nil, &Command{nil, "cmd", "cmd", "cmd", "", map[string]*Command{}, map[string]*Substitution{}, nil}},
-		{"empty name", "", "alias", "", nil, &Command{nil, "alias", "alias", "alias", "", map[string]*Command{}, map[string]*Substitution{}, nil}},
+		{"empty name", "", "alias", "", nil, &Command{nil, "alias", "", "alias", "", map[string]*Command{}, map[string]*Substitution{}, nil}},
 		{"valid alias", "cmd", "cmd-alias", "comment", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", "comment", map[string]*Command{}, map[string]*Substitution{}, nil}},
 	}
 
@@ -174,13 +176,13 @@ func TestExecutionString(t *testing.T) {
 		args     []string
 		expected string
 	}{
-		{"one level nil args", fakeCommand(1), nil, "sh -c one"},
-		{"one level empty args", fakeCommand(1), []string{}, "sh -c one"},
-		{"one level no dot arg", fakeCommand(1), []string{"arg"}, "sh -c one arg"},
-		{"one level dot arg", fakeCommand(1), []string{"arg.1"}, "sh -c one arg.1"},
-		{"n level no dot args", fakeCommand(3).Commands["two-alias"].Commands["three-alias"], []string{"arg1", "arg2"}, "sh -c one two three arg1 arg2"},
-		{"n level dot args", fakeCommand(4).Commands["two-alias"], []string{"arg.1", "arg2", "arg.3"}, "sh -c one two arg.1 arg2 arg.3"},
-		{"n level dot sub args", fakeCommand(4).Commands["two-alias"], []string{"arg.1", "one-sub", "two-sub"}, "sh -c one two arg.1 one two"},
+		{"one level nil args", fakeCommand(1), nil, "one"},
+		{"one level empty args", fakeCommand(1), []string{}, "one"},
+		{"one level no dot arg", fakeCommand(1), []string{"arg"}, "one arg"},
+		{"one level dot arg", fakeCommand(1), []string{"arg.1"}, "one arg.1"},
+		{"n level no dot args", fakeCommand(3).Commands["two-alias"].Commands["three-alias"], []string{"arg1", "arg2"}, "one two three arg1 arg2"},
+		{"n level dot args", fakeCommand(4).Commands["two-alias"], []string{"arg.1", "arg2", "arg.3"}, "one two arg.1 arg2 arg.3"},
+		{"n level dot sub args", fakeCommand(4).Commands["two-alias"], []string{"arg.1", "one-sub", "two-sub"}, "one two arg.1 one two"},
 	}
 
 	for _, test := range tests {
@@ -286,6 +288,8 @@ func TestBuild(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			test.command.build(test.keyPath, test.commandStr)
 			if !reflect.DeepEqual(test.expected, test.command) {
+				pretty.Println(test.expected)
+				pretty.Println(test.command)
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
 			}
 		})
@@ -321,7 +325,7 @@ func fakeBuiltCommand(startDepth, endDepth int, keyPath, command string) *Comman
 	for i := 1; i < endDepth; i++ {
 		cmd = cmd.Commands[keys[i]]
 		if i >= startDepth {
-			cmd.Name = cmd.Alias
+			cmd.Name = ""
 			cmd.Subs = map[string]*Substitution{}
 		}
 	}

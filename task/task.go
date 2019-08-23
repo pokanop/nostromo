@@ -5,6 +5,7 @@ import (
 
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/model"
+	"github.com/pokanop/nostromo/shell"
 )
 
 // InitConfig of nostromo config file if not already initialized
@@ -119,12 +120,16 @@ func Run(args []string) {
 		return
 	}
 
-	sh, err := cfg.Manifest.ExecutionString(args)
+	cmd, err := cfg.Manifest.ExecutionString(args)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(sh)
+
+	err = shell.Run(cmd)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func checkConfig() *config.Config {
