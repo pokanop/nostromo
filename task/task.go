@@ -112,6 +112,21 @@ func RemoveSubstitution(keyPath, alias string) {
 	saveConfig(cfg)
 }
 
+// Run a command from the manifest
+func Run(args []string) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	sh, err := cfg.Manifest.ExecutionString(args)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(sh)
+}
+
 func checkConfig() *config.Config {
 	cfg, err := config.Parse("~/.nostromo")
 	if err != nil {

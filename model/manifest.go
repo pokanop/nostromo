@@ -115,6 +115,19 @@ func (m *Manifest) AsJSON() string {
 	return string(b)
 }
 
+// ExecutionString from input if possible or return error
+func (m *Manifest) ExecutionString(args []string) (string, error) {
+	for _, cmd := range m.Commands {
+		keyPath := cmd.shortestKeyPath(keypath.KeyPath(args))
+		if len(keyPath) > 0 {
+			count := len(keypath.Keys(keyPath))
+			return cmd.Find(keyPath).ExecutionString(args[count:]), nil
+		}
+	}
+
+	return "", fmt.Errorf("unable to find execution string")
+}
+
 // count of the total number of commands in this manifest
 func (m *Manifest) count() int {
 	count := 0

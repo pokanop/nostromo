@@ -124,6 +124,7 @@ func (c *Command) ExecutionString(args []string) string {
 	for _, arg := range args {
 		subs = append(subs, c.substitute(arg))
 	}
+
 	return strings.TrimSpace(fmt.Sprintf("sh -c %s %s", cmd, strings.Join(subs, " ")))
 }
 
