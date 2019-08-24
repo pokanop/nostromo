@@ -37,25 +37,12 @@ the alias which can be run as "key path" for the actual command provided.
 This will remove appropriate command scopes for all levels beneath
 the provided key path. A command scope can a tree of sub commands
 and substitutions.`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if !minArgs(1, cmd, args) {
-			return
-		}
 		task.RemoveCommand(args[0])
 	},
 }
 
 func init() {
 	removeCmd.AddCommand(removecmdCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// removecmdCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// removecmdCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }

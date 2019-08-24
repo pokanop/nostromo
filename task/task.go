@@ -21,8 +21,6 @@ func InitConfig() {
 		fmt.Println(err)
 		return
 	}
-
-	fmt.Println("created .nostromo config")
 }
 
 // DestroyConfig deletes nostromo config file
@@ -37,8 +35,6 @@ func DestroyConfig() {
 		fmt.Println(err)
 		return
 	}
-
-	fmt.Println("removed .nostromo config")
 }
 
 // ShowConfig for nostromo config file

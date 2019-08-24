@@ -38,25 +38,12 @@ be substituted out with "cmd-alias sub1 sub2" by adding subs for the args.
 This will create the substitution for scopes beneath levels in
 the provided key path. A command scope can a tree of sub commands
 and substitutions.`,
+	Args: cobra.MinimumNArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
-		if !minArgs(3, cmd, args) {
-			return
-		}
 		task.AddSubstitution(args[0], args[1], args[2])
 	},
 }
 
 func init() {
 	addCmd.AddCommand(addsubCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addsubCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addsubCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }

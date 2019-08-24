@@ -40,9 +40,6 @@ and reliable. The tool adds shortcuts to your .profile that call into the nostro
 Nostromo reads and manages all aliases within its own config file.
 This is used to find and execute the actual command intended as well as any
 substitutions to simplify calls.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -56,10 +53,6 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports Persistent Flags, which, if defined here,
-	// will be global for your application.
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -73,14 +66,4 @@ func printUsage(cmd *cobra.Command) {
 	fmt.Println(cmd.Long)
 	fmt.Println()
 	fmt.Println(cmd.UsageString())
-}
-
-func minArgs(n int, cmd *cobra.Command, args []string) bool {
-	if len(args) < n {
-		fmt.Println("not enough arguments")
-		fmt.Println()
-		printUsage(cmd)
-		return false
-	}
-	return true
 }

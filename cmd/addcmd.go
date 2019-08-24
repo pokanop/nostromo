@@ -36,25 +36,12 @@ the alias which can be run as "key path" for the actual command provided.
 This will create appropriate command scopes for all levels in
 the provided key path. A command scope can a tree of sub commands
 and substitutions.`,
+	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		if !minArgs(2, cmd, args) {
-			return
-		}
 		task.AddCommand(args[0], args[1])
 	},
 }
 
 func init() {
 	addCmd.AddCommand(addcmdCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addcmdCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addcmdCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }
