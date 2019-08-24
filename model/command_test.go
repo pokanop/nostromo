@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
-
 	"github.com/pokanop/nostromo/keypath"
 )
 
@@ -288,8 +286,6 @@ func TestBuild(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			test.command.build(test.keyPath, test.commandStr)
 			if !reflect.DeepEqual(test.expected, test.command) {
-				pretty.Println(test.expected)
-				pretty.Println(test.command)
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
 			}
 		})

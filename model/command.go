@@ -220,6 +220,10 @@ func (c *Command) build(keyPath, command string) {
 	cmd.Name = command
 }
 
+func (c *Command) String() string {
+	return fmt.Sprintf("[%s] %s -> %s", c.KeyPath, c.Name, c.Alias)
+}
+
 func reversed(strs []string) []string {
 	if strs == nil {
 		return nil
