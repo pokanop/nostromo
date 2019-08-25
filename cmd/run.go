@@ -44,7 +44,7 @@ it will execute the actual commands:
   
 Since nostromo will alias these commands in your shell profile you can omit
 the "nostromo run" command itself. For example, it will add:
-  alias foo='nostromo run foo -- "$*"'
+  alias foo='nostromo run foo "$*"'
 
 The power of these commands are that you can take complicated combinations
 of commands and build up a more intelligent way to run things as if you wrote
@@ -55,7 +55,8 @@ your own tool. Imagine composing commands to simplify a workflow:
 The root "build" command can do things like cd to a folder, set env vars, and
 run the main command. Lastly, substitutions can further shorten any sets of
 commands that need to be run across the scope of the command.`,
-	Args: cobra.MinimumNArgs(1),
+	Args:               cobra.MinimumNArgs(1),
+	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		task.Run(args)
 	},
