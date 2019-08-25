@@ -134,7 +134,7 @@ func TestFind(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual := test.command.Find(test.keyPath)
+			actual := test.command.find(test.keyPath)
 			if !reflect.DeepEqual(test.expected, actual) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
@@ -185,7 +185,7 @@ func TestExecutionString(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if actual := test.command.ExecutionString(test.args); test.expected != actual {
+			if actual := test.command.executionString(test.args); test.expected != actual {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})

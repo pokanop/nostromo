@@ -8,8 +8,8 @@ type Code struct {
 	Snippet  string `json:"snippet"`
 }
 
-// ExecutionString for execution translated from code snippet and language
-func (c *Code) ExecutionString() (string, error) {
+// executionString for execution translated from code snippet and language
+func (c *Code) executionString() (string, error) {
 	switch c.Language {
 	case "ruby":
 		return fmt.Sprintf("ruby -e '%s'", c.Snippet), nil

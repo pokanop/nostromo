@@ -99,7 +99,7 @@ func (m *Manifest) RemoveSubstitution(keyPath, alias string) error {
 // Find command at key path or nil if missing
 func (m *Manifest) Find(keyPath string) *Command {
 	for _, cmd := range m.Commands {
-		if c := cmd.Find(keyPath); c != nil {
+		if c := cmd.find(keyPath); c != nil {
 			return c
 		}
 	}
@@ -121,7 +121,7 @@ func (m *Manifest) ExecutionString(args []string) (string, error) {
 		keyPath := cmd.shortestKeyPath(keypath.KeyPath(args))
 		if len(keyPath) > 0 {
 			count := len(keypath.Keys(keyPath))
-			return cmd.Find(keyPath).ExecutionString(args[count:]), nil
+			return cmd.find(keyPath).executionString(args[count:]), nil
 		}
 	}
 
