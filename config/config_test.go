@@ -43,6 +43,7 @@ func TestSave(t *testing.T) {
 	}{
 		{"invalid path", "", nil, true},
 		{"nil manifest", "path", nil, true},
+		{"no perms", "/tmp/no-perms/.nostromo", fakeManifest(), true},
 		{"valid manifest", "/tmp/test.nostromo", fakeManifest(), false},
 	}
 

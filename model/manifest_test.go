@@ -1,8 +1,12 @@
 package model
 
 import (
+	"io/ioutil"
+	"os"
 	"strconv"
 	"testing"
+
+	"github.com/pokanop/nostromo/pathutil"
 )
 
 func TestManifestAddCommand(t *testing.T) {
@@ -128,6 +132,65 @@ func TestManifestRemoveSubstitution(t *testing.T) {
 				if sub != nil {
 					t.Errorf("expected substitution to not exist")
 				}
+			}
+		})
+	}
+}
+
+func TestLink(t *testing.T) {
+	tests := []struct {
+		name     string
+		manifest *Manifest
+	}{
+		{"valid manifest", fakeManifest(2, 4)},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			for _, cmd := range test.manifest.Commands {
+				cmd.forwardWalk(func(child *Command, stop *bool) {
+					child.parent = nil
+				})
+			}
+
+			test.manifest.Link()
+
+			for _, cmd := range test.manifest.Commands {
+				cmd.forwardWalk(func(child *Command, stop *bool) {
+					if child != cmd && child.parent == nil {
+						t.Errorf("command parent not linked correctly")
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestAsJSON(t *testing.T) {
+	tests := []struct {
+		name        string
+		manifest    *Manifest
+		fixturePath string
+	}{
+		{"valid manifest", fakeManifest(2, 4), "../testdata/manifest.json"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			f, err := os.Open(pathutil.Abs(test.fixturePath))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
+
+			b, err := ioutil.ReadAll(f)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			expected := string(b)
+			if actual := test.manifest.AsJSON(); actual != expected {
+				t.Errorf("expected: %s, actual: %s", expected, actual)
 			}
 		})
 	}
