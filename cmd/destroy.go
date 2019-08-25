@@ -28,10 +28,10 @@ import (
 // destroyCmd represents the destroy command
 var destroyCmd = &cobra.Command{
 	Use:   "destroy",
-	Short: "Delete .nostromo configuration",
-	Long: `Deletes .nostromo config file.
+	Short: "Delete nostromo configuration",
+	Long: `Deletes nostromo config file.
 	
-The config file is located at ~/.nostromo`,
+The config file is located at ~/.nostromo/config`,
 	Run: func(cmd *cobra.Command, args []string) {
 		task.DestroyConfig()
 	},

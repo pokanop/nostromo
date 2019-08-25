@@ -63,5 +63,5 @@ commands that need to be run across the scope of the command.`,
 }
 
 func init() {
-	RootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(runCmd)
 }

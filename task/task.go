@@ -5,14 +5,21 @@ import (
 
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/model"
+	"github.com/pokanop/nostromo/pathutil"
 	"github.com/pokanop/nostromo/shell"
 )
 
 // InitConfig of nostromo config file if not already initialized
 func InitConfig() {
-	cfg := config.NewConfig("~/.nostromo", model.NewManifest())
+	cfg := config.NewConfig("~/.nostromo/config", model.NewManifest())
 	if cfg.Exists() {
-		fmt.Println(".nostromo config already exists")
+		fmt.Println("nostromo config already exists")
+		return
+	}
+
+	err := pathutil.EnsurePath("~/.nostromo")
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -131,7 +138,7 @@ func Run(args []string) {
 }
 
 func checkConfig() *config.Config {
-	cfg, err := config.Parse("~/.nostromo")
+	cfg, err := config.Parse("~/.nostromo/config")
 	if err != nil {
 		fmt.Println(err)
 		return nil

@@ -5,16 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 )
 
-var validFileTypes = []string{".nostromo"}
-
-// Config manages working with .nostromo configuration files
+// Config manages working with nostromo configuration files
 // The file format is JSON this just provides convenience around converting
 // to a manifest
 type Config struct {
@@ -29,10 +25,6 @@ func NewConfig(path string, manifest *model.Manifest) *Config {
 
 // Parse nostromo config at path into a `Manifest` object
 func Parse(path string) (*Config, error) {
-	if !isValidFileType(path) {
-		return nil, fmt.Errorf("file must be of type [%s]", strings.Join(validFileTypes, ", "))
-	}
-
 	f, err := os.Open(pathutil.Abs(path))
 	if err != nil {
 		return nil, err
@@ -98,14 +90,4 @@ func (c *Config) Exists() bool {
 
 	_, err := os.Stat(pathutil.Abs(c.path))
 	return err == nil
-}
-
-func isValidFileType(path string) bool {
-	ext := filepath.Ext(path)
-	for _, validFileType := range validFileTypes {
-		if ext == validFileType {
-			return true
-		}
-	}
-	return false
 }

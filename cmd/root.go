@@ -28,8 +28,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// RootCmd represents the base command when called without any subcommands
-var RootCmd = &cobra.Command{
+// rootCmd represents the base command when called without any subcommands
+var rootCmd = &cobra.Command{
 	Use:   "nostromo",
 	Short: "Nostromo is a tool to manage aliases",
 	Long: `Nostromo is a CLI to manage aliases through simple commands to add and remove
@@ -45,7 +45,7 @@ substitutions to simplify calls.`,
 // Execute adds all child commands to the root command sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := RootCmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(-1)
 	}
@@ -57,9 +57,10 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	viper.SetConfigName(".nostromo") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")     // adding home directory as first search path
-	viper.AutomaticEnv()             // read in environment variables that match
+	viper.SetConfigName("env")             // name of config file (without extension)
+	viper.AddConfigPath("$HOME")           // adding home directory as first search path
+	viper.AddConfigPath("$HOME/.nostromo") // adding .nostromo directory to search path
+	viper.AutomaticEnv()                   // read in environment variables that match
 }
 
 func printUsage(cmd *cobra.Command) {

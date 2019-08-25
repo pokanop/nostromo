@@ -39,3 +39,8 @@ func Expand(path string) string {
 
 	return filepath.Join(dir, path[1:])
 }
+
+// EnsurePath creates all directories up to and including path
+func EnsurePath(path string) error {
+	return os.MkdirAll(Abs(path), 0755)
+}
