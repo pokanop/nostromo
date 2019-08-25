@@ -16,11 +16,7 @@ func InitConfig() {
 		return
 	}
 
-	err := cfg.Save()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	saveConfig(cfg)
 }
 
 // DestroyConfig deletes nostromo config file
@@ -45,6 +41,12 @@ func ShowConfig() {
 	}
 
 	fmt.Println(cfg.Manifest.AsJSON())
+
+	lines, err := shell.InitFileLines()
+	if err != nil {
+		return
+	}
+	fmt.Println(lines)
 }
 
 // AddCommand to the manifest
@@ -139,6 +141,11 @@ func checkConfig() *config.Config {
 
 func saveConfig(cfg *config.Config) {
 	err := cfg.Save()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = shell.Commit(cfg.Manifest)
 	if err != nil {
 		fmt.Println(err)
 	}
