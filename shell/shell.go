@@ -15,8 +15,6 @@ func Run(command string) error {
 		return fmt.Errorf("cannot run empty command")
 	}
 
-	fmt.Println(command)
-
 	command = strings.TrimSuffix(command, "\n")
 
 	cmd := exec.Command("sh", "-c", command)
