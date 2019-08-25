@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"github.com/pokanop/nostromo/task"
-
 	"github.com/spf13/cobra"
 )
 

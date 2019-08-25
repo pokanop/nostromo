@@ -25,7 +25,6 @@ import (
 	"fmt"
 
 	"github.com/pokanop/nostromo/pathutil"
-
 	"github.com/spf13/cobra"
 )
 
