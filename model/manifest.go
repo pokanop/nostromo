@@ -32,7 +32,7 @@ func (m *Manifest) Link() {
 }
 
 // AddCommand tree up to key path
-func (m *Manifest) AddCommand(keyPath, command string) error {
+func (m *Manifest) AddCommand(keyPath, command, description string) error {
 	if len(keyPath) == 0 {
 		return fmt.Errorf("invalid key path")
 	}
@@ -47,7 +47,7 @@ func (m *Manifest) AddCommand(keyPath, command string) error {
 	}
 
 	// Modify or build the rest of the key path of commands
-	cmd.build(keyPath, command)
+	cmd.build(keyPath, command, description)
 
 	return nil
 }

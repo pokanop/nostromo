@@ -114,7 +114,7 @@ func TestExists(t *testing.T) {
 
 func fakeManifest() *model.Manifest {
 	m := model.NewManifest()
-	m.AddCommand("one.two.three", "command")
+	m.AddCommand("one.two.three", "command", "")
 	m.AddSubstitution("one.two", "name", "alias")
 	return m
 }

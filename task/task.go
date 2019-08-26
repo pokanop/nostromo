@@ -58,13 +58,13 @@ func ShowConfig() {
 }
 
 // AddCommand to the manifest
-func AddCommand(keyPath, command string) {
+func AddCommand(keyPath, command, description string) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
 	}
 
-	err := cfg.Manifest.AddCommand(keyPath, command)
+	err := cfg.Manifest.AddCommand(keyPath, command, description)
 	if err != nil {
 		fmt.Println(err)
 		return

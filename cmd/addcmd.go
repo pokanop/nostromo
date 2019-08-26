@@ -25,6 +25,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var description string
+
 // addcmdCmd represents the addcmd command
 var addcmdCmd = &cobra.Command{
 	Use:   "cmd [key.path] [alias]",
@@ -38,10 +40,13 @@ the provided key path. A command scope can a tree of sub commands
 and substitutions.`,
 	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		task.AddCommand(args[0], args[1])
+		task.AddCommand(args[0], args[1], description)
 	},
 }
 
 func init() {
 	addCmd.AddCommand(addcmdCmd)
+
+	// Flags
+	addcmdCmd.Flags().StringVarP(&description, "description", "d", "", "Description of the command to add")
 }

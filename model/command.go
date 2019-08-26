@@ -9,31 +9,31 @@ import (
 
 // Command is a scope for running one or more commands
 type Command struct {
-	parent   *Command
-	KeyPath  string                   `json:"keyPath"`
-	Name     string                   `json:"name"`
-	Alias    string                   `json:"alias"`
-	Comment  string                   `json:"comment"`
-	Commands map[string]*Command      `json:"commands"`
-	Subs     map[string]*Substitution `json:"subs"`
-	Code     *Code                    `json:"code"`
+	parent      *Command
+	KeyPath     string                   `json:"keyPath"`
+	Name        string                   `json:"name"`
+	Alias       string                   `json:"alias"`
+	Description string                   `json:"description"`
+	Commands    map[string]*Command      `json:"commands"`
+	Subs        map[string]*Substitution `json:"subs"`
+	Code        *Code                    `json:"code"`
 }
 
 // newCommand returns a newly initialized command
-func newCommand(name, alias, comment string, code *Code) *Command {
+func newCommand(name, alias, description string, code *Code) *Command {
 	// Default alias to same as command name
 	if len(alias) == 0 {
 		alias = name
 	}
 
 	return &Command{
-		KeyPath:  alias,
-		Name:     name,
-		Alias:    alias,
-		Comment:  comment,
-		Commands: map[string]*Command{},
-		Subs:     map[string]*Substitution{},
-		Code:     code,
+		KeyPath:     alias,
+		Name:        name,
+		Alias:       alias,
+		Description: description,
+		Commands:    map[string]*Command{},
+		Subs:        map[string]*Substitution{},
+		Code:        code,
 	}
 }
 
@@ -192,7 +192,7 @@ func (c *Command) link(parent *Command) {
 	}
 }
 
-func (c *Command) build(keyPath, command string) {
+func (c *Command) build(keyPath, command, description string) {
 	if len(keyPath) == 0 {
 		return
 	}
@@ -219,6 +219,7 @@ func (c *Command) build(keyPath, command string) {
 
 	// Last key will use actual command
 	cmd.Name = command
+	cmd.Description = description
 }
 
 func (c *Command) String() string {

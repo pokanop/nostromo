@@ -12,21 +12,21 @@ var depthKeys = []string{"zero", "one", "two", "three", "four", "five", "six", "
 
 func TestNewCommand(t *testing.T) {
 	tests := []struct {
-		name     string
-		cmdName  string
-		alias    string
-		comment  string
-		code     *Code
-		expected *Command
+		name        string
+		cmdName     string
+		alias       string
+		description string
+		code        *Code
+		expected    *Command
 	}{
 		{"empty alias", "cmd", "", "", nil, &Command{nil, "cmd", "cmd", "cmd", "", map[string]*Command{}, map[string]*Substitution{}, nil}},
 		{"empty name", "", "alias", "", nil, &Command{nil, "alias", "", "alias", "", map[string]*Command{}, map[string]*Substitution{}, nil}},
-		{"valid alias", "cmd", "cmd-alias", "comment", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", "comment", map[string]*Command{}, map[string]*Substitution{}, nil}},
+		{"valid alias", "cmd", "cmd-alias", "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", "description", map[string]*Command{}, map[string]*Substitution{}, nil}},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual := newCommand(test.cmdName, test.alias, test.comment, test.code)
+			actual := newCommand(test.cmdName, test.alias, test.description, test.code)
 			if !reflect.DeepEqual(test.expected, actual) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
@@ -284,7 +284,7 @@ func TestBuild(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.command.build(test.keyPath, test.commandStr)
+			test.command.build(test.keyPath, test.commandStr, "")
 			if !reflect.DeepEqual(test.expected, test.command) {
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
 			}

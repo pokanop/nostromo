@@ -5,25 +5,25 @@
       "keyPath": "0-one-alias",
       "name": "0-one",
       "alias": "0-one-alias",
-      "comment": "",
+      "description": "",
       "commands": {
         "0-two-alias": {
           "keyPath": "0-one-alias.0-two-alias",
           "name": "0-two",
           "alias": "0-two-alias",
-          "comment": "",
+          "description": "",
           "commands": {
             "0-three-alias": {
               "keyPath": "0-one-alias.0-two-alias.0-three-alias",
               "name": "0-three",
               "alias": "0-three-alias",
-              "comment": "",
+              "description": "",
               "commands": {
                 "0-four-alias": {
                   "keyPath": "0-one-alias.0-two-alias.0-three-alias.0-four-alias",
                   "name": "0-four",
                   "alias": "0-four-alias",
-                  "comment": "",
+                  "description": "",
                   "commands": {},
                   "subs": {
                     "0-four-sub": {
@@ -64,25 +64,25 @@
       "keyPath": "1-one-alias",
       "name": "1-one",
       "alias": "1-one-alias",
-      "comment": "",
+      "description": "",
       "commands": {
         "1-two-alias": {
           "keyPath": "1-one-alias.1-two-alias",
           "name": "1-two",
           "alias": "1-two-alias",
-          "comment": "",
+          "description": "",
           "commands": {
             "1-three-alias": {
               "keyPath": "1-one-alias.1-two-alias.1-three-alias",
               "name": "1-three",
               "alias": "1-three-alias",
-              "comment": "",
+              "description": "",
               "commands": {
                 "1-four-alias": {
                   "keyPath": "1-one-alias.1-two-alias.1-three-alias.1-four-alias",
                   "name": "1-four",
                   "alias": "1-four-alias",
-                  "comment": "",
+                  "description": "",
                   "commands": {},
                   "subs": {
                     "1-four-sub": {
