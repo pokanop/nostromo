@@ -2,6 +2,7 @@ package task
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/model"
@@ -125,7 +126,7 @@ func Run(args []string) {
 		return
 	}
 
-	cmd, err := cfg.Manifest.ExecutionString(args)
+	cmd, err := cfg.Manifest.ExecutionString(sanitizeArgs(args))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -156,4 +157,14 @@ func saveConfig(cfg *config.Config) {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func sanitizeArgs(args []string) []string {
+	sanitizedArgs := []string{}
+	for _, arg := range args {
+		if len(arg) > 0 {
+			sanitizedArgs = append(sanitizedArgs, strings.TrimSpace(arg))
+		}
+	}
+	return sanitizedArgs
 }

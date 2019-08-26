@@ -177,6 +177,10 @@ func (s *startupFile) commit() error {
 }
 
 func (s *startupFile) makeAliasBlock() string {
+	if len(s.aliases) == 0 {
+		return ""
+	}
+
 	aliases := []string{}
 	for _, a := range s.aliases {
 		alias := fmt.Sprintf("alias %s='nostromo run %s \"$*\"'", a, a)
