@@ -10,6 +10,7 @@ import (
 // Manifest is the main container for nostromo based commands
 type Manifest struct {
 	Version  string              `json:"version"`
+	Config   *Config             `json:"config"`
 	Commands map[string]*Command `json:"commands"`
 }
 
@@ -17,6 +18,7 @@ type Manifest struct {
 func NewManifest() *Manifest {
 	return &Manifest{
 		Version:  "1.0",
+		Config:   &Config{},
 		Commands: map[string]*Command{},
 	}
 }

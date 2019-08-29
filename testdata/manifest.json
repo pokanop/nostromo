@@ -1,5 +1,8 @@
 {
   "version": "1.0",
+  "config": {
+    "verbose": false
+  },
   "commands": {
     "0-one-alias": {
       "keyPath": "0-one-alias",

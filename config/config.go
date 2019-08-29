@@ -5,10 +5,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 )
+
+// ConfigPath for standard nostromo config
+var ConfigPath = "~/.nostromo/config"
 
 // Config manages working with nostromo configuration files
 // The file format is JSON this just provides convenience around converting
@@ -90,4 +94,27 @@ func (c *Config) Exists() bool {
 
 	_, err := os.Stat(pathutil.Abs(c.path))
 	return err == nil
+}
+
+// Get setting value from config
+func (c *Config) Get(key string) string {
+	switch key {
+	case "verbose":
+		return strconv.FormatBool(c.Manifest.Config.Verbose)
+	}
+	return "key not found"
+}
+
+// Set setting value for key
+func (c *Config) Set(key, value string) error {
+	switch key {
+	case "verbose":
+		verbose, err := strconv.ParseBool(value)
+		if err != nil {
+			return err
+		}
+		c.Manifest.Config.Verbose = verbose
+		return nil
+	}
+	return fmt.Errorf("key not found")
 }

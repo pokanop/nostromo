@@ -12,7 +12,7 @@ import (
 
 // InitConfig of nostromo config file if not already initialized
 func InitConfig() {
-	cfg := config.NewConfig("~/.nostromo/config", model.NewManifest())
+	cfg := config.NewConfig(config.ConfigPath, model.NewManifest())
 	if cfg.Exists() {
 		fmt.Println("nostromo config already exists")
 		return
@@ -55,6 +55,32 @@ func ShowConfig() {
 		return
 	}
 	fmt.Println(lines)
+}
+
+// SetConfig updates properties for nostromo settings
+func SetConfig(key, value string) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	err := cfg.Set(key, value)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	saveConfig(cfg)
+}
+
+// GetConfig reads properties from nostromo settings
+func GetConfig(key string) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	fmt.Println(cfg.Get(key))
 }
 
 // AddCommand to the manifest
@@ -139,7 +165,7 @@ func Run(args []string) {
 }
 
 func checkConfig() *config.Config {
-	cfg, err := config.Parse("~/.nostromo/config")
+	cfg, err := config.Parse(config.ConfigPath)
 	if err != nil {
 		fmt.Println(err)
 		return nil
