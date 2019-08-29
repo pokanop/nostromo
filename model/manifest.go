@@ -123,8 +123,18 @@ func (m *Manifest) ExecutionString(args []string) (string, error) {
 		keyPath := cmd.shortestKeyPath(keypath.KeyPath(args))
 		if len(keyPath) > 0 {
 			count := len(keypath.Keys(keyPath))
+			if m.Config.Verbose {
+				fmt.Println("key path:", keyPath)
+				if len(args[count:]) > 0 {
+					fmt.Println("arguments:", args[count:])
+				}
+			}
 			return cmd.find(keyPath).executionString(args[count:]), nil
 		}
+	}
+
+	if m.Config.Verbose {
+		fmt.Println("arguments:", args)
 	}
 
 	return "", fmt.Errorf("unable to find execution string")
