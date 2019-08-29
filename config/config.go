@@ -12,7 +12,7 @@ import (
 )
 
 // ConfigPath for standard nostromo config
-var ConfigPath = "~/.nostromo/config"
+const ConfigPath = "~/.nostromo/config"
 
 // Config manages working with nostromo configuration files
 // The file format is JSON this just provides convenience around converting

@@ -12,16 +12,16 @@ import (
 
 // InitConfig of nostromo config file if not already initialized
 func InitConfig() {
-	cfg := config.NewConfig(config.ConfigPath, model.NewManifest())
-	if cfg.Exists() {
-		fmt.Println("nostromo config already exists")
-		return
-	}
-
-	err := pathutil.EnsurePath("~/.nostromo")
-	if err != nil {
-		fmt.Println(err)
-		return
+	cfg := checkConfig()
+	if cfg == nil {
+		cfg = config.NewConfig(config.ConfigPath, model.NewManifest())
+		err := pathutil.EnsurePath("~/.nostromo")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		fmt.Println("nostromo config already exists, updating")
 	}
 
 	saveConfig(cfg)
@@ -156,6 +156,10 @@ func Run(args []string) {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+
+	if cfg.Manifest.Config.Verbose {
+		fmt.Println("executing:", cmd)
 	}
 
 	err = shell.Run(cmd)
