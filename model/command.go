@@ -85,32 +85,46 @@ func (c *Command) count() int {
 }
 
 // find matching command for given key path
-//
-// The first key in path should be this command
 func (c *Command) find(keyPath string) *Command {
 	if c.Alias == keyPath {
 		return c
 	}
 
-	cmd := c.Commands[keypath.Get(keyPath, 1)]
-	if cmd != nil {
-		return cmd.find(keypath.DropFirst(keyPath, 1))
+	// The first key in path should be this command
+	keys := keypath.Keys(keyPath)
+	if len(keys) < 2 || c.Alias != keys[0] {
+		return nil
 	}
 
-	return nil
+	cmd := c.Commands[keys[1]]
+	if cmd == nil {
+		return nil
+	}
+
+	return cmd.find(keypath.KeyPath(keys[1:]))
 }
 
 // shortestKeyPath valid key path
 func (c *Command) shortestKeyPath(keyPath string) string {
+	if c.Alias == keyPath {
+		return keyPath
+	}
+
 	keys := keypath.Keys(keyPath)
-	for i := 0; i < len(keys); i++ {
-		kp := keypath.DropLast(keyPath, i)
-		cmd := c.find(kp)
-		if cmd != nil {
-			return kp
+	if c.Alias != keys[0] {
+		return ""
+	}
+
+	cmd := c
+	i := 0
+	for i = 1; i < len(keys); i++ {
+		cmd = cmd.Commands[keys[i]]
+		if cmd == nil {
+			break
 		}
 	}
-	return ""
+
+	return keypath.KeyPath(keys[0:i])
 }
 
 // executionString to run the command with provided arguments

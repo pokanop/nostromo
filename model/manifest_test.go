@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/pokanop/nostromo/keypath"
+
 	"github.com/pokanop/nostromo/pathutil"
 )
 
@@ -196,10 +198,51 @@ func TestAsJSON(t *testing.T) {
 	}
 }
 
+func TestManifestExecutionString(t *testing.T) {
+	tests := []struct {
+		name     string
+		manifest *Manifest
+		keyPath  string
+		expErr   bool
+		expected string
+	}{
+		{"empty key path", fakeManifest(1, 1), "", true, ""},
+		{"missing key path", fakeManifest(1, 1), "missing.key.path", true, ""},
+		{"valid single key path", fakeManifest(1, 1), "0-one-alias", false, "0-one"},
+		{"valid nth key path", fakeManifest(1, 4), "0-one-alias.0-two-alias.0-three-alias", false, "0-one 0-two 0-three"},
+		{"valid repeat sub key path", fakeSimilarManifest(3, 4), "1-one-alias.two-alias.three-alias", false, "1-one two three"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual, err := test.manifest.ExecutionString(keypath.Keys(test.keyPath))
+			if test.expErr && err == nil {
+				t.Errorf("expected error but got none")
+			} else if !test.expErr && err != nil {
+				t.Errorf("expected no error but got %s", err)
+			} else if test.expected != actual {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
 func fakeManifest(n, depth int) *Manifest {
 	m := NewManifest()
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
+		m.Commands[c.Alias] = c
+	}
+	return m
+}
+
+func fakeSimilarManifest(n, depth int) *Manifest {
+	m := NewManifest()
+	for i := 0; i < n; i++ {
+		c := fakeCommand(depth)
+		c.Alias = strconv.Itoa(i) + "-" + c.Alias
+		c.KeyPath = strconv.Itoa(i) + "-" + c.KeyPath
+		c.Name = strconv.Itoa(i) + "-" + c.Name
 		m.Commands[c.Alias] = c
 	}
 	return m
