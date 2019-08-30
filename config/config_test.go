@@ -112,6 +112,60 @@ func TestExists(t *testing.T) {
 	}
 }
 
+func TestGet(t *testing.T) {
+	tests := []struct {
+		name     string
+		key      string
+		expected string
+	}{
+		{"no key", "", "key not found"},
+		{"missing key", "missing", "key not found"},
+		{"verbose", "verbose", "true"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			c := NewConfig("path", fakeManifest())
+			c.Manifest.Config.Verbose = true
+			if actual := c.Get(test.key); actual != test.expected {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
+func TestSet(t *testing.T) {
+	tests := []struct {
+		name     string
+		key      string
+		value    string
+		expErr   bool
+		expected string
+	}{
+		{"no key", "", "", true, ""},
+		{"missing key", "missing", "", true, ""},
+		{"verbose empty", "verbose", "", true, ""},
+		{"verbose true", "verbose", "true", false, "true"},
+		{"verbose false", "verbose", "false", false, "false"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			c := NewConfig("path", fakeManifest())
+			err := c.Set(test.key, test.value)
+			if test.expErr && err == nil {
+				t.Errorf("expected error but got none")
+			} else if !test.expErr && err != nil {
+				t.Errorf("expected no error but got %s", err)
+			} else if !test.expErr {
+				if actual := c.Get(test.key); actual != test.expected {
+					t.Errorf("expected: %s, actual: %s", test.expected, actual)
+				}
+			}
+		})
+	}
+}
+
 func fakeManifest() *model.Manifest {
 	m := model.NewManifest()
 	m.AddCommand("one.two.three", "command", "")

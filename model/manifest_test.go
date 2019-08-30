@@ -220,7 +220,7 @@ func TestManifestExecutionString(t *testing.T) {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
 				t.Errorf("expected no error but got %s", err)
-			} else if test.expected != actual {
+			} else if !test.expErr && test.expected != actual {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
