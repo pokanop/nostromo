@@ -7,3 +7,11 @@ Command line utility for building useful aliases
 
 ## Installation
 `go get -u github.com/pokanop/nostromo`
+
+## Key Features
+
+## How To Use
+
+## Credits
+
+## License
