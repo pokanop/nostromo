@@ -5,9 +5,12 @@ import (
 	"strings"
 )
 
-var (
-	currentTheme theme
-)
+type options struct {
+	theme   theme
+	verbose bool
+}
+
+var opt *options
 
 type logLevel int
 
@@ -20,52 +23,57 @@ const (
 
 // Regular log for body style text
 func Regular(a ...interface{}) {
-	fmt.Println(currentTheme.formatRegular(joined(a...)))
+	fmt.Println(opt.theme.formatRegular(joined(a...)))
 }
 
 // Highlight log as highlighted text
 func Highlight(a ...interface{}) {
-	fmt.Println(currentTheme.formatHighlight(joined(a...)))
+	fmt.Println(opt.theme.formatHighlight(joined(a...)))
 }
 
 // Debug logs a debug message
 func Debug(a ...interface{}) {
-	fmt.Println(currentTheme.formatLevel(debugLevel, "debug:"), joined(a...))
+	fmt.Println(opt.theme.formatLevel(debugLevel, "debug:"), joined(a...))
 }
 
 // Debugf logs a debug message
 func Debugf(format string, a ...interface{}) {
-	fmt.Print(currentTheme.formatLevel(debugLevel, "debug:"), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(debugLevel, "debug:"), fmt.Sprintf(format, a...))
 }
 
 // Info logs an info message
 func Info(a ...interface{}) {
-	fmt.Println(currentTheme.formatLevel(infoLevel, "info:"), joined(a...))
+	fmt.Println(opt.theme.formatLevel(infoLevel, "info:"), joined(a...))
 }
 
 // Infof logs a debug message
 func Infof(format string, a ...interface{}) {
-	fmt.Print(currentTheme.formatLevel(infoLevel, "info:"), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(infoLevel, "info:"), fmt.Sprintf(format, a...))
 }
 
 // Warning logs a warning message
 func Warning(a ...interface{}) {
-	fmt.Println(currentTheme.formatLevel(warningLevel, "warning:"), fmt.Sprint(a...))
+	fmt.Println(opt.theme.formatLevel(warningLevel, "warning:"), fmt.Sprint(a...))
 }
 
 // Warningf logs a debug message
 func Warningf(format string, a ...interface{}) {
-	fmt.Print(currentTheme.formatLevel(warningLevel, "warning:"), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(warningLevel, "warning:"), fmt.Sprintf(format, a...))
 }
 
 // Error logs an error message
 func Error(a ...interface{}) {
-	fmt.Println(currentTheme.formatLevel(errorLevel, "error:"), fmt.Sprint(a...))
+	fmt.Println(opt.theme.formatLevel(errorLevel, "error:"), fmt.Sprint(a...))
 }
 
 // Errorf logs a debug message
 func Errorf(format string, a ...interface{}) {
-	fmt.Print(currentTheme.formatLevel(errorLevel, "error:"), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(errorLevel, "error:"), fmt.Sprintf(format, a...))
+}
+
+// SetOptions for logger
+func SetOptions(verbose bool) {
+	opt.verbose = verbose
 }
 
 func joined(a ...interface{}) string {
@@ -77,5 +85,8 @@ func joined(a ...interface{}) string {
 }
 
 func init() {
-	currentTheme = &defaultTheme{}
+	opt = &options{
+		theme:   &defaultTheme{},
+		verbose: false,
+	}
 }

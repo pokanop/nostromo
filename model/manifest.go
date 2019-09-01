@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/pokanop/nostromo/keypath"
 	"github.com/pokanop/nostromo/log"
@@ -141,6 +142,20 @@ func (m *Manifest) ExecutionString(args []string) (string, error) {
 	return "", fmt.Errorf("unable to find execution string")
 }
 
+// Keys as ordered list of fields for logging
+func (m *Manifest) Keys() []string {
+	return []string{"version", "commands"}
+}
+
+// Fields interface for logging
+func (m *Manifest) Fields() map[string]interface{} {
+
+	return map[string]interface{}{
+		"version":  m.Version,
+		"commands": joinedCommands(m.Commands),
+	}
+}
+
 // count of the total number of commands in this manifest
 func (m *Manifest) count() int {
 	count := 0
@@ -148,4 +163,12 @@ func (m *Manifest) count() int {
 		count += cmd.count()
 	}
 	return count
+}
+
+func joinedCommands(cmdMap map[string]*Command) string {
+	commands := []string{}
+	for cmd := range cmdMap {
+		commands = append(commands, cmd)
+	}
+	return strings.Join(commands, ", ")
 }

@@ -23,15 +23,6 @@ type FieldMapper interface {
 
 // Fields logs key value pairs formatted in sections
 func Fields(mapper FieldMapper) {
-	fields(mapper, false)
-}
-
-// FieldsCompact logs key value pairs formatted on a single line
-func FieldsCompact(mapper FieldMapper) {
-	fields(mapper, true)
-}
-
-func fields(mapper FieldMapper, compact bool) {
 	if mapper == nil {
 		return
 	}
@@ -45,19 +36,19 @@ func fields(mapper FieldMapper, compact bool) {
 
 	for _, key := range keys {
 		value := fields[key]
-		if value == nil || omitKey(key, compact) {
+		if value == nil || omitKey(key) {
 			continue
 		}
-		if compact {
-			fmt.Print(currentTheme.formatStyle(keyFieldStyle, key))
-			fmt.Print(currentTheme.formatStyle(valueFieldStyle, ": "+fmt.Sprint(value)))
+		if !opt.verbose {
+			fmt.Print(opt.theme.formatStyle(keyFieldStyle, key))
+			fmt.Print(opt.theme.formatStyle(valueFieldStyle, ": "+fmt.Sprint(value)))
 			fmt.Print(" ")
 		} else {
-			fmt.Print(currentTheme.formatStyle(keyFieldStyle, key))
-			fmt.Println(currentTheme.formatStyle(valueFieldStyle, ": "+fmt.Sprint(value)))
+			fmt.Print(opt.theme.formatStyle(keyFieldStyle, key))
+			fmt.Println(opt.theme.formatStyle(valueFieldStyle, ": "+fmt.Sprint(value)))
 		}
 	}
-	if compact {
+	if !opt.verbose {
 		fmt.Println()
 	}
 }
@@ -67,8 +58,8 @@ func Table(mapper FieldMapper) {
 
 }
 
-func omitKey(key string, compact bool) bool {
-	if compact {
+func omitKey(key string) bool {
+	if !opt.verbose {
 		for _, k := range omitKeysCompact {
 			if k == key {
 				return true

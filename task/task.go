@@ -107,7 +107,7 @@ func AddCommand(keyPath, command, description string) {
 		log.Error(err)
 	}
 
-	log.FieldsCompact(cfg.Manifest.Find(keyPath))
+	log.Fields(cfg.Manifest.Find(keyPath))
 }
 
 // RemoveCommand from the manifest
@@ -146,7 +146,7 @@ func AddSubstitution(keyPath, name, alias string) {
 		log.Error(err)
 	}
 
-	log.FieldsCompact(cfg.Manifest.Find(keyPath))
+	log.Fields(cfg.Manifest.Find(keyPath))
 }
 
 // RemoveSubstitution from the manifest
@@ -196,6 +196,9 @@ func checkConfig() *config.Config {
 		log.Error(err)
 		return nil
 	}
+
+	log.SetOptions(cfg.Manifest.Config.Verbose)
+
 	return cfg
 }
 
