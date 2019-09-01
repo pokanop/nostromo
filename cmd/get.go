@@ -12,8 +12,8 @@ var getCmd = &cobra.Command{
 	Long: `Get a config item from manifest.
 Nostromo config items are saved in the manifest.
 
-Use this command to set keys to configure these settings:
-	verbose: true | false`,
+Use this command to get keys to examine these settings:
+verbose: true | false`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		task.GetConfig(args[0])

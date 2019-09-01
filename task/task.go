@@ -1,10 +1,10 @@
 package task
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/pokanop/nostromo/config"
+	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 	"github.com/pokanop/nostromo/shell"
@@ -17,11 +17,11 @@ func InitConfig() {
 		cfg = config.NewConfig(config.ConfigPath, model.NewManifest())
 		err := pathutil.EnsurePath("~/.nostromo")
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 			return
 		}
 	} else {
-		fmt.Println("nostromo config already exists, updating")
+		log.Highlight("nostromo config already exists, updating")
 	}
 
 	saveConfig(cfg)
@@ -36,7 +36,7 @@ func DestroyConfig() {
 
 	err := cfg.Delete()
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
 }
@@ -48,13 +48,13 @@ func ShowConfig() {
 		return
 	}
 
-	fmt.Println(cfg.Manifest.AsJSON())
+	log.Highlight(cfg.Manifest.AsJSON())
 
 	lines, err := shell.InitFileLines()
 	if err != nil {
 		return
 	}
-	fmt.Println(lines)
+	log.Highlight(lines)
 }
 
 // SetConfig updates properties for nostromo settings
@@ -66,7 +66,7 @@ func SetConfig(key, value string) {
 
 	err := cfg.Set(key, value)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -80,7 +80,7 @@ func GetConfig(key string) {
 		return
 	}
 
-	fmt.Println(cfg.Get(key))
+	log.Highlight(cfg.Get(key))
 }
 
 // AddCommand to the manifest
@@ -92,7 +92,7 @@ func AddCommand(keyPath, command, description string) {
 
 	err := cfg.Manifest.AddCommand(keyPath, command, description)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -108,7 +108,7 @@ func RemoveCommand(keyPath string) {
 
 	err := cfg.Manifest.RemoveCommand(keyPath)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -124,7 +124,7 @@ func AddSubstitution(keyPath, name, alias string) {
 
 	err := cfg.Manifest.AddSubstitution(keyPath, name, alias)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 
 	saveConfig(cfg)
@@ -139,7 +139,7 @@ func RemoveSubstitution(keyPath, alias string) {
 
 	err := cfg.Manifest.RemoveSubstitution(keyPath, alias)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 
 	saveConfig(cfg)
@@ -154,24 +154,24 @@ func Run(args []string) {
 
 	cmd, err := cfg.Manifest.ExecutionString(sanitizeArgs(args))
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
 
 	if cfg.Manifest.Config.Verbose {
-		fmt.Println("executing:", cmd)
+		log.Debug("executing:", cmd)
 	}
 
 	err = shell.Run(cmd)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 }
 
 func checkConfig() *config.Config {
 	cfg, err := config.Parse(config.ConfigPath)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return nil
 	}
 	return cfg
@@ -180,12 +180,12 @@ func checkConfig() *config.Config {
 func saveConfig(cfg *config.Config) {
 	err := cfg.Save()
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 
 	err = shell.Commit(cfg.Manifest)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 }
 

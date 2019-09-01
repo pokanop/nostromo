@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
+	"github.com/pokanop/nostromo/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -20,13 +20,15 @@ and reliable. The tool adds shortcuts to your .profile that call into the nostro
 Nostromo reads and manages all aliases within its own config file.
 This is used to find and execute the actual command intended as well as any
 substitutions to simplify calls.`,
+	SilenceErrors: true,
+	SilenceUsage:  true,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		os.Exit(-1)
 	}
 }
@@ -44,7 +46,7 @@ func initConfig() {
 }
 
 func printUsage(cmd *cobra.Command) {
-	fmt.Println(cmd.Long)
-	fmt.Println()
-	fmt.Println(cmd.UsageString())
+	log.Regular(cmd.Long)
+	log.Regular()
+	log.Regular(cmd.UsageString())
 }

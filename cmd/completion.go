@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/pathutil"
 	"github.com/spf13/cobra"
 )
@@ -22,11 +21,11 @@ To configure your bash shell to load completions for each session add to your sh
 	Run: func(cmd *cobra.Command, args []string) {
 		err := rootCmd.GenBashCompletionFile(pathutil.Abs("~/.nostromo/completion"))
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 			printUsage(cmd)
 			return
 		}
-		fmt.Println(cmd.Long)
+		log.Regular(cmd.Long)
 	},
 }
 

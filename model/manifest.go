@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pokanop/nostromo/keypath"
+	"github.com/pokanop/nostromo/log"
 )
 
 // Manifest is the main container for nostromo based commands
@@ -124,9 +125,9 @@ func (m *Manifest) ExecutionString(args []string) (string, error) {
 		if len(keyPath) > 0 {
 			count := len(keypath.Keys(keyPath))
 			if m.Config.Verbose {
-				fmt.Println("key path:", keyPath)
+				log.Debug("key path:", keyPath)
 				if len(args[count:]) > 0 {
-					fmt.Println("arguments:", args[count:])
+					log.Debug("arguments:", args[count:])
 				}
 			}
 			return cmd.find(keyPath).executionString(args[count:]), nil
@@ -134,7 +135,7 @@ func (m *Manifest) ExecutionString(args []string) (string, error) {
 	}
 
 	if m.Config.Verbose {
-		fmt.Println("arguments:", args)
+		log.Debug("arguments:", args)
 	}
 
 	return "", fmt.Errorf("unable to find execution string")
