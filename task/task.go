@@ -58,12 +58,15 @@ func ShowConfig(raw bool) {
 		if err != nil {
 			return
 		}
-		log.Regular()
-		log.Highlight("[profile aliases]")
+
+		log.Highlight("\n[profile aliases]")
 		log.Regular(strings.TrimSpace(lines))
 	} else {
 		log.Regular("[manifest]")
 		log.Fields(cfg.Manifest)
+
+		log.Regular("\n[config]")
+		log.Fields(cfg.Manifest.Config)
 
 		if len(cfg.Manifest.Commands) > 0 {
 			log.Regular("\n[commands]")
