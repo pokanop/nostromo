@@ -17,7 +17,7 @@ func Run(command string) error {
 
 	command = strings.TrimSuffix(command, "\n")
 
-	cmd := exec.Command("sh", "-c", command)
+	cmd := exec.Command("bash", "-ic", command)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
