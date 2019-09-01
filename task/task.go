@@ -12,7 +12,7 @@ import (
 
 // InitConfig of nostromo config file if not already initialized
 func InitConfig() {
-	cfg := checkConfig()
+	cfg := checkConfigQuiet()
 	if cfg == nil {
 		cfg = config.NewConfig(config.ConfigPath, model.NewManifest())
 		err := pathutil.EnsurePath("~/.nostromo")
@@ -212,10 +212,20 @@ func Run(args []string) {
 	}
 }
 
+func checkConfigQuiet() *config.Config {
+	return checkConfigCommon(true)
+}
+
 func checkConfig() *config.Config {
+	return checkConfigCommon(false)
+}
+
+func checkConfigCommon(quiet bool) *config.Config {
 	cfg, err := config.Parse(config.ConfigPath)
 	if err != nil {
-		log.Error(err)
+		if !quiet {
+			log.Error(err)
+		}
 		return nil
 	}
 
