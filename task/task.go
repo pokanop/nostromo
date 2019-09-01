@@ -21,10 +21,13 @@ func InitConfig() {
 			return
 		}
 	} else {
-		log.Highlight("nostromo config already exists, updating")
+		log.Highlight("nostromo config exists, updating")
 	}
 
-	saveConfig(cfg)
+	err := saveConfig(cfg)
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 // DestroyConfig deletes nostromo config file
@@ -70,7 +73,10 @@ func SetConfig(key, value string) {
 		return
 	}
 
-	saveConfig(cfg)
+	err = saveConfig(cfg)
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 // GetConfig reads properties from nostromo settings
@@ -96,7 +102,12 @@ func AddCommand(keyPath, command, description string) {
 		return
 	}
 
-	saveConfig(cfg)
+	err = saveConfig(cfg)
+	if err != nil {
+		log.Error(err)
+	}
+
+	log.FieldsCompact(cfg.Manifest.Find(keyPath))
 }
 
 // RemoveCommand from the manifest
@@ -112,7 +123,10 @@ func RemoveCommand(keyPath string) {
 		return
 	}
 
-	saveConfig(cfg)
+	err = saveConfig(cfg)
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 // AddSubstitution to the manifest
@@ -127,7 +141,12 @@ func AddSubstitution(keyPath, name, alias string) {
 		log.Error(err)
 	}
 
-	saveConfig(cfg)
+	err = saveConfig(cfg)
+	if err != nil {
+		log.Error(err)
+	}
+
+	log.FieldsCompact(cfg.Manifest.Find(keyPath))
 }
 
 // RemoveSubstitution from the manifest
@@ -142,7 +161,10 @@ func RemoveSubstitution(keyPath, alias string) {
 		log.Error(err)
 	}
 
-	saveConfig(cfg)
+	err = saveConfig(cfg)
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 // Run a command from the manifest
@@ -177,16 +199,18 @@ func checkConfig() *config.Config {
 	return cfg
 }
 
-func saveConfig(cfg *config.Config) {
+func saveConfig(cfg *config.Config) error {
 	err := cfg.Save()
 	if err != nil {
-		log.Error(err)
+		return err
 	}
 
 	err = shell.Commit(cfg.Manifest)
 	if err != nil {
-		log.Error(err)
+		return err
 	}
+
+	return nil
 }
 
 func sanitizeArgs(args []string) []string {

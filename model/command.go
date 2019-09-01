@@ -240,6 +240,24 @@ func (c *Command) String() string {
 	return fmt.Sprintf("[%s] %s -> %s", c.KeyPath, c.Name, c.Alias)
 }
 
+// Keys as ordered list of fields for logging
+func (c *Command) Keys() []string {
+	return []string{"keypath", "alias", "command", "description", "cmds", "subs", "code"}
+}
+
+// Fields interface for logging
+func (c *Command) Fields() map[string]interface{} {
+	return map[string]interface{}{
+		"keypath":     c.KeyPath,
+		"alias":       c.Alias,
+		"command":     c.Name,
+		"description": c.Description,
+		"cmds":        len(c.Commands),
+		"subs":        len(c.Subs),
+		"code":        c.Code != nil,
+	}
+}
+
 func reversed(strs []string) []string {
 	if strs == nil {
 		return nil
