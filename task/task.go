@@ -45,19 +45,38 @@ func DestroyConfig() {
 }
 
 // ShowConfig for nostromo config file
-func ShowConfig() {
+func ShowConfig(raw bool) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
 	}
 
-	log.Highlight(cfg.Manifest.AsJSON())
+	if raw {
+		log.Highlight("[raw json]")
+		log.Regular(cfg.Manifest.AsJSON())
+		lines, err := shell.InitFileLines()
+		if err != nil {
+			return
+		}
+		log.Regular()
+		log.Highlight("[profile aliases]")
+		log.Regular(strings.TrimSpace(lines))
+	} else {
+		log.Regular("[manifest]")
+		log.Fields(cfg.Manifest)
 
-	lines, err := shell.InitFileLines()
-	if err != nil {
-		return
+		if len(cfg.Manifest.Commands) > 0 {
+			log.Regular("\n[commands]")
+			for _, cmd := range cfg.Manifest.Commands {
+				cmd.Walk(func(c *model.Command, s *bool) {
+					log.Fields(c)
+					if cfg.Manifest.Config.Verbose {
+						log.Regular()
+					}
+				})
+			}
+		}
 	}
-	log.Highlight(lines)
 }
 
 // SetConfig updates properties for nostromo settings

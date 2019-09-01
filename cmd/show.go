@@ -5,6 +5,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var raw bool
+
 // showCmd represents the show command
 var showCmd = &cobra.Command{
 	Use:   "show",
@@ -13,10 +15,12 @@ var showCmd = &cobra.Command{
 
 The config file is located at ~/.nostromo/config`,
 	Run: func(cmd *cobra.Command, args []string) {
-		task.ShowConfig()
+		task.ShowConfig(raw)
 	},
 }
 
 func init() {
 	manifestCmd.AddCommand(showCmd)
+
+	showCmd.Flags().BoolVarP(&raw, "raw", "r", false, "Show manifest in raw form")
 }

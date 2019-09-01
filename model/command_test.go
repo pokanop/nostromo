@@ -213,7 +213,7 @@ func TestReverseWalk(t *testing.T) {
 	}
 }
 
-func TestForwardWalk(t *testing.T) {
+func TestforwardWalk(t *testing.T) {
 	tests := []struct {
 		name     string
 		command  *Command

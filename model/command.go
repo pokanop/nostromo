@@ -19,6 +19,33 @@ type Command struct {
 	Code        *Code                    `json:"code"`
 }
 
+func (c *Command) String() string {
+	return fmt.Sprintf("[%s] %s -> %s", c.KeyPath, c.Name, c.Alias)
+}
+
+// Keys as ordered list of fields for logging
+func (c *Command) Keys() []string {
+	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code"}
+}
+
+// Fields interface for logging
+func (c *Command) Fields() map[string]interface{} {
+	return map[string]interface{}{
+		"keypath":       c.KeyPath,
+		"alias":         c.Alias,
+		"command":       c.Name,
+		"description":   c.Description,
+		"commands":      joinedCommands(c.Commands),
+		"substitutions": joinedSubs(c.Subs),
+		"code":          c.Code != nil,
+	}
+}
+
+// Walk the command tree and run supplied func
+func (c *Command) Walk(fn func(*Command, *bool)) {
+	c.forwardWalk(fn)
+}
+
 // newCommand returns a newly initialized command
 func newCommand(name, alias, description string, code *Code) *Command {
 	// Default alias to same as command name
@@ -236,28 +263,6 @@ func (c *Command) build(keyPath, command, description string) {
 	cmd.Description = description
 }
 
-func (c *Command) String() string {
-	return fmt.Sprintf("[%s] %s -> %s", c.KeyPath, c.Name, c.Alias)
-}
-
-// Keys as ordered list of fields for logging
-func (c *Command) Keys() []string {
-	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code"}
-}
-
-// Fields interface for logging
-func (c *Command) Fields() map[string]interface{} {
-	return map[string]interface{}{
-		"keypath":       c.KeyPath,
-		"alias":         c.Alias,
-		"command":       c.Name,
-		"description":   c.Description,
-		"commands":      joinedCommands(c.Commands),
-		"substitutions": len(c.Subs),
-		"code":          c.Code != nil,
-	}
-}
-
 func reversed(strs []string) []string {
 	if strs == nil {
 		return nil
@@ -268,4 +273,12 @@ func reversed(strs []string) []string {
 		r = append(r, strs[i])
 	}
 	return r
+}
+
+func joinedSubs(subMap map[string]*Substitution) string {
+	subs := []string{}
+	for sub := range subMap {
+		subs = append(subs, sub)
+	}
+	return strings.Join(subs, ", ")
 }
