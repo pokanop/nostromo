@@ -16,7 +16,7 @@ var rootCmd = &cobra.Command{
 scoped aliases and substitutions.
 
 Managing aliases can be tedius and difficult to set up. Nostromo makes this process easy
-and reliable. The tool adds shortcuts to your .bash_profile that call into the nostromo binary.
+and reliable. The tool adds shortcuts to your .bashrc that call into the nostromo binary.
 Nostromo reads and manages all aliases within its own config file.
 This is used to find and execute the actual command intended as well as any
 substitutions to simplify calls.`,

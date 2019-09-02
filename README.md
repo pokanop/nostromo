@@ -5,7 +5,7 @@
 # nostromo
 `nostromo` is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
 
-Managing aliases can be tedius and difficult to set up. `nostromo` makes this process easy and reliable. The tool adds shortcuts to your `.bash_profile` that call into the `nostromo` binary. It reads and manages all aliases within its own manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
+Managing aliases can be tedius and difficult to set up. `nostromo` makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` that call into the `nostromo` binary. It reads and manages all aliases within its own manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
 
 `nostromo` can potentially help you build complex tools in a declarative way. Tools commonly allow you to run multi-level commands like `git rebase master branch` or `docker rmi b750fe78269d` which seem clear to use. Imagine if you could wrap your aliases / commands / workflow into custom commands that describe things you do often.
 
@@ -52,13 +52,13 @@ nostromo manifest init
 ## Usage
 
 ### Managing Aliases
-Aliases is one of the core functionalities provided by `nostromo`. Instead of constantly updating shell profiles manually, `nostromo` will automatically keep it updated with the latest additions. **Note** that commands won't take affect until you open a new shell or `source` your `.bash_profile` again.
+Aliases is one of the core functionalities provided by `nostromo`. Instead of constantly updating shell profiles manually, `nostromo` will automatically keep it updated with the latest additions. **Note** that commands won't take affect until you open a new shell or `source` your `.bashrc` again.
 
 To add an alias (or command in `nostromo` parlance), simply run:
 ```sh
 nostromo add cmd foo "echo doo"
 ```
-Re-source your `.bash_profile` and just like that you can run `foo` like any other alias.
+Re-source your `.bashrc` and just like that you can run `foo` like any other alias.
 
 #### Keypaths
 `nostromo` uses the concept of keypaths to simplify building commands and accessing the command tree. A keypath is simply a `.` delimited string that represents the path to the command.

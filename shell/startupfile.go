@@ -102,7 +102,7 @@ func newStartupFile(path, content string, mode os.FileMode) *startupFile {
 		mode:      mode,
 		content:   content,
 		aliases:   []string{},
-		preferred: strings.Contains(path, ".bash_profile"),
+		preferred: strings.Contains(path, ".bashrc"),
 	}
 }
 
