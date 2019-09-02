@@ -3,6 +3,8 @@
 [![GitHub](https://img.shields.io/github/license/pokanop/nostromo)](https://github.com/pokanop/nostromo/blob/master/LICENSE)
 
 # nostromo
+<img src="images/nostromo-manifest-show.png" alt="nostromo">
+
 `nostromo` is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
 
 Managing aliases can be tedius and difficult to set up. `nostromo` makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` that call into the `nostromo` binary. It reads and manages all aliases within its own manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
