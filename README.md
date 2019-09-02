@@ -125,6 +125,8 @@ eval "$(nostromo completion)"
 ```
 
 ## Credits
+- This tool was bootstrapped using [cobra](https://github.com/spf13/cobra).
+- Colored logging provided by [aurora](https://github.com/logrusorgru/aurora).
 
 ## Contibuting
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
