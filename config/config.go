@@ -11,8 +11,6 @@ import (
 	"github.com/pokanop/nostromo/pathutil"
 )
 
-var cfg *Config
-
 // ConfigPath for standard nostromo config
 const ConfigPath = "~/.nostromo/manifest"
 

@@ -42,6 +42,12 @@ func DestroyConfig() {
 		log.Error(err)
 		return
 	}
+
+	err = shell.Commit(model.NewManifest())
+	if err != nil {
+		log.Error(err)
+		return
+	}
 }
 
 // ShowConfig for nostromo config file

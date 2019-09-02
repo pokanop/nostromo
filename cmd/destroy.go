@@ -18,5 +18,5 @@ The config file is located at ~/.nostromo/config`,
 }
 
 func init() {
-	manifestCmd.AddCommand(destroyCmd)
+	rootCmd.AddCommand(destroyCmd)
 }

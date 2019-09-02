@@ -41,7 +41,7 @@ go get -u github.com/pokanop/nostromo
 ### Initialization
 This command will initialize nostromo and create a manifest under `~/.nostromo`:
 ```sh
-nostromo manifest init
+nostromo init
 ```
 
 ## Key Features
