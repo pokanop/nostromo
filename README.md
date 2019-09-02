@@ -36,6 +36,12 @@ The possibilities are endless and up to your imagination with the ability to com
 go get -u github.com/pokanop/nostromo
 ```
 
+### Initialization
+This command will initialize nostromo and create a manifest under `~/.nostromo`:
+```sh
+nostromo manifest init
+```
+
 ## Key Features
 - Simplified alias management
 - Scoped commands and substitutions
