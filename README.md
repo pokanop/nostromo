@@ -54,7 +54,11 @@ nostromo init
 ## Usage
 
 ### Managing Aliases
-Aliases is one of the core functionalities provided by nostromo. Instead of constantly updating shell profiles manually, nostromo will automatically keep it updated with the latest additions. **Note** that commands won't take effect until you open a new shell or `source` your `.bashrc` again.
+Aliases to commands is one of the core functionalities provided by nostromo. Instead of constantly updating shell profiles manually, nostromo will automatically keep it updated with the latest additions.
+
+**Notes**
+- *Commands are executed in a child process, so aliases cannot modify the parent shell at this time.*
+- *Commands won't take effect until you open a new shell or `source` your `.bashrc` again.*
 
 To add an alias (or command in nostromo parlance), simply run:
 ```sh
