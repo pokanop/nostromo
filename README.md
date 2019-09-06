@@ -81,14 +81,14 @@ foo bar baz
 ```
 where the last one will execute the `echo` command.
 
-This is also how you can compose further commands by adding a **real** command to `foo.bar` for example that will get prepended for commands below that scope.
+This is also how you can compose further commands by adding a **final** command to `foo.bar` for example that will get prepended for commands below that scope.
 
 ### Scoped Commands & Substitutions
-Scope affects a tree of commands such that a parent scope is executed first and then each command in the keypath. If a command is run as follows:
+Scope affects a tree of commands such that a parent scope is prepended first and then each command in the keypath. If a command is run as follows:
 ```sh
 foo bar baz
 ```
-then the command associated with `foo` runs first, then `bar`, and finally `baz`. So if these commands were configured like this:
+then the command associated with `foo` is concatenated first, then `bar`, and finally `baz`. So if these commands were configured like this:
 ```sh
 nostromo add cmd foo 'echo oof'
 nostromo add cmd foo.bar 'rab'
@@ -96,7 +96,7 @@ nostromo add cmd foo.bar.baz 'zab'
 ```
 then the actual execution would result in:
 ```sh
-oof rab zab
+echo oof rab zab
 ```
 
 nostromo also provides the ability to add substitutions at each one of these scopes in the command tree. So if you want to shorten common strings that are otherwise long into substitutions, you can attach them to a parent scope and nostromo will replace them at execution time for all instances.
