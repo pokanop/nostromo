@@ -13,28 +13,24 @@ var writeCompletion bool
 // completionCmd represents the completion command
 var completionCmd = &cobra.Command{
 	Use:   "completion",
-	Short: "Generates bash completion scripts",
+	Short: "Generates shell completion scripts",
 	Long: `To load completion now, run
 
-eval "$(nostromo completion)"
+eval "$(nostromo completion)"	# for bash
+eval "$(nostromo completion --zsh)" # for zsh
 
-To configure your bash shell to load completions for each session add to your shell init files
+To configure your shell to load completions for each session add to your init files
 
 # In ~/.bashrc or ~/.bash_profile
-eval "$(nostromo completion)"`,
+eval "$(nostromo completion)"
+
+# In ~/.zshrc
+eval "$(nostromo completion --zsh)"`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if writeCompletion {
-			err := rootCmd.GenBashCompletionFile(pathutil.Abs("~/.nostromo/completion"))
-			if err != nil {
-				log.Error(err)
-			} else {
-				log.Highlight("bash completion script written to ~/.nostromo/completion")
-			}
+			writeCompletionFile()
 		} else {
-			err := rootCmd.GenBashCompletion(os.Stdout)
-			if err != nil {
-				log.Error(err)
-			}
+			printCompletion()
 		}
 	},
 }
@@ -42,5 +38,54 @@ eval "$(nostromo completion)"`,
 func init() {
 	rootCmd.AddCommand(completionCmd)
 
-	completionCmd.Flags().BoolVarP(&writeCompletion, "write", "w", false, "Write bash completion to file")
+	completionCmd.Flags().BoolVarP(&writeCompletion, "write", "w", false, "Write completions to file")
+	completionCmd.Flags().BoolVarP(&useZsh, "zsh", "z", false, "Generate completions for zsh")
+}
+
+func writeCompletionFile() {
+	if useZsh {
+		writeZshCompletionFile()
+	} else {
+		writeBashCompletionFile()
+	}
+}
+
+func writeBashCompletionFile() {
+	err := rootCmd.GenBashCompletionFile(pathutil.Abs("~/.nostromo/completion"))
+	if err != nil {
+		log.Error(err)
+	} else {
+		log.Highlight("bash completion script written to ~/.nostromo/completion")
+	}
+}
+
+func writeZshCompletionFile() {
+	err := rootCmd.GenZshCompletionFile(pathutil.Abs("~/.nostromo/zcompletion"))
+	if err != nil {
+		log.Error(err)
+	} else {
+		log.Highlight("zsh completion script written to ~/.nostromo/zcompletion")
+	}
+}
+
+func printCompletion() {
+	if useZsh {
+		printZshCompletion()
+	} else {
+		printBashCompletion()
+	}
+}
+
+func printBashCompletion() {
+	err := rootCmd.GenBashCompletion(os.Stdout)
+	if err != nil {
+		log.Error(err)
+	}
+}
+
+func printZshCompletion() {
+	err := rootCmd.GenZshCompletion(os.Stdout)
+	if err != nil {
+		log.Error(err)
+	}
 }

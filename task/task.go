@@ -196,7 +196,7 @@ func RemoveSubstitution(keyPath, alias string) {
 }
 
 // Run a command from the manifest
-func Run(args []string) {
+func Run(args []string, useZsh bool) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
@@ -212,7 +212,11 @@ func Run(args []string) {
 		log.Debug("executing:", cmd)
 	}
 
-	err = shell.Run(cmd)
+	sh := shell.Bash
+	if useZsh {
+		sh = shell.Zsh
+	}
+	err = shell.Run(cmd, sh)
 	if err != nil {
 		log.Error(err)
 	}

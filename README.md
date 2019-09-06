@@ -7,7 +7,7 @@
 
 nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
 
-Managing aliases can be tedious and difficult to set up. nostromo makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` that call into the nostromo binary. It reads and manages all aliases within its manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
+Managing aliases can be tedious and difficult to set up. nostromo makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` / `.zshrc` that call into the nostromo binary. It reads and manages all aliases within its manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
 
 nostromo can potentially help you build complex tools in a declarative way. Tools commonly allow you to run multi-level commands like `git rebase master branch` or `docker rmi b750fe78269d` which seem clear to use. Imagine if you could wrap your aliases / commands / workflow into custom commands that describe things you do often.
 
@@ -31,7 +31,7 @@ The possibilities are endless and up to your imagination with the ability to com
 
 ### Prerequisites
 1. A working `go` installation with `GOPATH` and `PATH` set to run installed binaries
-2. Works for MacOS and `bash` shell (other combinations untested)
+2. Works for MacOS and `bash` / `zsh` shells (other combinations untested)
 
 ### Installation
 ```sh
@@ -58,13 +58,13 @@ Aliases to commands is one of the core functionalities provided by nostromo. Ins
 
 **Notes**
 - *Commands are executed in a child process, so aliases cannot modify the parent shell at this time.*
-- *Commands won't take effect until you open a new shell or `source` your `.bashrc` again.*
+- *Commands won't take effect until you open a new shell or `source` your `.bashrc` / `.zshrc` again.*
 
 To add an alias (or command in nostromo parlance), simply run:
 ```sh
 nostromo add cmd foo "echo doo"
 ```
-Re-source your `.bashrc` and just like that you can run `foo` like any other alias.
+Re-source your `.bashrc` / `.zshrc` and just like that you can run `foo` like any other alias.
 
 #### Keypaths
 nostromo uses the concept of keypaths to simplify building commands and accessing the command tree. A keypath is simply a `.` delimited string that represents the path to the command.
@@ -123,9 +123,10 @@ nostromo manifest show
 ```
 
 ### Bash Completion
-nostromo provides bash completion scripts to allow tab completion. You can get this by adding this to your shell init file:
+nostromo provides completion scripts to allow tab completion. You can get this by adding this to your shell init file:
 ```sh
-eval "$(nostromo completion)"
+eval "$(nostromo completion)" # for bash
+eval "$(nostromo completion --zsh)" # for zsh
 ```
 
 ## Credits

@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	startupFileNames = []string{".profile", ".bash_profile", ".bashrc"}
+	startupFileNames = []string{".profile", ".bash_profile", ".bashrc", ".zshrc"}
 )
 
 type startupFile struct {
@@ -48,16 +48,14 @@ func loadStartupFiles() []*startupFile {
 	return files
 }
 
-func preferredStartupFile(files []*startupFile) *startupFile {
-	if len(files) == 0 {
-		return nil
-	}
+func preferredStartupFiles(files []*startupFile) []*startupFile {
+	p := []*startupFile{}
 	for _, s := range files {
 		if s.preferred {
-			return s
+			p = append(p, s)
 		}
 	}
-	return nil
+	return p
 }
 
 func findStartupFile(name string) (string, os.FileMode, error) {
@@ -102,7 +100,7 @@ func newStartupFile(path, content string, mode os.FileMode) *startupFile {
 		mode:      mode,
 		content:   content,
 		aliases:   []string{},
-		preferred: strings.Contains(path, ".bashrc"),
+		preferred: strings.Contains(path, ".bashrc") || strings.Contains(path, ".zshrc"),
 	}
 }
 
@@ -181,9 +179,14 @@ func (s *startupFile) makeAliasBlock() string {
 		return ""
 	}
 
+	zsh := ""
+	if strings.Contains(s.path, "zsh") {
+		zsh = "--zsh"
+	}
+
 	aliases := []string{}
 	for _, a := range s.aliases {
-		alias := fmt.Sprintf("alias %s='nostromo run %s \"$*\"'", a, a)
+		alias := strings.TrimSpace(fmt.Sprintf("alias %s='nostromo run %s \"$*\"' %s", a, a, zsh))
 		aliases = append(aliases, alias)
 	}
 	return fmt.Sprintf("\n%s\n%s\n%s\n", beginBlockComment, strings.Join(aliases, "\n"), endBlockComment)

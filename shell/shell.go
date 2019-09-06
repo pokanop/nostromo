@@ -9,15 +9,26 @@ import (
 	"github.com/pokanop/nostromo/model"
 )
 
+// Shell type
+type Shell int
+
+// Supported shells
+const (
+	Bash Shell = iota
+	Zsh
+)
+
 // Run a command on the shell
-func Run(command string) error {
+func Run(command string, shell Shell) error {
 	if len(command) == 0 {
 		return fmt.Errorf("cannot run empty command")
 	}
 
 	command = strings.TrimSuffix(command, "\n")
 
-	cmd := exec.Command("bash", "-ic", command)
+	name, args := buildExecArgs(shell, command)
+	cmd := exec.Command(name, args...)
+
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -36,18 +47,20 @@ func Run(command string) error {
 // with manifest's commands.
 func Commit(manifest *model.Manifest) error {
 	initFiles := loadStartupFiles()
-	p := preferredStartupFile(initFiles)
-	if p == nil {
+	prefFiles := preferredStartupFiles(initFiles)
+	if len(prefFiles) == 0 {
 		return fmt.Errorf("could not find preferred init file")
 	}
 
-	// Forget previous aliases
-	p.reset()
+	for _, p := range prefFiles {
+		// Forget previous aliases
+		p.reset()
 
-	// Since nostromo works by aliasing only the top level commands,
-	// iterate the manifest's list and update.
-	for _, cmd := range manifest.Commands {
-		p.add(cmd.Alias)
+		// Since nostromo works by aliasing only the top level commands,
+		// iterate the manifest's list and update.
+		for _, cmd := range manifest.Commands {
+			p.add(cmd.Alias)
+		}
 	}
 
 	for _, f := range initFiles {
@@ -63,10 +76,17 @@ func Commit(manifest *model.Manifest) error {
 // InitFileLines returns the shell initialization file lines
 func InitFileLines() (string, error) {
 	initFiles := loadStartupFiles()
-	p := preferredStartupFile(initFiles)
-	if p == nil {
+	prefFiles := preferredStartupFiles(initFiles)
+	if len(prefFiles) == 0 {
 		return "", fmt.Errorf("could not find preferred init file")
 	}
 
-	return p.makeAliasBlock(), nil
+	return prefFiles[0].makeAliasBlock(), nil
+}
+
+func buildExecArgs(sh Shell, cmd string) (string, []string) {
+	if sh == Zsh {
+		return "zsh", []string{"-ic", cmd}
+	}
+	return "bash", []string{"-ic", cmd}
 }
