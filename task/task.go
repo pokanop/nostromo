@@ -234,11 +234,11 @@ func Find(name string) {
 
 	for _, cmd := range cfg.Manifest.Commands {
 		cmd.Walk(func(c *model.Command, s *bool) {
-			if strings.Contains(c.Name, name) || strings.Contains(c.Alias, name) {
+			if containsCaseInsensitive(c.Name, name) || containsCaseInsensitive(c.Alias, name) {
 				matchingCmds = append(matchingCmds, c)
 			}
 			for _, sub := range c.Subs {
-				if strings.Contains(sub.Name, name) || strings.Contains(sub.Alias, name) {
+				if containsCaseInsensitive(sub.Name, name) || containsCaseInsensitive(sub.Alias, name) {
 					matchingSubs = append(matchingSubs, c)
 				}
 			}
@@ -314,4 +314,8 @@ func sanitizeArgs(args []string) []string {
 		}
 	}
 	return sanitizedArgs
+}
+
+func containsCaseInsensitive(s, substr string) bool {
+	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
 }
