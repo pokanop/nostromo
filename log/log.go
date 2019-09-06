@@ -26,9 +26,19 @@ func Regular(a ...interface{}) {
 	fmt.Println(opt.theme.formatRegular(joined(a...)))
 }
 
+// Regularf log for body style text
+func Regularf(format string, a ...interface{}) {
+	fmt.Print(opt.theme.formatRegular(fmt.Sprintf(format, a...)))
+}
+
 // Highlight log as highlighted text
 func Highlight(a ...interface{}) {
 	fmt.Println(opt.theme.formatHighlight(joined(a...)))
+}
+
+// Highlightf log as highlighted text
+func Highlightf(format string, a ...interface{}) {
+	fmt.Print(opt.theme.formatHighlight(fmt.Sprintf(format, a...)))
 }
 
 // Debug logs a debug message
@@ -38,7 +48,7 @@ func Debug(a ...interface{}) {
 
 // Debugf logs a debug message
 func Debugf(format string, a ...interface{}) {
-	fmt.Print(opt.theme.formatLevel(debugLevel, "debug:"), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(debugLevel, "debug: "), fmt.Sprintf(format, a...))
 }
 
 // Info logs an info message
@@ -48,27 +58,27 @@ func Info(a ...interface{}) {
 
 // Infof logs a debug message
 func Infof(format string, a ...interface{}) {
-	fmt.Print(opt.theme.formatLevel(infoLevel, "info:"), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(infoLevel, "info: "), fmt.Sprintf(format, a...))
 }
 
 // Warning logs a warning message
 func Warning(a ...interface{}) {
-	fmt.Println(opt.theme.formatLevel(warningLevel, "warning:"), fmt.Sprint(a...))
+	fmt.Println(opt.theme.formatLevel(warningLevel, "warning:"), joined(a...))
 }
 
 // Warningf logs a debug message
 func Warningf(format string, a ...interface{}) {
-	fmt.Print(opt.theme.formatLevel(warningLevel, "warning:"), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(warningLevel, "warning: "), fmt.Sprintf(format, a...))
 }
 
 // Error logs an error message
 func Error(a ...interface{}) {
-	fmt.Println(opt.theme.formatLevel(errorLevel, "error:"), fmt.Sprint(a...))
+	fmt.Println(opt.theme.formatLevel(errorLevel, "error:"), joined(a...))
 }
 
 // Errorf logs a debug message
 func Errorf(format string, a ...interface{}) {
-	fmt.Print(opt.theme.formatLevel(errorLevel, "error:"), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(errorLevel, "error: "), fmt.Sprintf(format, a...))
 }
 
 // SetOptions for logger

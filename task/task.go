@@ -222,6 +222,54 @@ func Run(args []string, useZsh bool) {
 	}
 }
 
+// Find matching commands and substitutions
+func Find(name string) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	matchingCmds := []*model.Command{}
+	matchingSubs := []*model.Command{}
+
+	for _, cmd := range cfg.Manifest.Commands {
+		cmd.Walk(func(c *model.Command, s *bool) {
+			if strings.Contains(c.Name, name) || strings.Contains(c.Alias, name) {
+				matchingCmds = append(matchingCmds, c)
+			}
+			for _, sub := range c.Subs {
+				if strings.Contains(sub.Name, name) || strings.Contains(sub.Alias, name) {
+					matchingSubs = append(matchingSubs, c)
+				}
+			}
+		})
+	}
+
+	if len(matchingCmds) == 0 && len(matchingSubs) == 0 {
+		log.Highlight("no matching commands or substitutions found")
+		return
+	}
+
+	log.Regular("[commands]")
+	for _, cmd := range matchingCmds {
+		log.Fields(cmd)
+		if cfg.Manifest.Config.Verbose {
+			log.Regular()
+		}
+	}
+
+	if !cfg.Manifest.Config.Verbose {
+		log.Regular()
+	}
+	log.Regular("[substitutions]")
+	for _, cmd := range matchingSubs {
+		log.Fields(cmd)
+		if cfg.Manifest.Config.Verbose {
+			log.Regular()
+		}
+	}
+}
+
 func checkConfigQuiet() *config.Config {
 	return checkConfigCommon(true)
 }
