@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 )
 
@@ -19,7 +20,7 @@ const (
 )
 
 // Run a command on the shell
-func Run(command string, shell Shell) error {
+func Run(command string, shell Shell, verbose bool) error {
 	if len(command) == 0 {
 		return fmt.Errorf("cannot run empty command")
 	}
@@ -27,6 +28,9 @@ func Run(command string, shell Shell) error {
 	command = strings.TrimSuffix(command, "\n")
 
 	name, args := buildExecArgs(shell, command)
+	if verbose {
+		log.Debugf("executing: %s %s\n", name, strings.Join(args, " "))
+	}
 	cmd := exec.Command(name, args...)
 
 	cmd.Stdout = os.Stdout

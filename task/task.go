@@ -208,15 +208,11 @@ func Run(args []string, useZsh bool) {
 		return
 	}
 
-	if cfg.Manifest.Config.Verbose {
-		log.Debug("executing:", cmd)
-	}
-
 	sh := shell.Bash
 	if useZsh {
 		sh = shell.Zsh
 	}
-	err = shell.Run(cmd, sh)
+	err = shell.Run(cmd, sh, cfg.Manifest.Config.Verbose)
 	if err != nil {
 		log.Error(err)
 	}
