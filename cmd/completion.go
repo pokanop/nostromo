@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var useZsh bool
 var writeCompletion bool
 
 // completionCmd represents the completion command

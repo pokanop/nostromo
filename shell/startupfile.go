@@ -179,14 +179,9 @@ func (s *startupFile) makeAliasBlock() string {
 		return ""
 	}
 
-	zsh := ""
-	if strings.Contains(s.path, "zsh") {
-		zsh = "--zsh"
-	}
-
 	aliases := []string{}
 	for _, a := range s.aliases {
-		alias := strings.TrimSpace(fmt.Sprintf("alias %s='nostromo run %s \"$*\"' %s", a, a, zsh))
+		alias := strings.TrimSpace(fmt.Sprintf("alias %s='nostromo run %s \"$*\"'", a, a))
 		aliases = append(aliases, alias)
 	}
 	return fmt.Sprintf("\n%s\n%s\n%s\n", beginBlockComment, strings.Join(aliases, "\n"), endBlockComment)

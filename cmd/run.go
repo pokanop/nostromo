@@ -5,8 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var useZsh bool
-
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run [command] [args]",
@@ -40,12 +38,10 @@ commands that need to be run across the scope of the command.`,
 	Args:               cobra.MinimumNArgs(1),
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		task.Run(args, useZsh)
+		task.Run(args)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-
-	runCmd.Flags().BoolVarP(&useZsh, "zsh", "z", false, "Use zsh for shell exec")
 }

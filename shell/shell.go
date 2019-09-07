@@ -20,14 +20,14 @@ const (
 )
 
 // Run a command on the shell
-func Run(command string, shell Shell, verbose bool) error {
+func Run(command string, verbose bool) error {
 	if len(command) == 0 {
 		return fmt.Errorf("cannot run empty command")
 	}
 
 	command = strings.TrimSuffix(command, "\n")
 
-	name, args := buildExecArgs(shell, command)
+	name, args := buildExecArgs(command)
 	if verbose {
 		log.Debugf("executing: %s %s\n", name, strings.Join(args, " "))
 	}
@@ -88,8 +88,17 @@ func InitFileLines() (string, error) {
 	return prefFiles[0].makeAliasBlock(), nil
 }
 
-func buildExecArgs(sh Shell, cmd string) (string, []string) {
-	if sh == Zsh {
+// Which shell is currently running
+func Which() Shell {
+	sh := os.Getenv("SHELL")
+	if strings.Contains(sh, "zsh") {
+		return Zsh
+	}
+	return Bash
+}
+
+func buildExecArgs(cmd string) (string, []string) {
+	if Which() == Zsh {
 		return "zsh", []string{"-ic", cmd}
 	}
 	return "bash", []string{"-ic", cmd}
