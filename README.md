@@ -123,7 +123,7 @@ nostromo manifest show
 ```
 
 ### Bash Completion
-nostromo provides completion scripts to allow tab completion. You can get this by adding this to your shell init file:
+nostromo provides completion scripts to allow tab completion. This is added by default when running `nostromo init` or by adding this to your shell init file:
 ```sh
 eval "$(nostromo completion)" # for bash
 eval "$(nostromo completion --zsh)" # for zsh

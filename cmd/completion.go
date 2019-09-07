@@ -20,7 +20,8 @@ var completionCmd = &cobra.Command{
 eval "$(nostromo completion)"	# for bash
 eval "$(nostromo completion --zsh)" # for zsh
 
-To configure your shell to load completions for each session add to your init files
+To configure your shell to load completions for each session add to your init files.
+Note that "nostromo init" will add this automatically.
 
 # In ~/.bashrc or ~/.bash_profile
 eval "$(nostromo completion)"

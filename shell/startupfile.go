@@ -15,6 +15,7 @@ import (
 const (
 	beginBlockComment = "# nostromo [section begin]"
 	endBlockComment   = "# nostromo [section end]"
+	sourceCompletion  = "eval \"$(nostromo completion%s)\""
 )
 
 var (
@@ -184,5 +185,9 @@ func (s *startupFile) makeAliasBlock() string {
 		alias := strings.TrimSpace(fmt.Sprintf("alias %s='nostromo run %s \"$*\"'", a, a))
 		aliases = append(aliases, alias)
 	}
-	return fmt.Sprintf("\n%s\n%s\n%s\n", beginBlockComment, strings.Join(aliases, "\n"), endBlockComment)
+	zsh := ""
+	if strings.Contains(s.path, "zsh") {
+		zsh = " --zsh"
+	}
+	return fmt.Sprintf("\n%s\n%s\n\n%s\n%s\n", beginBlockComment, fmt.Sprintf(sourceCompletion, zsh), strings.Join(aliases, "\n"), endBlockComment)
 }
