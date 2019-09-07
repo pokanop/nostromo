@@ -59,6 +59,18 @@ func preferredStartupFiles(files []*startupFile) []*startupFile {
 	return p
 }
 
+func currentStartupFile(files []*startupFile) *startupFile {
+	sh := Which()
+	for _, s := range files {
+		if sh == Zsh && strings.Contains(s.path, "zshrc") {
+			return s
+		} else if sh == Bash && strings.Contains(s.path, "bashrc") {
+			return s
+		}
+	}
+	return nil
+}
+
 func findStartupFile(name string) (string, os.FileMode, error) {
 	home, err := pathutil.HomeDir()
 	if err != nil {

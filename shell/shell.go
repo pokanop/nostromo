@@ -80,12 +80,12 @@ func Commit(manifest *model.Manifest) error {
 // InitFileLines returns the shell initialization file lines
 func InitFileLines() (string, error) {
 	initFiles := loadStartupFiles()
-	prefFiles := preferredStartupFiles(initFiles)
-	if len(prefFiles) == 0 {
-		return "", fmt.Errorf("could not find preferred init file")
+	prefFile := currentStartupFile(initFiles)
+	if prefFile == nil {
+		return "", fmt.Errorf("could not find current init file")
 	}
 
-	return prefFiles[0].makeAliasBlock(), nil
+	return prefFile.makeAliasBlock(), nil
 }
 
 // Which shell is currently running

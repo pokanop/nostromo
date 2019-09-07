@@ -65,7 +65,7 @@ func ShowConfig(raw bool) {
 			return
 		}
 
-		log.Highlight("\n[profile aliases]")
+		log.Highlight("\n[profile]")
 		log.Regular(strings.TrimSpace(lines))
 	} else {
 		log.Regular("[manifest]")
