@@ -26,3 +26,67 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+brews:
+  -
+    # Name template of the recipe
+    # Default to project name
+    name: nostromo
+
+    # NOTE: make sure the url_template, the token and given repo (github or gitlab) owner and name are from the
+    # same kind. We will probably unify this in the next major version like it is done with scoop.
+
+    # Github repository to push the tap to.
+    github:
+      owner: pokanop
+      name: homebrew-pokanop
+
+    # Template for the url which is determined by the given Token (github or gitlab)
+    # Default for github is "https://github.com/<repo_owner>/<repo_name>/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    url_template: "https://github.com/pokanop/nostromo/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+
+    # Git author used to commit to the repository.
+    # Defaults are shown.
+    commit_author:
+      name: saheljalal
+      email: sahel.jalal@icloud.com
+
+    # Folder inside the repository to put the formula.
+    # Default is the root folder.
+    folder: Formula
+
+    # Caveats for the user of your binary.
+    # Default is empty.
+    caveats: >+
+      Initialize nostromo and create a manifest under ~/.nostromo by running:
+
+        nostromo init
+      
+      You can add shell bindings for autocompletion adding these to your init file(s):
+        eval "$(nostromo completion)" # for bash
+        eval "$(nostromo completion --zsh)" # for zsh
+
+    # Your app's homepage.
+    # Default is empty.
+    homepage: "https://nostromo.sh"
+
+    # Your app's description.
+    # Default is empty.
+    description: "nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions."
+
+    # Setting this will prevent goreleaser to actually try to commit the updated
+    # formula - instead, the formula file will be stored on the dist folder only,
+    # leaving the responsibility of publishing it to the user.
+    # If set to auto, the release will not be uploaded to the homebrew tap
+    # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
+    # Default is false.
+    skip_upload: false
+
+    # So you can `brew test` your formula.
+    # Default is empty.
+    test: |
+      system "#{bin}/nostromo help"
+
+    # Custom install script for brew.
+    # Default is 'bin.install "program"'.
+    install: |
+      bin.install "nostromo"
