@@ -3,6 +3,7 @@ module github.com/pokanop/nostromo
 go 1.12
 
 require (
+	github.com/kr/pretty v0.1.0
 	github.com/logrusorgru/aurora v0.0.0-20190417123914-21d75270181e
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/pelletier/go-toml v1.4.0 // indirect

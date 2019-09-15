@@ -3,11 +3,12 @@ package model
 import (
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strconv"
 	"testing"
 
+	"github.com/kr/pretty"
 	"github.com/pokanop/nostromo/keypath"
-
 	"github.com/pokanop/nostromo/pathutil"
 )
 
@@ -227,8 +228,53 @@ func TestManifestExecutionString(t *testing.T) {
 	}
 }
 
+func TestManifestKeys(t *testing.T) {
+	tests := []struct {
+		name     string
+		manifest *Manifest
+		expected []string
+	}{
+		{"keys", fakeManifest(1, 1), []string{"version", "commands"}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := test.manifest.Keys(); !reflect.DeepEqual(actual, test.expected) {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
+func TestManifestFields(t *testing.T) {
+	tests := []struct {
+		name     string
+		manifest *Manifest
+		expected map[string]interface{}
+	}{
+		{
+			"keys",
+			fakeManifest(1, 1),
+			map[string]interface{}{
+				"version":  "1.0",
+				"commands": "0-one-alias",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := test.manifest.Fields(); !reflect.DeepEqual(actual, test.expected) {
+				pretty.Println(actual)
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
 func fakeManifest(n, depth int) *Manifest {
 	m := NewManifest()
+	m.Config.Verbose = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
 		m.Commands[c.Alias] = c

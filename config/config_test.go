@@ -1,8 +1,10 @@
 package config
 
 import (
+	"reflect"
 	"testing"
 
+	"github.com/kr/pretty"
 	"github.com/pokanop/nostromo/model"
 )
 
@@ -161,6 +163,49 @@ func TestSet(t *testing.T) {
 				if actual := c.Get(test.key); actual != test.expected {
 					t.Errorf("expected: %s, actual: %s", test.expected, actual)
 				}
+			}
+		})
+	}
+}
+
+func TestKeys(t *testing.T) {
+	tests := []struct {
+		name     string
+		config   *Config
+		expected []string
+	}{
+		{"keys", NewConfig("path", fakeManifest()), []string{"verbose"}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := test.config.Manifest.Config.Keys(); !reflect.DeepEqual(actual, test.expected) {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
+func TestFields(t *testing.T) {
+	tests := []struct {
+		name     string
+		config   *Config
+		expected map[string]interface{}
+	}{
+		{
+			"keys",
+			NewConfig("path", fakeManifest()),
+			map[string]interface{}{
+				"verbose": false,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := test.config.Manifest.Config.Fields(); !reflect.DeepEqual(actual, test.expected) {
+				pretty.Println(actual)
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
 	}

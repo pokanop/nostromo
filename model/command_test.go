@@ -213,7 +213,7 @@ func TestReverseWalk(t *testing.T) {
 	}
 }
 
-func TestforwardWalk(t *testing.T) {
+func TestForwardWalk(t *testing.T) {
 	tests := []struct {
 		name     string
 		command  *Command
@@ -227,6 +227,27 @@ func TestforwardWalk(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.command.forwardWalk(test.fn)
+			if !reflect.DeepEqual(test.command, test.expected) {
+				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
+			}
+		})
+	}
+}
+
+func TestWalk(t *testing.T) {
+	tests := []struct {
+		name     string
+		command  *Command
+		fn       func(*Command, *bool)
+		expected *Command
+	}{
+		{"nil fn", fakeCommand(1), nil, fakeCommand(1)},
+		{"stop fn", fakeCommand(1), func(cmd *Command, stop *bool) { *stop = true }, fakeCommand(1)},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.command.Walk(test.fn)
 			if !reflect.DeepEqual(test.command, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
 			}
@@ -287,6 +308,72 @@ func TestBuild(t *testing.T) {
 			test.command.build(test.keyPath, test.commandStr, "")
 			if !reflect.DeepEqual(test.expected, test.command) {
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
+			}
+		})
+	}
+}
+
+func TestString(t *testing.T) {
+	tests := []struct {
+		name     string
+		command  *Command
+		expected string
+	}{
+		{"single command", fakeCommand(1), "[one-alias] one -> one-alias"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := test.command.String(); actual != test.expected {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
+func TestKeys(t *testing.T) {
+	tests := []struct {
+		name     string
+		command  *Command
+		expected []string
+	}{
+		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code"}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := test.command.Keys(); !reflect.DeepEqual(actual, test.expected) {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
+func TestFields(t *testing.T) {
+	tests := []struct {
+		name     string
+		command  *Command
+		expected map[string]interface{}
+	}{
+		{
+			"keys",
+			fakeCommand(1),
+			map[string]interface{}{
+				"alias":         "one-alias",
+				"command":       "one",
+				"description":   "",
+				"commands":      "",
+				"substitutions": "one-sub",
+				"code":          false,
+				"keypath":       "one-alias",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := test.command.Fields(); !reflect.DeepEqual(actual, test.expected) {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
 	}

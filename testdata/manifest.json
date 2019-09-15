@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "config": {
-    "verbose": false
+    "verbose": true
   },
   "commands": {
     "0-one-alias": {
