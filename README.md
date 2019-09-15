@@ -30,12 +30,12 @@ The possibilities are endless and up to your imagination with the ability to com
 ## Getting Started
 
 ### Prerequisites
-1. A working `go` installation with `GOPATH` and `PATH` set to run installed binaries
-2. Works for MacOS and `bash` / `zsh` shells (other combinations untested)
+- Works for MacOS and `bash` / `zsh` shells (other combinations untested)
 
 ### Installation
 ```sh
-go get -u github.com/pokanop/nostromo
+brew tap pokanop/pokanop
+brew install nostromo
 ```
 
 ### Initialization
