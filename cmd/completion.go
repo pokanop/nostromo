@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"bytes"
+	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/pokanop/nostromo/log"
@@ -62,12 +65,22 @@ func writeBashCompletionFile() {
 }
 
 func writeZshCompletionFile() {
-	err := rootCmd.GenZshCompletionFile(pathutil.Abs("~/.nostromo/zcompletion"))
+	var buf bytes.Buffer
+	err := rootCmd.GenZshCompletion(&buf)
 	if err != nil {
 		log.Error(err)
-	} else {
-		log.Highlight("zsh completion script written to ~/.nostromo/zcompletion")
+		return
 	}
+
+	f, err := os.Create(pathutil.Abs("~/.nostromo/zcompletion"))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	fixZshCompletion(&buf, f)
+
+	log.Highlight("zsh completion script written to ~/.nostromo/zcompletion")
 }
 
 func printCompletion() {
@@ -86,8 +99,24 @@ func printBashCompletion() {
 }
 
 func printZshCompletion() {
-	err := rootCmd.GenZshCompletion(os.Stdout)
+	var buf bytes.Buffer
+	err := rootCmd.GenZshCompletion(&buf)
 	if err != nil {
 		log.Error(err)
+		return
 	}
+	fixZshCompletion(&buf, os.Stdout)
+}
+
+// This is required due to a bug in cobra and zsh support:
+// https://github.com/spf13/cobra/pull/887
+func fixZshCompletion(r io.Reader, w io.Writer) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	s := string(b)
+	s += "compdef _nostromo nostromo\n"
+	w.Write([]byte(s))
 }
