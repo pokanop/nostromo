@@ -62,8 +62,10 @@ brews:
         nostromo init
       
       You can add shell bindings for autocompletion adding these to your init file(s):
+
         eval "$(nostromo completion)" # for bash
         eval "$(nostromo completion --zsh)" # for zsh
+        
 
     # Your app's homepage.
     # Default is empty.
