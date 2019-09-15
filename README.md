@@ -2,10 +2,17 @@
 [![Coveralls github](https://img.shields.io/coveralls/github/pokanop/nostromo)](https://coveralls.io/github/pokanop/nostromo)
 [![GitHub](https://img.shields.io/github/license/pokanop/nostromo)](https://github.com/pokanop/nostromo/blob/master/LICENSE)
 
+<p align="center">
+  <img src="images/nostromo-mess-hall.png" alt="nostromo-mess-hall">
+</p>
+
 # nostromo
-<img src="images/nostromo-manifest-show.png" alt="nostromo">
 
 nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
+
+<p align="center">
+    <img src="images/nostromo-manifest-show.png" alt="nostromo">
+</p>
 
 Managing aliases can be tedious and difficult to set up. nostromo makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` / `.zshrc` that call into the nostromo binary. It reads and manages all aliases within its manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
 
@@ -132,6 +139,8 @@ eval "$(nostromo completion --zsh)" # for zsh
 ## Credits
 - This tool was bootstrapped using [cobra](https://github.com/spf13/cobra).
 - Colored logging provided by [aurora](https://github.com/logrusorgru/aurora).
+- Nostromo fan art supplied by [Ian Stewart](https://www.artstation.com/artwork/EBBVN).
+- Gopher artwork by [@egonelbre](https://github.com/egonelbre/gophers) and original by [Renee French](http://reneefrench.blogspot.com/).
 
 ## Contibuting
 Contributions are what makes the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
