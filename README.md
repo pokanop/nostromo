@@ -40,9 +40,17 @@ The possibilities are endless and up to your imagination with the ability to com
 - Works for MacOS and `bash` / `zsh` shells (other combinations untested)
 
 ### Installation
+
+Using `brew`:
+
 ```sh
 brew tap pokanop/pokanop
 brew install nostromo
+```
+
+Using `go get`:
+```sh
+go get -u github.com/pokanop/nostromo
 ```
 
 ### Initialization
