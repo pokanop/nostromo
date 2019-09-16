@@ -11,6 +11,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	bashCompletionPath = "~/.nostromo/completion.bash"
+	zshCompletionPath  = "~/.nostromo/completion.zsh"
+)
+
 var useZsh bool
 var writeCompletion bool
 
@@ -56,11 +61,11 @@ func writeCompletionFile() {
 }
 
 func writeBashCompletionFile() {
-	err := rootCmd.GenBashCompletionFile(pathutil.Abs("~/.nostromo/completion"))
+	err := rootCmd.GenBashCompletionFile(pathutil.Abs(bashCompletionPath))
 	if err != nil {
 		log.Error(err)
 	} else {
-		log.Highlight("bash completion script written to ~/.nostromo/completion")
+		log.Highlight("bash completion script written to " + bashCompletionPath)
 	}
 }
 
@@ -72,7 +77,7 @@ func writeZshCompletionFile() {
 		return
 	}
 
-	f, err := os.Create(pathutil.Abs("~/.nostromo/zcompletion"))
+	f, err := os.Create(pathutil.Abs(zshCompletionPath))
 	if err != nil {
 		log.Error(err)
 		return
@@ -80,7 +85,7 @@ func writeZshCompletionFile() {
 
 	fixZshCompletion(&buf, f)
 
-	log.Highlight("zsh completion script written to ~/.nostromo/zcompletion")
+	log.Highlight("zsh completion script written to " + zshCompletionPath)
 }
 
 func printCompletion() {
