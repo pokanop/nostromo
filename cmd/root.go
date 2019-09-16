@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/pokanop/nostromo/log"
@@ -33,6 +34,11 @@ func Execute() {
 	}
 }
 
+// SetVersion to inject version info
+func SetVersion(v, c, d string) {
+	rootCmd.Version = fmt.Sprintf("[%s %s %s]", v, c, d)
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 }
@@ -49,4 +55,8 @@ func printUsage(cmd *cobra.Command) {
 	log.Regular(cmd.Long)
 	log.Regular()
 	log.Regular(cmd.UsageString())
+}
+
+func printVersion() {
+	log.Regularf("nostromo version %s\n", rootCmd.Version)
 }
