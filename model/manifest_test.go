@@ -216,7 +216,7 @@ func TestManifestExecutionString(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual, err := test.manifest.ExecutionString(keypath.Keys(test.keyPath))
+			_, actual, err := test.manifest.ExecutionString(keypath.Keys(test.keyPath))
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {

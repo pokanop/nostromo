@@ -19,9 +19,9 @@ func TestNewCommand(t *testing.T) {
 		code        *Code
 		expected    *Command
 	}{
-		{"empty alias", "cmd", "", "", nil, &Command{nil, "cmd", "cmd", "cmd", "", map[string]*Command{}, map[string]*Substitution{}, nil}},
-		{"empty name", "", "alias", "", nil, &Command{nil, "alias", "", "alias", "", map[string]*Command{}, map[string]*Substitution{}, nil}},
-		{"valid alias", "cmd", "cmd-alias", "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", "description", map[string]*Command{}, map[string]*Substitution{}, nil}},
+		{"empty alias", "cmd", "", "", nil, &Command{nil, "cmd", "cmd", "cmd", "", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
+		{"empty name", "", "alias", "", nil, &Command{nil, "alias", "", "alias", "", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
+		{"valid alias", "cmd", "cmd-alias", "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
 	}
 
 	for _, test := range tests {

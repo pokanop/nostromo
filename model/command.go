@@ -37,7 +37,7 @@ func (c *Command) Fields() map[string]interface{} {
 		"description":   c.Description,
 		"commands":      joinedCommands(c.Commands),
 		"substitutions": joinedSubs(c.Subs),
-		"code":          c.Code != nil,
+		"code":          c.Code.valid(),
 	}
 }
 
@@ -51,6 +51,10 @@ func newCommand(name, alias, description string, code *Code) *Command {
 	// Default alias to same as command name
 	if len(alias) == 0 {
 		alias = name
+	}
+
+	if code == nil {
+		code = &Code{}
 	}
 
 	return &Command{
@@ -168,7 +172,9 @@ func (c *Command) executionString(args []string) string {
 func (c *Command) expand() string {
 	cmds := []string{}
 	c.reverseWalk(func(cmd *Command, stop *bool) {
-		if len(cmd.Name) > 0 {
+		if cmd.Code.valid() {
+			cmds = append(cmds, cmd.Code.Snippet)
+		} else if len(cmd.Name) > 0 {
 			cmds = append(cmds, cmd.Name)
 		}
 	})
@@ -228,6 +234,9 @@ func (c *Command) forwardWalk(fn func(*Command, *bool)) bool {
 
 func (c *Command) link(parent *Command) {
 	c.parent = parent
+	if c.Code == nil {
+		c.Code = &Code{}
+	}
 	for _, cmd := range c.Commands {
 		cmd.link(c)
 	}

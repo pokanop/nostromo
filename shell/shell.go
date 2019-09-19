@@ -19,15 +19,17 @@ const (
 	Zsh
 )
 
+var validLanguages = []string{"ruby", "python", "perl", "js", "sh"}
+
 // Run a command on the shell
-func Run(command string, verbose bool) error {
+func Run(command, language string, verbose bool) error {
 	if len(command) == 0 {
 		return fmt.Errorf("cannot run empty command")
 	}
 
 	command = strings.TrimSuffix(command, "\n")
 
-	name, args := buildExecArgs(command)
+	name, args := buildExecArgs(command, language)
 	if verbose {
 		log.Debugf("executing: %s %s\n", name, strings.Join(args, " "))
 	}
@@ -97,9 +99,37 @@ func Which() Shell {
 	return Bash
 }
 
-func buildExecArgs(cmd string) (string, []string) {
-	if Which() == Zsh {
-		return "zsh", []string{"-ic", cmd}
+// ValidLanguages that can be executed
+func ValidLanguages() []string {
+	return validLanguages
+}
+
+// IsSupportedLanguage returns true if supported snippet language and false otherwise
+func IsSupportedLanguage(language string) bool {
+	for _, l := range validLanguages {
+		if language == l {
+			return true
+		}
 	}
-	return "bash", []string{"-ic", cmd}
+	return false
+}
+
+func buildExecArgs(cmd, language string) (string, []string) {
+	switch language {
+	case "ruby":
+		return "ruby", []string{"-e", cmd}
+	case "python":
+		return "python", []string{"-c", cmd}
+	case "perl":
+		return "perl", []string{"-e", cmd}
+	case "js":
+		return "node", []string{"-e", cmd}
+	case "sh":
+		fallthrough
+	default:
+		if Which() == Zsh {
+			return "zsh", []string{"-ic", cmd}
+		}
+		return "bash", []string{"-ic", cmd}
+	}
 }

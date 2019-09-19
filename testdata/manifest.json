@@ -34,7 +34,10 @@
                       "Alias": "0-four-sub"
                     }
                   },
-                  "code": null
+                  "code": {
+                    "language": "",
+                    "snippet": ""
+                  }
                 }
               },
               "subs": {
@@ -43,7 +46,10 @@
                   "Alias": "0-three-sub"
                 }
               },
-              "code": null
+              "code": {
+                "language": "",
+                "snippet": ""
+              }
             }
           },
           "subs": {
@@ -52,7 +58,10 @@
               "Alias": "0-two-sub"
             }
           },
-          "code": null
+          "code": {
+            "language": "",
+            "snippet": ""
+          }
         }
       },
       "subs": {
@@ -61,7 +70,10 @@
           "Alias": "0-one-sub"
         }
       },
-      "code": null
+      "code": {
+        "language": "",
+        "snippet": ""
+      }
     },
     "1-one-alias": {
       "keyPath": "1-one-alias",
@@ -93,7 +105,10 @@
                       "Alias": "1-four-sub"
                     }
                   },
-                  "code": null
+                  "code": {
+                    "language": "",
+                    "snippet": ""
+                  }
                 }
               },
               "subs": {
@@ -102,7 +117,10 @@
                   "Alias": "1-three-sub"
                 }
               },
-              "code": null
+              "code": {
+                "language": "",
+                "snippet": ""
+              }
             }
           },
           "subs": {
@@ -111,7 +129,10 @@
               "Alias": "1-two-sub"
             }
           },
-          "code": null
+          "code": {
+            "language": "",
+            "snippet": ""
+          }
         }
       },
       "subs": {
@@ -120,7 +141,10 @@
           "Alias": "1-one-sub"
         }
       },
-      "code": null
+      "code": {
+        "language": "",
+        "snippet": ""
+      }
     }
   }
 }

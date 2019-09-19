@@ -120,7 +120,7 @@ func (m *Manifest) AsJSON() string {
 }
 
 // ExecutionString from input if possible or return error
-func (m *Manifest) ExecutionString(args []string) (string, error) {
+func (m *Manifest) ExecutionString(args []string) (string, string, error) {
 	for _, cmd := range m.Commands {
 		keyPath := cmd.shortestKeyPath(keypath.KeyPath(args))
 		if len(keyPath) > 0 {
@@ -131,7 +131,8 @@ func (m *Manifest) ExecutionString(args []string) (string, error) {
 					log.Debug("arguments:", args[count:])
 				}
 			}
-			return cmd.find(keyPath).executionString(args[count:]), nil
+			c := cmd.find(keyPath)
+			return c.Code.Language, c.executionString(args[count:]), nil
 		}
 	}
 
@@ -139,7 +140,7 @@ func (m *Manifest) ExecutionString(args []string) (string, error) {
 		log.Debug("arguments:", args)
 	}
 
-	return "", fmt.Errorf("unable to find execution string")
+	return "", "", fmt.Errorf("unable to find execution string")
 }
 
 // Keys as ordered list of fields for logging

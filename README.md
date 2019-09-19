@@ -65,6 +65,7 @@ nostromo init
 - Build complex command trees
 - Bash completion support
 - Preserves flags and arguments
+- Execute code snippets
 
 ## Usage
 
@@ -124,7 +125,7 @@ Subsequent calls to `foo bar` would replace the subs before running. This comman
 ```sh
 foo bar baz sls
 ```
-would finally run the following since the substitution is in scope:
+would finally result in the following since the substitution is in scope:
 ```sh
 oof rab zab //some/long/string
 ```
@@ -143,6 +144,19 @@ nostromo provides completion scripts to allow tab completion. This is added by d
 eval "$(nostromo completion)" # for bash
 eval "$(nostromo completion --zsh)" # for zsh
 ```
+
+### Execute Code Snippets
+nostromo provides the ability to supply code snippets in the following languages for execution, in lieu of the standard shell command:
+- `ruby` - runs ruby interpreter
+- `python` - runs python interpreter
+- `js` - runs node
+- `perl` - runs perl interpreter
+
+```sh
+nostromo add cmd foo --code 'console.log("hello js")' --language js
+```
+
+For more complex snippets you can edit `~/.nostromo/manifest.json` directly but multiline JSON must be escaped correctly to work.
 
 ## Credits
 - This tool was bootstrapped using [cobra](https://github.com/spf13/cobra).
