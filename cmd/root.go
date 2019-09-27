@@ -1,13 +1,15 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/pokanop/nostromo/log"
+	"github.com/pokanop/nostromo/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var ver *version.Info
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -36,7 +38,11 @@ func Execute() {
 
 // SetVersion to inject version info
 func SetVersion(v, c, d string) {
-	rootCmd.Version = fmt.Sprintf("[%s %s %s]", v, c, d)
+	ver = &version.Info{
+		SemVer:    v,
+		GitCommit: c,
+		BuildDate: d,
+	}
 }
 
 func init() {
@@ -58,5 +64,5 @@ func printUsage(cmd *cobra.Command) {
 }
 
 func printVersion() {
-	log.Regularf("nostromo version %s\n", rootCmd.Version)
+	log.Regularf("Nostromo: %s\n", ver.Formatted())
 }
