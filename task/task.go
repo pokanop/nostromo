@@ -8,7 +8,15 @@ import (
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 	"github.com/pokanop/nostromo/shell"
+	"github.com/pokanop/nostromo/version"
 )
+
+var ver *version.Info
+
+// SetVersion should be called before any task to ensure manifest is updated
+func SetVersion(v *version.Info) {
+	ver = v
+}
 
 // InitConfig of nostromo config file if not already initialized
 func InitConfig() {
@@ -20,6 +28,8 @@ func InitConfig() {
 			log.Error(err)
 			return
 		}
+
+		log.Highlight("nostromo config created")
 	} else {
 		log.Highlight("nostromo config exists, updating")
 	}
@@ -296,6 +306,8 @@ func checkConfigCommon(quiet bool) *config.Config {
 }
 
 func saveConfig(cfg *config.Config) error {
+	cfg.Manifest.Version = ver.SemVer
+
 	err := cfg.Save()
 	if err != nil {
 		return err

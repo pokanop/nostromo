@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/pokanop/nostromo/log"
+	"github.com/pokanop/nostromo/task"
 	"github.com/pokanop/nostromo/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -43,6 +44,9 @@ func SetVersion(v, c, d string) {
 		GitCommit: c,
 		BuildDate: d,
 	}
+
+	// Update task package
+	task.SetVersion(ver)
 }
 
 func init() {
