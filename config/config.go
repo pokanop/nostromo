@@ -5,14 +5,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
+	"gopkg.in/yaml.v2"
 )
 
 // ConfigPath for standard nostromo config
-const ConfigPath = "~/.nostromo/manifest.json"
+const (
+	ConfigPath         = "~/.nostromo/manifest.yaml"
+	ConfigFallbackPath = "~/.nostromo/manifest.json"
+)
 
 // Config manages working with nostromo configuration files
 // The file format is JSON this just provides convenience around converting
@@ -41,7 +46,15 @@ func Parse(path string) (*Config, error) {
 	}
 
 	var m *model.Manifest
-	err = json.Unmarshal(b, &m)
+	ext := filepath.Ext(path)
+	if ext == ".json" {
+		err = json.Unmarshal(b, &m)
+	} else if ext == ".yaml" {
+		err = yaml.Unmarshal(b, &m)
+	} else {
+		return nil, fmt.Errorf("invalid file format: %s", ext)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +73,15 @@ func (c *Config) Save() error {
 		return fmt.Errorf("manifest is nil")
 	}
 
-	b, err := json.MarshalIndent(c.Manifest, "", "  ")
+	var b []byte
+	var err error
+	ext := filepath.Ext(c.path)
+	if ext == ".json" {
+		b, err = json.Marshal(c.Manifest)
+	} else if ext == ".yaml" {
+		b, err = yaml.Marshal(c.Manifest)
+	}
+
 	if err != nil {
 		return err
 	}

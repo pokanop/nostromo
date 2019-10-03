@@ -7,6 +7,7 @@ import (
 
 	"github.com/pokanop/nostromo/keypath"
 	"github.com/pokanop/nostromo/log"
+	"gopkg.in/yaml.v2"
 )
 
 // Manifest is the main container for nostromo based commands
@@ -110,9 +111,18 @@ func (m *Manifest) Find(keyPath string) *Command {
 	return nil
 }
 
-// AsJSON returns string representation used for storage
+// AsJSON returns string representation of manifest
 func (m *Manifest) AsJSON() string {
 	b, err := json.MarshalIndent(m, "", "  ")
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+// AsYAML returns string representation of manifest
+func (m *Manifest) AsYAML() string {
+	b, err := yaml.Marshal(m)
 	if err != nil {
 		return ""
 	}

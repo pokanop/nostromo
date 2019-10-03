@@ -156,7 +156,7 @@ nostromo provides the ability to supply code snippets in the following languages
 nostromo add cmd foo --code 'console.log("hello js")' --language js
 ```
 
-For more complex snippets you can edit `~/.nostromo/manifest.json` directly but multiline JSON must be escaped correctly to work.
+For more complex snippets you can edit `~/.nostromo/manifest.yaml` directly but multiline JSON must be escaped correctly to work.
 
 ## Credits
 - This tool was bootstrapped using [cobra](https://github.com/spf13/cobra).

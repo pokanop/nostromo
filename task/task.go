@@ -61,21 +61,27 @@ func DestroyConfig() {
 }
 
 // ShowConfig for nostromo config file
-func ShowConfig(raw bool) {
+func ShowConfig(rawJSON bool, rawYAML bool) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
 	}
 
-	if raw {
-		log.Highlight("[raw json]")
-		log.Regular(cfg.Manifest.AsJSON())
+	if rawJSON || rawYAML {
+		log.Highlight("[manifest]")
+		if rawJSON {
+			log.Regular(cfg.Manifest.AsJSON())
+			log.Regular()
+		} else if rawYAML {
+			log.Regular(cfg.Manifest.AsYAML())
+		}
+
 		lines, err := shell.InitFileLines()
 		if err != nil {
 			return
 		}
 
-		log.Highlight("\n[profile]")
+		log.Highlight("[profile]")
 		log.Regular(strings.TrimSpace(lines))
 	} else {
 		log.Regular("[manifest]")
@@ -293,6 +299,10 @@ func checkConfig() *config.Config {
 
 func checkConfigCommon(quiet bool) *config.Config {
 	cfg, err := config.Parse(config.ConfigPath)
+	if err != nil {
+		cfg, err = config.Parse(config.ConfigFallbackPath)
+	}
+
 	if err != nil {
 		if !quiet {
 			log.Error(err)

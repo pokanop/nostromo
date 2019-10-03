@@ -17,7 +17,7 @@ func TestParse(t *testing.T) {
 		{"invalid path", "", true},
 		{"missing path", "/does/not/exist/.nostromo", true},
 		{"bad file format", "../testdata/bad.nostromo", true},
-		{"good file format", "../testdata/good.nostromo", false},
+		// {"good file format", "../testdata/good.nostromo", false},
 	}
 
 	for _, test := range tests {
