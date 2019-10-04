@@ -1,6 +1,8 @@
 package task
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pokanop/nostromo/config"
@@ -21,6 +23,7 @@ func SetVersion(v *version.Info) {
 // InitConfig of nostromo config file if not already initialized
 func InitConfig() {
 	cfg := checkConfigQuiet()
+
 	if cfg == nil {
 		cfg = config.NewConfig(config.ConfigPath, model.NewManifest())
 		err := pathutil.EnsurePath("~/.nostromo")
@@ -30,6 +33,25 @@ func InitConfig() {
 		}
 
 		log.Highlight("nostromo config created")
+	} else if filepath.Ext(cfg.Path()) == ".json" {
+		// Deprecated config file treated as new config
+		// Need to update to yaml
+		p := cfg.Path()
+		m := cfg.Manifest()
+		cfg = config.NewConfig(config.ConfigPath, m)
+		err := pathutil.EnsurePath("~/.nostromo")
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		err = os.Remove(pathutil.Abs(p))
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		log.Highlight("nostromo config exists, upgraded")
 	} else {
 		log.Highlight("nostromo config exists, updating")
 	}
@@ -67,13 +89,15 @@ func ShowConfig(rawJSON bool, rawYAML bool) {
 		return
 	}
 
+	m := cfg.Manifest()
+
 	if rawJSON || rawYAML {
 		log.Highlight("[manifest]")
 		if rawJSON {
-			log.Regular(cfg.Manifest.AsJSON())
+			log.Regular(m.AsJSON())
 			log.Regular()
 		} else if rawYAML {
-			log.Regular(cfg.Manifest.AsYAML())
+			log.Regular(m.AsYAML())
 		}
 
 		lines, err := shell.InitFileLines()
@@ -85,17 +109,17 @@ func ShowConfig(rawJSON bool, rawYAML bool) {
 		log.Regular(strings.TrimSpace(lines))
 	} else {
 		log.Regular("[manifest]")
-		log.Fields(cfg.Manifest)
+		log.Fields(m)
 
 		log.Regular("\n[config]")
-		log.Fields(cfg.Manifest.Config)
+		log.Fields(m.Config)
 
-		if len(cfg.Manifest.Commands) > 0 {
+		if len(m.Commands) > 0 {
 			log.Regular("\n[commands]")
-			for _, cmd := range cfg.Manifest.Commands {
+			for _, cmd := range m.Commands {
 				cmd.Walk(func(c *model.Command, s *bool) {
 					log.Fields(c)
-					if cfg.Manifest.Config.Verbose {
+					if m.Config.Verbose {
 						log.Regular()
 					}
 				})
@@ -140,13 +164,15 @@ func AddCommand(keyPath, command, description, code, language string) {
 		return
 	}
 
-	err := cfg.Manifest.AddCommand(keyPath, command, description)
+	m := cfg.Manifest()
+
+	err := m.AddCommand(keyPath, command, description)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	cmd := cfg.Manifest.Find(keyPath)
+	cmd := m.Find(keyPath)
 	if cmd == nil {
 		log.Error("unable to find newly created command")
 		return
@@ -172,7 +198,7 @@ func RemoveCommand(keyPath string) {
 		return
 	}
 
-	err := cfg.Manifest.RemoveCommand(keyPath)
+	err := cfg.Manifest().RemoveCommand(keyPath)
 	if err != nil {
 		log.Error(err)
 		return
@@ -191,7 +217,9 @@ func AddSubstitution(keyPath, name, alias string) {
 		return
 	}
 
-	err := cfg.Manifest.AddSubstitution(keyPath, name, alias)
+	m := cfg.Manifest()
+
+	err := m.AddSubstitution(keyPath, name, alias)
 	if err != nil {
 		log.Error(err)
 	}
@@ -201,7 +229,7 @@ func AddSubstitution(keyPath, name, alias string) {
 		log.Error(err)
 	}
 
-	log.Fields(cfg.Manifest.Find(keyPath))
+	log.Fields(m.Find(keyPath))
 }
 
 // RemoveSubstitution from the manifest
@@ -211,7 +239,7 @@ func RemoveSubstitution(keyPath, alias string) {
 		return
 	}
 
-	err := cfg.Manifest.RemoveSubstitution(keyPath, alias)
+	err := cfg.Manifest().RemoveSubstitution(keyPath, alias)
 	if err != nil {
 		log.Error(err)
 	}
@@ -229,13 +257,15 @@ func Run(args []string) {
 		return
 	}
 
-	language, cmd, err := cfg.Manifest.ExecutionString(sanitizeArgs(args))
+	m := cfg.Manifest()
+
+	language, cmd, err := m.ExecutionString(sanitizeArgs(args))
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	err = shell.Run(cmd, language, cfg.Manifest.Config.Verbose)
+	err = shell.Run(cmd, language, m.Config.Verbose)
 	if err != nil {
 		log.Error(err)
 	}
@@ -248,10 +278,12 @@ func Find(name string) {
 		return
 	}
 
+	m := cfg.Manifest()
+
 	matchingCmds := []*model.Command{}
 	matchingSubs := []*model.Command{}
 
-	for _, cmd := range cfg.Manifest.Commands {
+	for _, cmd := range m.Commands {
 		cmd.Walk(func(c *model.Command, s *bool) {
 			if containsCaseInsensitive(c.Name, name) || containsCaseInsensitive(c.Alias, name) {
 				matchingCmds = append(matchingCmds, c)
@@ -272,18 +304,18 @@ func Find(name string) {
 	log.Regular("[commands]")
 	for _, cmd := range matchingCmds {
 		log.Fields(cmd)
-		if cfg.Manifest.Config.Verbose {
+		if m.Config.Verbose {
 			log.Regular()
 		}
 	}
 
-	if !cfg.Manifest.Config.Verbose {
+	if !m.Config.Verbose {
 		log.Regular()
 	}
 	log.Regular("[substitutions]")
 	for _, cmd := range matchingSubs {
 		log.Fields(cmd)
-		if cfg.Manifest.Config.Verbose {
+		if m.Config.Verbose {
 			log.Regular()
 		}
 	}
@@ -310,20 +342,21 @@ func checkConfigCommon(quiet bool) *config.Config {
 		return nil
 	}
 
-	log.SetOptions(cfg.Manifest.Config.Verbose)
+	log.SetOptions(cfg.Manifest().Config.Verbose)
 
 	return cfg
 }
 
 func saveConfig(cfg *config.Config) error {
-	cfg.Manifest.Version = ver.SemVer
+	m := cfg.Manifest()
+	m.Version = ver.SemVer
 
 	err := cfg.Save()
 	if err != nil {
 		return err
 	}
 
-	err = shell.Commit(cfg.Manifest)
+	err = shell.Commit(m)
 	if err != nil {
 		return err
 	}

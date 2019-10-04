@@ -24,7 +24,7 @@ const (
 // to a manifest
 type Config struct {
 	path     string
-	Manifest *model.Manifest
+	manifest *model.Manifest
 }
 
 // NewConfig returns a new nostromo config
@@ -63,13 +63,23 @@ func Parse(path string) (*Config, error) {
 	return NewConfig(path, m), nil
 }
 
+// Path of the config
+func (c *Config) Path() string {
+	return c.path
+}
+
+// Manifest associated with this config
+func (c *Config) Manifest() *model.Manifest {
+	return c.manifest
+}
+
 // Save nostromo config to file
 func (c *Config) Save() error {
 	if len(c.path) == 0 {
 		return fmt.Errorf("invalid path to save")
 	}
 
-	if c.Manifest == nil {
+	if c.manifest == nil {
 		return fmt.Errorf("manifest is nil")
 	}
 
@@ -77,9 +87,9 @@ func (c *Config) Save() error {
 	var err error
 	ext := filepath.Ext(c.path)
 	if ext == ".json" {
-		b, err = json.Marshal(c.Manifest)
+		b, err = json.Marshal(c.manifest)
 	} else if ext == ".yaml" {
-		b, err = yaml.Marshal(c.Manifest)
+		b, err = yaml.Marshal(c.manifest)
 	}
 
 	if err != nil {
@@ -121,7 +131,7 @@ func (c *Config) Exists() bool {
 func (c *Config) Get(key string) string {
 	switch key {
 	case "verbose":
-		return strconv.FormatBool(c.Manifest.Config.Verbose)
+		return strconv.FormatBool(c.manifest.Config.Verbose)
 	}
 	return "key not found"
 }
@@ -134,7 +144,7 @@ func (c *Config) Set(key, value string) error {
 		if err != nil {
 			return err
 		}
-		c.Manifest.Config.Verbose = verbose
+		c.manifest.Config.Verbose = verbose
 		return nil
 	}
 	return fmt.Errorf("key not found")

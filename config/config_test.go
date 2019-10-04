@@ -28,7 +28,7 @@ func TestParse(t *testing.T) {
 			} else if !test.expErr {
 				if err != nil {
 					t.Errorf("expected no error but got %s", err)
-				} else if c.Manifest == nil {
+				} else if c.manifest == nil {
 					t.Errorf("manifest is nil")
 				}
 			}
@@ -128,7 +128,7 @@ func TestGet(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			c := NewConfig("path", fakeManifest())
-			c.Manifest.Config.Verbose = true
+			c.Manifest().Config.Verbose = true
 			if actual := c.Get(test.key); actual != test.expected {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
@@ -179,7 +179,7 @@ func TestKeys(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if actual := test.config.Manifest.Config.Keys(); !reflect.DeepEqual(actual, test.expected) {
+			if actual := test.config.Manifest().Config.Keys(); !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
@@ -203,7 +203,7 @@ func TestFields(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if actual := test.config.Manifest.Config.Fields(); !reflect.DeepEqual(actual, test.expected) {
+			if actual := test.config.Manifest().Config.Fields(); !reflect.DeepEqual(actual, test.expected) {
 				pretty.Println(actual)
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
