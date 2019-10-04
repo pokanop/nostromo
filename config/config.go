@@ -20,7 +20,7 @@ const (
 )
 
 // Config manages working with nostromo configuration files
-// The file format is JSON this just provides convenience around converting
+// The file format is YAML this just provides convenience around converting
 // to a manifest
 type Config struct {
 	path     string
