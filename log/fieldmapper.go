@@ -39,13 +39,19 @@ func Fields(mapper FieldMapper) {
 		if value == nil || omitKey(key) {
 			continue
 		}
+
+		svalue := fmt.Sprint(value)
+		if len(svalue) == 0 {
+			continue
+		}
+
 		if !opt.verbose {
 			fmt.Print(opt.theme.formatStyle(keyFieldStyle, key))
-			fmt.Print(opt.theme.formatStyle(valueFieldStyle, ": "+fmt.Sprint(value)))
+			fmt.Print(opt.theme.formatStyle(valueFieldStyle, ": "+svalue))
 			fmt.Print(" ")
 		} else {
 			fmt.Print(opt.theme.formatStyle(keyFieldStyle, key))
-			fmt.Println(opt.theme.formatStyle(valueFieldStyle, ": "+fmt.Sprint(value)))
+			fmt.Println(opt.theme.formatStyle(valueFieldStyle, ": "+svalue))
 		}
 	}
 	if !opt.verbose {
