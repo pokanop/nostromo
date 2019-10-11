@@ -11,6 +11,7 @@ import (
 	"github.com/pokanop/nostromo/pathutil"
 	"github.com/pokanop/nostromo/shell"
 	"github.com/pokanop/nostromo/version"
+	"github.com/shivamMg/ppds/tree"
 )
 
 var ver *version.Info
@@ -83,7 +84,7 @@ func DestroyConfig() {
 }
 
 // ShowConfig for nostromo config file
-func ShowConfig(rawJSON bool, rawYAML bool) {
+func ShowConfig(rawJSON bool, rawYAML bool, asTree bool) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
@@ -107,6 +108,8 @@ func ShowConfig(rawJSON bool, rawYAML bool) {
 
 		log.Highlight("[profile]")
 		log.Regular(strings.TrimSpace(lines))
+	} else if asTree {
+		tree.PrintHr(m)
 	} else {
 		log.Regular("[manifest]")
 		logFields(m, m.Config.Verbose)

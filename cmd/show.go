@@ -8,6 +8,7 @@ import (
 var (
 	rawJSON bool
 	rawYAML bool
+	asTree  bool
 )
 
 // showCmd represents the show command
@@ -19,7 +20,7 @@ and profile changes.
 
 The config file is located at ~/.nostromo/config`,
 	Run: func(cmd *cobra.Command, args []string) {
-		task.ShowConfig(rawJSON, rawYAML)
+		task.ShowConfig(rawJSON, rawYAML, asTree)
 	},
 }
 
@@ -28,4 +29,5 @@ func init() {
 
 	showCmd.Flags().BoolVarP(&rawJSON, "json", "j", false, "Show manifest as json")
 	showCmd.Flags().BoolVarP(&rawYAML, "yaml", "y", false, "Show manifest as yaml")
+	showCmd.Flags().BoolVarP(&asTree, "tree", "t", false, "Show manifest as tree")
 }

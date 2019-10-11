@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pokanop/nostromo/keypath"
+	"github.com/shivamMg/ppds/tree"
 )
 
 // Command is a scope for running one or more commands
@@ -39,6 +40,20 @@ func (c *Command) Fields() map[string]interface{} {
 		"substitutions": joinedSubs(c.Subs),
 		"code":          c.Code.valid(),
 	}
+}
+
+// Data method for Node interface to print tree
+func (c *Command) Data() interface{} {
+	return c.Alias
+}
+
+// Children method for Node interface to print tree
+func (c *Command) Children() []tree.Node {
+	nodes := make([]tree.Node, 0, len(c.Commands))
+	for _, v := range c.Commands {
+		nodes = append(nodes, v)
+	}
+	return nodes
 }
 
 // Walk the command tree and run supplied func

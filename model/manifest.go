@@ -7,6 +7,7 @@ import (
 
 	"github.com/pokanop/nostromo/keypath"
 	"github.com/pokanop/nostromo/log"
+	"github.com/shivamMg/ppds/tree"
 	"gopkg.in/yaml.v2"
 )
 
@@ -164,6 +165,20 @@ func (m *Manifest) Fields() map[string]interface{} {
 		"version":  m.Version,
 		"commands": joinedCommands(m.Commands),
 	}
+}
+
+// Data method for Node interface to print tree
+func (m *Manifest) Data() interface{} {
+	return "manifest"
+}
+
+// Children method for Node interface to print tree
+func (m *Manifest) Children() []tree.Node {
+	nodes := make([]tree.Node, 0, len(m.Commands))
+	for _, v := range m.Commands {
+		nodes = append(nodes, v)
+	}
+	return nodes
 }
 
 // count of the total number of commands in this manifest
