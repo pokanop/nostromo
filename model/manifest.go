@@ -160,7 +160,6 @@ func (m *Manifest) Keys() []string {
 
 // Fields interface for logging
 func (m *Manifest) Fields() map[string]interface{} {
-
 	return map[string]interface{}{
 		"version":  m.Version,
 		"commands": joinedCommands(m.Commands),

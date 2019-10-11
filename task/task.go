@@ -109,16 +109,16 @@ func ShowConfig(rawJSON bool, rawYAML bool) {
 		log.Regular(strings.TrimSpace(lines))
 	} else {
 		log.Regular("[manifest]")
-		log.Fields(m)
+		logFields(m, m.Config.Verbose)
 
 		log.Regular("\n[config]")
-		log.Fields(m.Config)
+		logFields(m.Config, m.Config.Verbose)
 
 		if len(m.Commands) > 0 {
 			log.Regular("\n[commands]")
 			for _, cmd := range m.Commands {
 				cmd.Walk(func(c *model.Command, s *bool) {
-					log.Fields(c)
+					logFields(c, m.Config.Verbose)
 					if m.Config.Verbose {
 						log.Regular()
 					}
@@ -188,7 +188,7 @@ func AddCommand(keyPath, command, description, code, language string) {
 		log.Error(err)
 	}
 
-	log.Fields(cmd)
+	logFields(cmd, m.Config.Verbose)
 }
 
 // RemoveCommand from the manifest
@@ -229,7 +229,7 @@ func AddSubstitution(keyPath, name, alias string) {
 		log.Error(err)
 	}
 
-	log.Fields(m.Find(keyPath))
+	logFields(m.Find(keyPath), m.Config.Verbose)
 }
 
 // RemoveSubstitution from the manifest
@@ -303,7 +303,7 @@ func Find(name string) {
 
 	log.Regular("[commands]")
 	for _, cmd := range matchingCmds {
-		log.Fields(cmd)
+		logFields(cmd, m.Config.Verbose)
 		if m.Config.Verbose {
 			log.Regular()
 		}
@@ -314,7 +314,7 @@ func Find(name string) {
 	}
 	log.Regular("[substitutions]")
 	for _, cmd := range matchingSubs {
-		log.Fields(cmd)
+		logFields(cmd, m.Config.Verbose)
 		if m.Config.Verbose {
 			log.Regular()
 		}
@@ -376,4 +376,12 @@ func sanitizeArgs(args []string) []string {
 
 func containsCaseInsensitive(s, substr string) bool {
 	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
+}
+
+func logFields(mapper log.FieldMapper, verbose bool) {
+	if verbose {
+		log.Table(mapper)
+		return
+	}
+	log.Fields(mapper)
 }
