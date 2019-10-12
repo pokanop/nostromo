@@ -72,9 +72,12 @@ nostromo init
 ### Managing Aliases
 Aliases to commands is one of the core functionalities provided by nostromo. Instead of constantly updating shell profiles manually, nostromo will automatically keep it updated with the latest additions.
 
-**Notes**
-- *Commands are executed in a child process, so aliases cannot modify the parent shell at this time.*
-- *Commands won't take effect until you open a new shell or `source` your `.bashrc` / `.zshrc` again.*
+> Given that nostromo is not a shell command there are some key things to note:
+>
+> - *Commands are executed in a child process, so nostromo aliases cannot modify the parent shell at this time.*
+> - *Commands won't take effect until you open a new shell or `source` your `.bashrc` / `.zshrc` again.*
+>
+> If you want create pure **shell aliases** only you can do that with an additional flag or a config setting described below.
 
 To add an alias (or command in nostromo parlance), simply run:
 ```sh
@@ -98,6 +101,34 @@ foo bar baz
 where the last one will execute the `echo` command.
 
 This is also how you can compose further commands by adding a **final** command to `foo.bar` for example that will get prepended for commands below that scope.
+
+#### Shell Aliases
+
+nostromo allows users to manage shell aliases. By default, however, all commands are designed to run through the nostromo binary. This allows you to run those declarative commands easily like `foo bar baz`. nostromo only creates an alias for the root command `foo` and passes the remaining arguments to `nostromo run` to evaluate the command tree and execute. Pure shell aliases do not get this behavior.
+
+> The use of pure shell aliases is to persist commands like `cd /path` in the current shell, which nostromo commands cannot do since it runs in a child process.
+
+There are two methods for adding aliases to your shell profile that are considered regular or pure aliases:
+- Use the `--alias-only` or `-a` flag when using `nostromo add cmd`
+- Set the `aliasesOnly` config setting to affect all command additions
+
+For example, you can see both methods here:
+```sh
+nostromo add cmd foo.bar.baz "cd /tmp" --alias-only
+
+nostromo manifest set aliasesOnly true
+nostromo add cmd foo.bar.baz "cd /tmp"
+```
+Adding only an alias will produce this line in your profile:
+```sh
+alias foo.bar.baz='cd /tmp'
+```
+instead of the standard nostromo command:
+```sh
+alias foo='nostromo run foo "$*"'
+```
+
+Also, notice how the keypath has no affect in building a command tree when using the **alias only** feature. Currently, pure shell aliases can only be root level commands.
 
 ### Scoped Commands & Substitutions
 Scope affects a tree of commands such that a parent scope is prepended first and then each command in the keypath. If a command is run as follows:
