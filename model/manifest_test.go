@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/kr/pretty"
 	"github.com/pokanop/nostromo/keypath"
 	"github.com/pokanop/nostromo/pathutil"
 )
@@ -199,6 +198,36 @@ func TestAsJSON(t *testing.T) {
 	}
 }
 
+func TestAsYAML(t *testing.T) {
+	tests := []struct {
+		name        string
+		manifest    *Manifest
+		fixturePath string
+	}{
+		{"valid manifest", fakeManifest(2, 4), "../testdata/manifest.yaml"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			f, err := os.Open(pathutil.Abs(test.fixturePath))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
+
+			b, err := ioutil.ReadAll(f)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			expected := string(b)
+			if actual := test.manifest.AsYAML(); actual != expected {
+				t.Errorf("expected: %s, actual: %s", expected, actual)
+			}
+		})
+	}
+}
+
 func TestManifestExecutionString(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -265,7 +294,6 @@ func TestManifestFields(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if actual := test.manifest.Fields(); !reflect.DeepEqual(actual, test.expected) {
-				pretty.Println(actual)
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})

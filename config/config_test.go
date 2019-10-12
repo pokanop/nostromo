@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
 	"github.com/pokanop/nostromo/model"
 )
 
@@ -217,7 +216,6 @@ func TestFields(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if actual := test.config.Manifest().Config.Fields(); !reflect.DeepEqual(actual, test.expected) {
-				pretty.Println(actual)
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
