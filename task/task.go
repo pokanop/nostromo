@@ -84,7 +84,7 @@ func DestroyConfig() {
 }
 
 // ShowConfig for nostromo config file
-func ShowConfig(rawJSON bool, rawYAML bool, asTree bool) {
+func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
@@ -92,12 +92,12 @@ func ShowConfig(rawJSON bool, rawYAML bool, asTree bool) {
 
 	m := cfg.Manifest()
 
-	if rawJSON || rawYAML {
+	if asJSON || asYAML {
 		log.Highlight("[manifest]")
-		if rawJSON {
+		if asJSON {
 			log.Regular(m.AsJSON())
 			log.Regular()
-		} else if rawYAML {
+		} else if asYAML {
 			log.Regular(m.AsYAML())
 		}
 
