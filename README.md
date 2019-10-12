@@ -139,7 +139,7 @@ nostromo manifest show
 ```
 
 With nostromo, you can also visualize the command tree (or manifest) in several other ways including as `json`, `yaml` and a tree itself.
-```sh
+```
 nostromo manifest show --tree
 manifest ┬─ ard
          ├─ certs ── sync
@@ -159,7 +159,7 @@ manifest ┬─ ard
 ```
 
 Setting the `verbose` config item prints more detailed information as well.
-```sh
+```
 nostromo manifest set verbose true
 nostromo manifest show
 ...
