@@ -138,6 +138,49 @@ You can get a quick snapshot of the command tree using:
 nostromo manifest show
 ```
 
+With nostromo, you can also visualize the command tree (or manifest) in several other ways including as `json`, `yaml` and a tree itself.
+```sh
+nostromo manifest show --tree
+manifest ┬─ ard
+         ├─ certs ── sync
+         ├─ cls
+         ├─ config ┬─ nostromo
+         │         ├─ zsh
+         │         └─ bash
+         ├─ dock ┬─ vol
+         │       ├─ clean
+         │       ├─ nuke
+         │       ├─ rmi
+         │       └─ stop
+         ├─ install ── helm
+         └─ ip ┬─ hosts
+               ├─ local
+               └─ public
+```
+
+Setting the `verbose` config item prints more detailed information as well.
+```sh
+nostromo manifest set verbose true
+nostromo manifest show
+...
++--------------+------------------------------------------+
+| keypath      | ip.local                                 |
+| alias        | local                                    |
+| command      | ipconfig getifaddr en1                   |
+| description  | Get the local IP address of this machine |
+| code         | false                                    |
++--------------+------------------------------------------+
+
++--------------+-------------------------------------------+
+| keypath      | ip.public                                 |
+| alias        | public                                    |
+| command      | curl -Ss icanhazip.com                    |
+| description  | Get the public IP address of this machine |
+| code         | false                                     |
++--------------+-------------------------------------------+
+...
+```
+
 ### Bash Completion
 nostromo provides completion scripts to allow tab completion. This is added by default when running `nostromo init` or by adding this to your shell init file:
 ```sh
