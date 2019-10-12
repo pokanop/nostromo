@@ -90,6 +90,8 @@ func (c *Config) Save() error {
 		b, err = json.Marshal(c.manifest)
 	} else if ext == ".yaml" {
 		b, err = yaml.Marshal(c.manifest)
+	} else {
+		return fmt.Errorf("invalid file format: %s", ext)
 	}
 
 	if err != nil {

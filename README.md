@@ -181,8 +181,8 @@ nostromo manifest show
 ...
 ```
 
-### Bash Completion
-nostromo provides completion scripts to allow tab completion. This is added by default when running `nostromo init` or by adding this to your shell init file:
+### Shell Completion
+nostromo provides completion scripts to allow tab completion. This is added by default to your shell init file:
 ```sh
 eval "$(nostromo completion)" # for bash
 eval "$(nostromo completion --zsh)" # for zsh

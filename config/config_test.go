@@ -16,8 +16,10 @@ func TestParse(t *testing.T) {
 	}{
 		{"invalid path", "", true},
 		{"missing path", "/does/not/exist/.nostromo", true},
-		{"bad file format", "../testdata/bad.nostromo", true},
-		// {"good file format", "../testdata/good.nostromo", false},
+		{"bad file contents", "../testdata/bad.json", true},
+		{"bad extension", "../testdata/bad.ext", true},
+		{"json file format", "../testdata/manifest.json", false},
+		{"yaml file format", "../testdata/manifest.yaml", false},
 	}
 
 	for _, test := range tests {
@@ -30,6 +32,9 @@ func TestParse(t *testing.T) {
 					t.Errorf("expected no error but got %s", err)
 				} else if c.manifest == nil {
 					t.Errorf("manifest is nil")
+				}
+				if c.Path() != test.path {
+					t.Errorf("path not as expected")
 				}
 			}
 		})
@@ -46,7 +51,9 @@ func TestSave(t *testing.T) {
 		{"invalid path", "", nil, true},
 		{"nil manifest", "path", nil, true},
 		{"no perms", "/tmp/no-perms/.nostromo", fakeManifest(), true},
-		{"valid manifest", "/tmp/test.nostromo", fakeManifest(), false},
+		{"bad extension", "/tmp/bad.ext", fakeManifest(), true},
+		{"json file format", "/tmp/manifest.json", fakeManifest(), false},
+		{"yaml file format", "/tmp/manifest.yaml", fakeManifest(), false},
 	}
 
 	for _, test := range tests {
@@ -71,7 +78,7 @@ func TestDelete(t *testing.T) {
 	}{
 		{"invalid path", "", nil, true},
 		{"missing path", "/does/not/exist", nil, true},
-		{"valid path", "/tmp/test.nostromo", fakeManifest(), false},
+		{"valid path", "/tmp/test.yaml", fakeManifest(), false},
 	}
 
 	for _, test := range tests {
@@ -101,7 +108,7 @@ func TestExists(t *testing.T) {
 	}{
 		{"invalid path", "", false},
 		{"missing path", "/does/not/exist", false},
-		{"valid path", "../testdata/good.nostromo", true},
+		{"valid path", "../testdata/manifest.yaml", true},
 	}
 
 	for _, test := range tests {
@@ -123,12 +130,14 @@ func TestGet(t *testing.T) {
 		{"no key", "", "key not found"},
 		{"missing key", "missing", "key not found"},
 		{"verbose", "verbose", "true"},
+		{"aliasesOnly", "aliasesOnly", "true"},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			c := NewConfig("path", fakeManifest())
 			c.Manifest().Config.Verbose = true
+			c.Manifest().Config.AliasesOnly = true
 			if actual := c.Get(test.key); actual != test.expected {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
@@ -149,6 +158,9 @@ func TestSet(t *testing.T) {
 		{"verbose empty", "verbose", "", true, ""},
 		{"verbose true", "verbose", "true", false, "true"},
 		{"verbose false", "verbose", "false", false, "false"},
+		{"aliasesOnly empty", "aliasesOnly", "", true, ""},
+		{"aliasesOnly true", "aliasesOnly", "true", false, "true"},
+		{"aliasesOnly false", "aliasesOnly", "false", false, "false"},
 	}
 
 	for _, test := range tests {

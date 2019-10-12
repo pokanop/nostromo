@@ -1,0 +1,219 @@
+version: dev
+config:
+  verbose: false
+  aliasesonly: false
+commands:
+  ard:
+    keypath: ard
+    name: sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart
+      -restart -agent
+    alias: ard
+    aliasonly: false
+    description: ""
+    commands: {}
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+  bar:
+    keypath: bar
+    name: echo bar
+    alias: bar
+    aliasonly: false
+    description: ""
+    commands: {}
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+  cls:
+    keypath: cls
+    name: clear && ls
+    alias: cls
+    aliasonly: false
+    description: ""
+    commands: {}
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+  config:
+    keypath: config
+    name: ""
+    alias: config
+    aliasonly: false
+    description: ""
+    commands:
+      bash:
+        keypath: config.bash
+        name: vim ~/.bashrc
+        alias: bash
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+      nostromo:
+        keypath: config.nostromo
+        name: vim ~/.nostromo/manifest.yaml
+        alias: nostromo
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+      zsh:
+        keypath: config.zsh
+        name: vim ~/.zshrc
+        alias: zsh
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+  dock:
+    keypath: dock
+    name: ""
+    alias: dock
+    aliasonly: false
+    description: ""
+    commands:
+      clean:
+        keypath: dock.clean
+        name: docker ps -a -q |xargs docker rm
+        alias: clean
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+      nuke:
+        keypath: dock.nuke
+        name: dock stop && dock clean && dock rmi
+        alias: nuke
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+      rmi:
+        keypath: dock.rmi
+        name: docker rmi $(docker images -q)
+        alias: rmi
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+      stop:
+        keypath: dock.stop
+        name: docker ps -q |xargs docker stop
+        alias: stop
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+      vol:
+        keypath: dock.vol
+        name: docker volume rm $(docker volume ls -qf dangling=true)
+        alias: vol
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+  install:
+    keypath: install
+    name: ""
+    alias: install
+    aliasonly: false
+    description: ""
+    commands:
+      helm:
+        keypath: install.helm
+        name: kubectl -n kube-system create serviceaccount tiller && kubectl create
+          clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+          && helm init --service-account=tiller
+        alias: helm
+        aliasonly: false
+        description: ""
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+  ip:
+    keypath: ip
+    name: ""
+    alias: ip
+    aliasonly: false
+    description: ""
+    commands:
+      hosts:
+        keypath: ip.hosts
+        name: ""
+        alias: hosts
+        aliasonly: false
+        description: See https://vitux.com/find-devices-connected-to-your-network-with-nmap/
+        commands: {}
+        subs: {}
+        code:
+          language: ruby
+          snippet: '`nmap -sP #{`ipconfig getifaddr en1`.gsub(/\.\d+$/, ".0/24")}`.scan(/Nmap
+            scan report for .*/).each { |h| puts h.gsub(/Nmap scan report for /, "")
+            }'
+      local:
+        keypath: ip.local
+        name: ipconfig getifaddr en1
+        alias: local
+        aliasonly: false
+        description: Get the local IP address of this machine
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+      public:
+        keypath: ip.public
+        name: curl -Ss icanhazip.com
+        alias: public
+        aliasonly: false
+        description: Get the public IP address of this machine
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+    subs: {}
+    code:
+      language: ""
+      snippet: ""

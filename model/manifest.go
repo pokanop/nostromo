@@ -158,7 +158,7 @@ func (m *Manifest) ExecutionString(args []string) (string, string, error) {
 		log.Debug("arguments:", args)
 	}
 
-	return "", "", fmt.Errorf("unable to find execution string")
+	return "", "", fmt.Errorf("unable to execute command '%s'", strings.Join(args, " "))
 }
 
 // Keys as ordered list of fields for logging
