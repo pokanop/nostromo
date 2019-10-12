@@ -15,18 +15,19 @@ func TestNewCommand(t *testing.T) {
 		name        string
 		cmdName     string
 		alias       string
+		aliasOnly   bool
 		description string
 		code        *Code
 		expected    *Command
 	}{
-		{"empty alias", "cmd", "", "", nil, &Command{nil, "cmd", "cmd", "cmd", "", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
-		{"empty name", "", "alias", "", nil, &Command{nil, "alias", "", "alias", "", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
-		{"valid alias", "cmd", "cmd-alias", "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
+		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
+		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
+		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual := newCommand(test.cmdName, test.alias, test.description, test.code)
+			actual := newCommand(test.cmdName, test.alias, test.description, test.code, test.aliasOnly)
 			if !reflect.DeepEqual(test.expected, actual) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
@@ -276,36 +277,29 @@ func TestReversed(t *testing.T) {
 }
 
 func TestBuild(t *testing.T) {
-	fc4 := fakeCommand(2)
-	fc4.Commands["two-alias"].addCommand(newCommand("three-alias", "three-alias", "", nil))
-	fc4.Commands["two-alias"].Commands["three-alias"].addCommand(newCommand("four-alias", "four-alias", "", nil))
-	fc5 := fakeCommand(1)
-	fc5.addCommand(newCommand("two-alias", "two-alias", "", nil))
-	fc5.Commands["two-alias"].addCommand(newCommand("three-alias", "three-alias", "", nil))
-	fc5.Commands["two-alias"].Commands["three-alias"].addCommand(newCommand("four", "four-alias", "", nil))
-
 	tests := []struct {
 		name       string
 		command    *Command
 		keyPath    string
 		commandStr string
+		aliasOnly  bool
 		expected   *Command
 	}{
-		{"empty key path and command", fakeCommand(1), "", "", fakeCommand(1)},
-		{"empty key path", fakeCommand(1), "", "command", fakeCommand(1)},
-		{"empty command", fakeCommand(1), "key path", "", fakeCommand(1)},
-		{"single no change", fakeCommand(1), "one-alias", "one", fakeCommand(1)},
-		{"single change", fakeCommand(1), "one-alias", "diff", fakeBuiltCommand(1, 1, "one-alias", "diff")},
-		{"multi no change", fakeCommand(3), "one-alias.two-alias.three-alias", "three", fakeCommand(3)},
-		{"multi mid change", fakeCommand(3), "one-alias.two-alias", "diff", fakeBuiltCommand(3, 2, "one-alias.two-alias", "diff")},
-		{"multi last change", fakeCommand(2), "one-alias.two-alias", "diff", fakeBuiltCommand(2, 2, "one-alias.two-alias", "diff")},
-		{"multi add no command", fakeCommand(2), "one-alias.two-alias.three-alias.four-alias", "", fakeBuiltCommand(2, 4, "one-alias.two-alias.three-alias.four-alias", "")},
-		{"multi add command", fakeCommand(1), "one-alias.two-alias.three-alias.four-alias", "four", fakeBuiltCommand(1, 4, "one-alias.two-alias.three-alias.four-alias", "four")},
+		{"empty key path and command", fakeCommand(1), "", "", false, fakeCommand(1)},
+		{"empty key path", fakeCommand(1), "", "command", false, fakeCommand(1)},
+		{"empty command", fakeCommand(1), "key path", "", false, fakeCommand(1)},
+		{"single no change", fakeCommand(1), "one-alias", "one", false, fakeCommand(1)},
+		{"single change", fakeCommand(1), "one-alias", "diff", false, fakeBuiltCommand(1, 1, "one-alias", "diff")},
+		{"multi no change", fakeCommand(3), "one-alias.two-alias.three-alias", "three", false, fakeCommand(3)},
+		{"multi mid change", fakeCommand(3), "one-alias.two-alias", "diff", false, fakeBuiltCommand(3, 2, "one-alias.two-alias", "diff")},
+		{"multi last change", fakeCommand(2), "one-alias.two-alias", "diff", false, fakeBuiltCommand(2, 2, "one-alias.two-alias", "diff")},
+		{"multi add no command", fakeCommand(2), "one-alias.two-alias.three-alias.four-alias", "", false, fakeBuiltCommand(2, 4, "one-alias.two-alias.three-alias.four-alias", "")},
+		{"multi add command", fakeCommand(1), "one-alias.two-alias.three-alias.four-alias", "four", false, fakeBuiltCommand(1, 4, "one-alias.two-alias.three-alias.four-alias", "four")},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.command.build(test.keyPath, test.commandStr, "")
+			test.command.build(test.keyPath, test.commandStr, "", &Code{}, test.aliasOnly)
 			if !reflect.DeepEqual(test.expected, test.command) {
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
 			}
@@ -389,7 +383,7 @@ func fakeCommandWithPrefix(depth int, prefix string) *Command {
 	var cmd *Command
 	for i := 0; i < depth; i++ {
 		name := depthKeys[i+1]
-		cmd = newCommand(prefix+name, prefix+name+"-alias", "", nil)
+		cmd = newCommand(prefix+name, prefix+name+"-alias", "", nil, false)
 		cmd.addSubstitution(&Substitution{prefix + name, prefix + name + "-sub"})
 		if lastCmd != nil {
 			lastCmd.addCommand(cmd)

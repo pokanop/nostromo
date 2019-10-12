@@ -161,7 +161,7 @@ func GetConfig(key string) {
 }
 
 // AddCommand to the manifest
-func AddCommand(keyPath, command, description, code, language string) {
+func AddCommand(keyPath, command, description, code, language string, aliasOnly bool) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
@@ -169,7 +169,12 @@ func AddCommand(keyPath, command, description, code, language string) {
 
 	m := cfg.Manifest()
 
-	err := m.AddCommand(keyPath, command, description)
+	snippet := &model.Code{
+		Language: language,
+		Snippet:  code,
+	}
+
+	err := m.AddCommand(keyPath, command, description, snippet, aliasOnly)
 	if err != nil {
 		log.Error(err)
 		return
@@ -179,11 +184,6 @@ func AddCommand(keyPath, command, description, code, language string) {
 	if cmd == nil {
 		log.Error("unable to find newly created command")
 		return
-	}
-
-	cmd.Code = &model.Code{
-		Language: language,
-		Snippet:  code,
 	}
 
 	err = saveConfig(cfg)

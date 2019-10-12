@@ -174,7 +174,7 @@ func TestKeys(t *testing.T) {
 		config   *Config
 		expected []string
 	}{
-		{"keys", NewConfig("path", fakeManifest()), []string{"verbose"}},
+		{"keys", NewConfig("path", fakeManifest()), []string{"verbose", "aliasesOnly"}},
 	}
 
 	for _, test := range tests {
@@ -196,7 +196,8 @@ func TestFields(t *testing.T) {
 			"keys",
 			NewConfig("path", fakeManifest()),
 			map[string]interface{}{
-				"verbose": false,
+				"verbose":     false,
+				"aliasesOnly": false,
 			},
 		},
 	}
@@ -213,7 +214,7 @@ func TestFields(t *testing.T) {
 
 func fakeManifest() *model.Manifest {
 	m := model.NewManifest()
-	m.AddCommand("one.two.three", "command", "")
+	m.AddCommand("one.two.three", "command", "", &model.Code{}, false)
 	m.AddSubstitution("one.two", "name", "alias")
 	return m
 }

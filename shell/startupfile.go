@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 )
 
@@ -26,7 +27,7 @@ type startupFile struct {
 	path      string
 	mode      os.FileMode
 	content   string
-	aliases   []string
+	cmds      []*model.Command
 	preferred bool
 	pristine  bool
 }
@@ -112,14 +113,20 @@ func newStartupFile(path, content string, mode os.FileMode) *startupFile {
 		path:      path,
 		mode:      mode,
 		content:   content,
-		aliases:   []string{},
+		cmds:      []*model.Command{},
 		preferred: strings.Contains(path, ".bashrc") || strings.Contains(path, ".zshrc"),
 	}
 }
 
 func (s *startupFile) parse() error {
-	re := regexp.MustCompile("alias (.+)='nostromo run .+")
-	m := re.FindAllStringSubmatch(s.content, -1)
+	// Find the nostromo content block
+	content, err := s.contentBlock()
+	if err != nil {
+		return err
+	}
+
+	re := regexp.MustCompile("alias (.+)='(.+)'")
+	m := re.FindAllStringSubmatch(content, -1)
 	if m == nil {
 		// No matches
 		s.pristine = true
@@ -128,21 +135,28 @@ func (s *startupFile) parse() error {
 
 	// Add existing aliases
 	for _, a := range m {
-		if len(a) < 2 {
+		if len(a) < 3 {
 			return fmt.Errorf("unable to find alias matches")
 		}
-		s.add(a[1])
+
+		name := a[2]
+		alias := a[1]
+		aliasOnly := false
+		if !strings.Contains(alias, "nostromo run") {
+			aliasOnly = true
+		}
+		s.add(&model.Command{Name: name, Alias: a[1], AliasOnly: aliasOnly})
 	}
 
 	return nil
 }
 
 func (s *startupFile) reset() {
-	s.aliases = []string{}
+	s.cmds = []*model.Command{}
 }
 
-func (s *startupFile) add(alias string) {
-	s.aliases = append(s.aliases, alias)
+func (s *startupFile) add(cmd *model.Command) {
+	s.cmds = append(s.cmds, cmd)
 }
 
 func (s *startupFile) commit() error {
@@ -151,19 +165,10 @@ func (s *startupFile) commit() error {
 		return nil
 	}
 
-	start := strings.Index(s.content, beginBlockComment)
-	end := strings.Index(s.content, endBlockComment)
-	if (start == -1 && end != -1) || (start != -1 && end == -1) {
-		// Malformed block
-		return fmt.Errorf("malformed nostromo section found")
-	}
-
-	content := s.content
-	if start != -1 && end != -1 {
-		// Remove existing nostromo block
-		start--
-		end += len(endBlockComment) + 1
-		content = content[:start] + content[end:]
+	// Find the nostromo content block and remove
+	content, err := s.contentOmitted()
+	if err != nil {
+		return err
 	}
 
 	// Add aliases
@@ -172,7 +177,7 @@ func (s *startupFile) commit() error {
 	// Save a timestamped backup
 	ts := time.Now().UTC().Format("20060102150405")
 	backupPath := filepath.Join("/tmp", filepath.Base(s.path)) + "_" + ts
-	err := ioutil.WriteFile(backupPath, []byte(s.content), s.mode)
+	err = ioutil.WriteFile(backupPath, []byte(s.content), s.mode)
 	if err != nil {
 		return err
 	}
@@ -187,14 +192,54 @@ func (s *startupFile) commit() error {
 	return nil
 }
 
+func (s *startupFile) contentOmitted() (string, error) {
+	start, end := s.contentIndexes()
+	if start == -1 || end == -1 {
+		// Malformed block
+		return "", fmt.Errorf("malformed nostromo section found")
+	}
+
+	// Remove existing nostromo block
+	return s.content[:start] + s.content[end:], nil
+}
+
+func (s *startupFile) contentBlock() (string, error) {
+	start, end := s.contentIndexes()
+	if start == -1 || end == -1 {
+		// Malformed block
+		return "", fmt.Errorf("malformed nostromo section found")
+	}
+
+	// Return existing nostromo block
+	return s.content[start:end], nil
+}
+
+func (s *startupFile) contentIndexes() (int, int) {
+	start := strings.Index(s.content, beginBlockComment)
+	end := strings.Index(s.content, endBlockComment)
+	if start == -1 || end == -1 {
+		// Malformed block
+		return start, end
+	}
+
+	// Return adjusted indexes
+	start--
+	end += len(endBlockComment) + 1
+	return start, end
+}
+
 func (s *startupFile) makeAliasBlock() string {
-	if len(s.aliases) == 0 {
+	if len(s.cmds) == 0 {
 		return ""
 	}
 
 	aliases := []string{}
-	for _, a := range s.aliases {
-		alias := strings.TrimSpace(fmt.Sprintf("alias %s='nostromo run %s \"$*\"'", a, a))
+	for _, c := range s.cmds {
+		cmd := fmt.Sprintf("nostromo run %s \"$*\"", c.Alias)
+		if c.AliasOnly {
+			cmd = c.Name
+		}
+		alias := strings.TrimSpace(fmt.Sprintf("alias %s='%s'", c.Alias, cmd))
 		aliases = append(aliases, alias)
 	}
 	zsh := ""

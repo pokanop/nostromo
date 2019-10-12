@@ -13,7 +13,8 @@ var setCmd = &cobra.Command{
 Nostromo config items are saved in the manifest.
 
 Use this command to set values for these settings:
-verbose: true | false`,
+verbose: true | false
+aliasesOnly: true | false`,
 	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		task.SetConfig(args[0], args[1])

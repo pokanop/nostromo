@@ -65,7 +65,7 @@ func Commit(manifest *model.Manifest) error {
 		// Since nostromo works by aliasing only the top level commands,
 		// iterate the manifest's list and update.
 		for _, cmd := range manifest.Commands {
-			p.add(cmd.Alias)
+			p.add(cmd)
 		}
 	}
 

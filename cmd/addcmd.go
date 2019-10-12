@@ -13,6 +13,7 @@ var (
 	description string
 	code        string
 	language    string
+	aliasOnly   bool
 )
 
 // addcmdCmd represents the addcmd command
@@ -32,7 +33,7 @@ and substitutions.`,
 		if len(args) > 1 {
 			name = args[1]
 		}
-		task.AddCommand(args[0], name, description, code, language)
+		task.AddCommand(args[0], name, description, code, language, aliasOnly)
 	},
 }
 
@@ -43,6 +44,7 @@ func init() {
 	addcmdCmd.Flags().StringVarP(&description, "description", "d", "", "Description of the command to add")
 	addcmdCmd.Flags().StringVarP(&code, "code", "c", "", "Code snippet to run for this command")
 	addcmdCmd.Flags().StringVarP(&language, "language", "l", "", "Language of code snippet (e.g., ruby, python, perl, js)")
+	addcmdCmd.Flags().BoolVarP(&aliasOnly, "alias-only", "a", false, "Add shell alias only, not a nostromo command")
 }
 
 func codeEmpty() bool {

@@ -14,6 +14,7 @@ type Command struct {
 	KeyPath     string                   `json:"keyPath"`
 	Name        string                   `json:"name"`
 	Alias       string                   `json:"alias"`
+	AliasOnly   bool                     `json:"aliasOnly"`
 	Description string                   `json:"description"`
 	Commands    map[string]*Command      `json:"commands"`
 	Subs        map[string]*Substitution `json:"subs"`
@@ -62,7 +63,7 @@ func (c *Command) Walk(fn func(*Command, *bool)) {
 }
 
 // newCommand returns a newly initialized command
-func newCommand(name, alias, description string, code *Code) *Command {
+func newCommand(name, alias, description string, code *Code, aliasOnly bool) *Command {
 	// Default alias to same as command name
 	if len(alias) == 0 {
 		alias = name
@@ -76,6 +77,7 @@ func newCommand(name, alias, description string, code *Code) *Command {
 		KeyPath:     alias,
 		Name:        name,
 		Alias:       alias,
+		AliasOnly:   aliasOnly,
 		Description: description,
 		Commands:    map[string]*Command{},
 		Subs:        map[string]*Substitution{},
@@ -257,7 +259,7 @@ func (c *Command) link(parent *Command) {
 	}
 }
 
-func (c *Command) build(keyPath, command, description string) {
+func (c *Command) build(keyPath, command, description string, code *Code, aliasOnly bool) {
 	if len(keyPath) == 0 {
 		return
 	}
@@ -277,7 +279,7 @@ func (c *Command) build(keyPath, command, description string) {
 		last = cmd
 		cmd = cmd.Commands[key]
 		if cmd == nil {
-			cmd = newCommand("", key, "", nil)
+			cmd = newCommand("", key, "", nil, false)
 			last.addCommand(cmd)
 		}
 	}
@@ -285,6 +287,8 @@ func (c *Command) build(keyPath, command, description string) {
 	// Last key will use actual command
 	cmd.Name = command
 	cmd.Description = description
+	cmd.Code = code
+	cmd.AliasOnly = aliasOnly
 }
 
 func reversed(strs []string) []string {

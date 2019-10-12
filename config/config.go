@@ -132,6 +132,8 @@ func (c *Config) Get(key string) string {
 	switch key {
 	case "verbose":
 		return strconv.FormatBool(c.manifest.Config.Verbose)
+	case "aliasesOnly":
+		return strconv.FormatBool(c.manifest.Config.AliasesOnly)
 	}
 	return "key not found"
 }
@@ -145,6 +147,13 @@ func (c *Config) Set(key, value string) error {
 			return err
 		}
 		c.manifest.Config.Verbose = verbose
+		return nil
+	case "aliasesOnly":
+		aliasesOnly, err := strconv.ParseBool(value)
+		if err != nil {
+			return err
+		}
+		c.manifest.Config.AliasesOnly = aliasesOnly
 		return nil
 	}
 	return fmt.Errorf("key not found")
