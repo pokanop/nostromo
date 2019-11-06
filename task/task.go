@@ -225,11 +225,13 @@ func AddSubstitution(keyPath, name, alias string) {
 	err := m.AddSubstitution(keyPath, name, alias)
 	if err != nil {
 		log.Error(err)
+		return
 	}
 
 	err = saveConfig(cfg)
 	if err != nil {
 		log.Error(err)
+		return
 	}
 
 	logFields(m.Find(keyPath), m.Config.Verbose)
@@ -245,6 +247,7 @@ func RemoveSubstitution(keyPath, alias string) {
 	err := cfg.Manifest().RemoveSubstitution(keyPath, alias)
 	if err != nil {
 		log.Error(err)
+		return
 	}
 
 	err = saveConfig(cfg)
