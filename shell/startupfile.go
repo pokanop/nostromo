@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 )
@@ -37,11 +38,13 @@ func loadStartupFiles() []*startupFile {
 	for _, n := range startupFileNames {
 		path, mode, err := findStartupFile(n)
 		if err != nil {
+			log.Infof("could not find %s: %s\n", path, err)
 			continue
 		}
 
 		s, err := parseStartupFile(path, mode)
 		if err != nil {
+			log.Infof("could not parse %s: %s\n", path, err)
 			continue
 		}
 
@@ -125,6 +128,11 @@ func (s *startupFile) parse() error {
 		return err
 	}
 
+	// No existing content block
+	if content == "" {
+		return nil
+	}
+
 	re := regexp.MustCompile("alias (.+)='(.+)'")
 	m := re.FindAllStringSubmatch(content, -1)
 	if m == nil {
@@ -194,6 +202,11 @@ func (s *startupFile) commit() error {
 
 func (s *startupFile) contentOmitted() (string, error) {
 	start, end := s.contentIndexes()
+	if start == -1 && end == -1 {
+		// No content block
+		return "", nil
+	}
+
 	if start == -1 || end == -1 {
 		// Malformed block
 		return "", fmt.Errorf("malformed nostromo section found")
@@ -205,6 +218,11 @@ func (s *startupFile) contentOmitted() (string, error) {
 
 func (s *startupFile) contentBlock() (string, error) {
 	start, end := s.contentIndexes()
+	if start == -1 && end == -1 {
+		// No content block
+		return "", nil
+	}
+
 	if start == -1 || end == -1 {
 		// Malformed block
 		return "", fmt.Errorf("malformed nostromo section found")
