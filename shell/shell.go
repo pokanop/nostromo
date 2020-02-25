@@ -55,24 +55,19 @@ func Commit(manifest *model.Manifest) error {
 	initFiles := loadStartupFiles()
 	prefFiles := preferredStartupFiles(initFiles)
 	if len(prefFiles) == 0 {
-		return fmt.Errorf("could not find preferred init file")
-	}
-
-	for _, p := range prefFiles {
-		// Forget previous aliases
-		p.reset()
-
-		// Since nostromo works by aliasing only the top level commands,
-		// iterate the manifest's list and update.
-		for _, cmd := range manifest.Commands {
-			p.add(cmd)
-		}
+		return fmt.Errorf("could not find preferred init file [%s]", strings.Join(preferredFilenames, ", "))
 	}
 
 	for _, f := range initFiles {
-		err := f.commit()
-		if err != nil {
-			return err
+		// Apply the manifest
+		f.apply(manifest)
+
+		// Write updated file
+		if f.canCommit() {
+			err := f.commit()
+			if err != nil {
+				return err
+			}
 		}
 	}
 

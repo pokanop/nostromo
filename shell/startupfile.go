@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -21,21 +22,32 @@ const (
 )
 
 var (
-	startupFileNames = []string{".profile", ".bash_profile", ".bashrc", ".zshrc"}
+	startupFilenames = []string{".profile", ".bash_profile", ".bashrc", ".zshrc"}
+	preferredFilenames = []string{".bashrc", ".zshrc"}
 )
 
 type startupFile struct {
 	path      string
 	mode      os.FileMode
 	content   string
-	cmds      []*model.Command
+	updatedContent string
+	commands  map[string]*model.Command
 	preferred bool
 	pristine  bool
 }
 
+func isPreferredFilename(filename string) bool {
+	for _, preferredFilename := range preferredFilenames {
+		if filename == preferredFilename {
+			return true
+		}
+	}
+	return false
+}
+
 func loadStartupFiles() []*startupFile {
-	files := []*startupFile{}
-	for _, n := range startupFileNames {
+	var files []*startupFile
+	for _, n := range startupFilenames {
 		path, mode, err := findStartupFile(n)
 		if err != nil {
 			log.Infof("could not find %s: %s\n", path, err)
@@ -54,7 +66,7 @@ func loadStartupFiles() []*startupFile {
 }
 
 func preferredStartupFiles(files []*startupFile) []*startupFile {
-	p := []*startupFile{}
+	var p []*startupFile
 	for _, s := range files {
 		if s.preferred {
 			p = append(p, s)
@@ -116,8 +128,8 @@ func newStartupFile(path, content string, mode os.FileMode) *startupFile {
 		path:      path,
 		mode:      mode,
 		content:   content,
-		cmds:      []*model.Command{},
-		preferred: strings.Contains(path, ".bashrc") || strings.Contains(path, ".zshrc"),
+		commands:  map[string]*model.Command{},
+		preferred: isPreferredFilename(path),
 	}
 }
 
@@ -130,6 +142,7 @@ func (s *startupFile) parse() error {
 
 	// No existing content block
 	if content == "" {
+		s.pristine = true
 		return nil
 	}
 
@@ -153,24 +166,29 @@ func (s *startupFile) parse() error {
 		if !strings.Contains(alias, "nostromo run") {
 			aliasOnly = true
 		}
-		s.add(&model.Command{Name: name, Alias: a[1], AliasOnly: aliasOnly})
+
+		s.commands[name] = &model.Command{
+			Name: name,
+			Alias: a[1],
+			AliasOnly: aliasOnly,
+		}
 	}
 
 	return nil
 }
 
-func (s *startupFile) reset() {
-	s.cmds = []*model.Command{}
-}
+func (s *startupFile) apply(manifest *model.Manifest) error {
+	if manifest == nil {
+		return fmt.Errorf("manifest must not be nil")
+	}
 
-func (s *startupFile) add(cmd *model.Command) {
-	s.cmds = append(s.cmds, cmd)
-}
+	// Forget previous aliases
+	s.commands = map[string]*model.Command{}
 
-func (s *startupFile) commit() error {
-	// No changes were made
-	if s.pristine && !s.preferred {
-		return nil
+	// Since nostromo works by aliasing only the top level commands,
+	// iterate the manifest's list and update.
+	for _, cmd := range manifest.Commands {
+		s.commands[cmd.Name] = cmd
 	}
 
 	// Find the nostromo content block and remove
@@ -179,32 +197,52 @@ func (s *startupFile) commit() error {
 		return err
 	}
 
-	// Add aliases
-	content += s.makeAliasBlock()
+	// Add aliases to preferred init files only
+	if s.preferred {
+		content += s.makeAliasBlock()
+	}
+
+	s.updatedContent = content
+
+	return nil
+}
+
+func (s *startupFile) canCommit() bool {
+	return !s.pristine || s.preferred
+}
+
+func (s *startupFile) commit() error {
+	// Only update preferred init files, clean up other files if possible
+	if !s.canCommit() {
+		return fmt.Errorf("commit now allowed")
+	}
+
+	if len(s.updatedContent) == 0 {
+		return fmt.Errorf("no updates to commit")
+	}
 
 	// Save a timestamped backup
 	ts := time.Now().UTC().Format("20060102150405")
 	backupPath := filepath.Join("/tmp", filepath.Base(s.path)) + "_" + ts
-	err = ioutil.WriteFile(backupPath, []byte(s.content), s.mode)
+	err := ioutil.WriteFile(backupPath, []byte(s.content), s.mode)
 	if err != nil {
 		return err
 	}
 
 	// Save changes
-	err = ioutil.WriteFile(pathutil.Abs(s.path), []byte(content), s.mode)
+	err = ioutil.WriteFile(pathutil.Abs(s.path), []byte(s.updatedContent), s.mode)
 	if err != nil {
 		return err
 	}
 
-	s.content = content
 	return nil
 }
 
 func (s *startupFile) contentOmitted() (string, error) {
 	start, end := s.contentIndexes()
 	if start == -1 && end == -1 {
-		// No content block
-		return "", nil
+		// No nostromo block, return content as is
+		return s.content, nil
 	}
 
 	if start == -1 || end == -1 {
@@ -243,16 +281,29 @@ func (s *startupFile) contentIndexes() (int, int) {
 	// Return adjusted indexes
 	start--
 	end += len(endBlockComment) + 1
+
+	// Adjust if no newline at the end
+	if end > len(s.content) {
+		end = len(s.content)
+	}
+
 	return start, end
 }
 
 func (s *startupFile) makeAliasBlock() string {
-	if len(s.cmds) == 0 {
+	if len(s.commands) == 0 {
 		return ""
 	}
 
-	aliases := []string{}
-	for _, c := range s.cmds {
+	keys := make([]string, 0, len(s.commands))
+	for k := range s.commands {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var aliases []string
+	for _, k := range keys {
+		c := s.commands[k]
 		cmd := fmt.Sprintf("nostromo run %s \"$*\"", c.Alias)
 		if c.AliasOnly {
 			cmd = c.Name

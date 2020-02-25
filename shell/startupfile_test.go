@@ -1,0 +1,121 @@
+package shell
+
+import (
+	"github.com/pokanop/nostromo/model"
+	"os"
+	"reflect"
+	"testing"
+)
+
+func TestStartupFile(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		content string
+		manifest *model.Manifest
+		preferred bool
+		pristine bool
+		expParseErr bool
+		expApplyErr bool
+		expContent string
+	}{
+		{"nil manifest", ".profile", "", nil, false, true, false, true, ""},
+		{"malformed block 1", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'", makeManifest("foo", "baz"), true, false, true, true, ""},
+		{"malformed block 2", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'# nostromo [section begin]", makeManifest("foo", "baz"), true, false, true, true, ""},
+		{"empty profile", ".profile", "", model.NewManifest(), false, true, false, false, ""},
+		{"empty bash_profile", ".bash_profile", "", model.NewManifest(), false, true, false, false, ""},
+		{"empty bashrc", ".bashrc", "", model.NewManifest(), true, true, false, false, ""},
+		{"empty zshrc", ".zshrc", "", model.NewManifest(), true, true, false, false, ""},
+		{"existing non-preferred no commands", ".profile", "export PATH=/usr/local/bin\nexport FOO=bar", model.NewManifest(), false, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar"},
+		{"existing preferred no commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar", model.NewManifest(), true, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar"},
+		{"existing non-preferred same commands", ".profile", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifest("foo", "bar"), false, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n"},
+		{"existing preferred same commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifest("foo", "bar"), true, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\n\nalias bar='nostromo run bar \"$*\"'\nalias foo='nostromo run foo \"$*\"'\n# nostromo [section end]\n"},
+		{"existing non-preferred diff commands", ".profile", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifest("baz"), false, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n"},
+		{"existing preferred diff commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifest("foo", "baz"), true, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\n\nalias baz='nostromo run baz \"$*\"'\nalias foo='nostromo run foo \"$*\"'\n# nostromo [section end]\n"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			f := newStartupFile(test.path, test.content, os.ModeAppend)
+
+			err := f.parse()
+			if err == nil && test.expParseErr {
+				t.Errorf("expected parse error but got none")
+			} else if err != nil && !test.expParseErr {
+				t.Errorf("expected no parse error but got: %s", err)
+			}
+
+			if f.pristine != test.pristine {
+				t.Errorf("pristine mismatch, expected: %t, actual: %t", test.pristine, f.pristine)
+			}
+			if f.preferred != test.preferred {
+				t.Errorf("preferred mismatch, expected: %t, actual: %t", test.preferred, f.preferred)
+			}
+
+			err = f.apply(test.manifest)
+			if err == nil && test.expApplyErr {
+				t.Errorf("expected apply error but got none")
+			} else if err != nil && !test.expApplyErr {
+				t.Errorf("expected no apply error but got: %s", err)
+			}
+
+			if f.updatedContent != test.expContent {
+				t.Errorf("expected content '%s' but got '%s'", test.expContent, f.updatedContent)
+			}
+		})
+	}
+}
+
+func TestIsPreferredFilename(t *testing.T) {
+	tests := []struct {
+		name string
+		filename string
+		want bool
+	}{
+		{"profile", ".profile", false},
+		{"bash_profile", ".bash_profile", false},
+		{"bashrc", ".bashrc", true},
+		{"zshrc", ".zshrc", true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := isPreferredFilename(test.filename); got != test.want {
+				t.Errorf("isPreferredFilename() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestPreferredStartupFiles(t *testing.T) {
+	tests := []struct {
+		name string
+		files []*startupFile
+		want []*startupFile
+	}{
+		{"nil list", nil, nil},
+		{"empty list", []*startupFile{}, nil},
+		{"no preferred", []*startupFile{makeStartupFile(false)}, nil},
+		{"only preferred", []*startupFile{makeStartupFile(true), makeStartupFile(true)}, []*startupFile{makeStartupFile(true), makeStartupFile(true)}},
+		{"mix preferred", []*startupFile{makeStartupFile(true), makeStartupFile(false), makeStartupFile(true)}, []*startupFile{makeStartupFile(true), makeStartupFile(true)}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := preferredStartupFiles(test.files); !reflect.DeepEqual(got, test.want) {
+				t.Errorf("preferredStartupFiles() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func makeManifest(cmds ...string) *model.Manifest {
+	m := model.NewManifest()
+	for _, cmd := range cmds {
+		m.AddCommand(cmd, cmd, "", nil, false)
+	}
+	return m
+}
+
+func makeStartupFile(preferred bool) *startupFile {
+	s := newStartupFile("path", "", os.ModeAppend)
+	s.preferred = preferred
+	return s
+}
