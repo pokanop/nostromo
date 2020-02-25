@@ -38,7 +38,7 @@ type startupFile struct {
 
 func isPreferredFilename(filename string) bool {
 	for _, preferredFilename := range preferredFilenames {
-		if filename == preferredFilename {
+		if strings.Contains(filename, preferredFilename) {
 			return true
 		}
 	}
