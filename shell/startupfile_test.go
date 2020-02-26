@@ -9,15 +9,15 @@ import (
 
 func TestStartupFile(t *testing.T) {
 	tests := []struct {
-		name string
-		path string
-		content string
-		manifest *model.Manifest
-		preferred bool
-		pristine bool
+		name        string
+		path        string
+		content     string
+		manifest    *model.Manifest
+		preferred   bool
+		pristine    bool
 		expParseErr bool
 		expApplyErr bool
-		expContent string
+		expContent  string
 	}{
 		{"nil manifest", ".profile", "", nil, false, true, false, true, ""},
 		{"malformed block 1", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'", makeManifest("foo", "baz"), true, false, true, true, ""},
@@ -33,7 +33,7 @@ func TestStartupFile(t *testing.T) {
 		{"existing non-preferred diff commands", ".profile", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifest("baz"), false, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n"},
 		{"existing preferred diff commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifest("foo", "baz"), true, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\n\nalias baz='nostromo run baz \"$*\"'\nalias foo='nostromo run foo \"$*\"'\n# nostromo [section end]\n"},
 		{"empty commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifestLong(false, false, "foo", "bar", "baz", "qux"), true, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\n\nalias bar='nostromo run bar \"$*\"'\nalias baz='nostromo run baz \"$*\"'\nalias foo='nostromo run foo \"$*\"'\nalias qux='nostromo run qux \"$*\"'\n# nostromo [section end]\n"},
-		{"aliases only", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifestLong(true, true,"baz", "qux"), true, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\n\nalias baz='baz'\nalias qux='qux'\n# nostromo [section end]\n"},
+		{"aliases only", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\nalias foo='nostromo run foo \"$*\"'\nalias bar='nostromo run bar \"$*\"'\n# nostromo [section end]", makeManifestLong(true, true, "baz", "qux"), true, false, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion --zsh)\"\n\nalias baz='baz'\nalias qux='qux'\n# nostromo [section end]\n"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -69,9 +69,9 @@ func TestStartupFile(t *testing.T) {
 
 func TestIsPreferredFilename(t *testing.T) {
 	tests := []struct {
-		name string
+		name     string
 		filename string
-		want bool
+		want     bool
 	}{
 		{"empty string", "", false},
 		{"profile", ".profile", false},
@@ -92,9 +92,9 @@ func TestIsPreferredFilename(t *testing.T) {
 
 func TestPreferredStartupFiles(t *testing.T) {
 	tests := []struct {
-		name string
+		name  string
 		files []*startupFile
-		want []*startupFile
+		want  []*startupFile
 	}{
 		{"nil list", nil, nil},
 		{"empty list", []*startupFile{}, nil},

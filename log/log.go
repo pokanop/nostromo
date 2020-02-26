@@ -43,11 +43,17 @@ func Highlightf(format string, a ...interface{}) {
 
 // Debug logs a debug message
 func Debug(a ...interface{}) {
+	if !opt.verbose {
+		return
+	}
 	fmt.Println(opt.theme.formatLevel(debugLevel, "debug:"), joined(a...))
 }
 
 // Debugf logs a debug message
 func Debugf(format string, a ...interface{}) {
+	if !opt.verbose {
+		return
+	}
 	fmt.Print(opt.theme.formatLevel(debugLevel, "debug: "), fmt.Sprintf(format, a...))
 }
 

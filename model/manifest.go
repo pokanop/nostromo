@@ -143,20 +143,18 @@ func (m *Manifest) ExecutionString(args []string) (string, string, error) {
 		keyPath := cmd.shortestKeyPath(keypath.KeyPath(args))
 		if len(keyPath) > 0 {
 			count := len(keypath.Keys(keyPath))
-			if m.Config.Verbose {
-				log.Debug("key path:", keyPath)
-				if len(args[count:]) > 0 {
-					log.Debug("arguments:", args[count:])
-				}
+
+			log.Debug("key path:", keyPath)
+			if len(args[count:]) > 0 {
+				log.Debug("arguments:", args[count:])
 			}
+
 			c := cmd.find(keyPath)
 			return c.Code.Language, c.executionString(args[count:]), nil
 		}
 	}
 
-	if m.Config.Verbose {
-		log.Debug("arguments:", args)
-	}
+	log.Debug("arguments:", args)
 
 	return "", "", fmt.Errorf("unable to execute command '%s'", strings.Join(args, " "))
 }

@@ -22,18 +22,18 @@ const (
 )
 
 var (
-	startupFilenames = []string{".profile", ".bash_profile", ".bashrc", ".zshrc"}
+	startupFilenames   = []string{".profile", ".bash_profile", ".bashrc", ".zshrc"}
 	preferredFilenames = []string{".bashrc", ".zshrc"}
 )
 
 type startupFile struct {
-	path      string
-	mode      os.FileMode
-	content   string
+	path           string
+	mode           os.FileMode
+	content        string
 	updatedContent string
-	commands  map[string]*model.Command
-	preferred bool
-	pristine  bool
+	commands       map[string]*model.Command
+	preferred      bool
+	pristine       bool
 }
 
 func isPreferredFilename(filename string) bool {
@@ -50,13 +50,13 @@ func loadStartupFiles() []*startupFile {
 	for _, n := range startupFilenames {
 		path, mode, err := findStartupFile(n)
 		if err != nil {
-			log.Infof("could not find %s: %s\n", path, err)
+			log.Debugf("could not find %s: %s\n", n, err)
 			continue
 		}
 
 		s, err := parseStartupFile(path, mode)
 		if err != nil {
-			log.Infof("could not parse %s: %s\n", path, err)
+			log.Debugf("could not parse %s: %s\n", n, err)
 			continue
 		}
 
@@ -168,8 +168,8 @@ func (s *startupFile) parse() error {
 		}
 
 		s.commands[name] = &model.Command{
-			Name: name,
-			Alias: a[1],
+			Name:      name,
+			Alias:     a[1],
 			AliasOnly: aliasOnly,
 		}
 	}
