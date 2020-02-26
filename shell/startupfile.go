@@ -188,7 +188,7 @@ func (s *startupFile) apply(manifest *model.Manifest) error {
 	// Since nostromo works by aliasing only the top level commands,
 	// iterate the manifest's list and update.
 	for _, cmd := range manifest.Commands {
-		s.commands[cmd.Name] = cmd
+		s.commands[cmd.Alias] = cmd
 	}
 
 	// Find the nostromo content block and remove
