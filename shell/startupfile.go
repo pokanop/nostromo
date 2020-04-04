@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -143,35 +142,6 @@ func (s *startupFile) parse() error {
 	// No existing content block
 	if content == "" {
 		s.pristine = true
-		return nil
-	}
-
-	re := regexp.MustCompile("alias (.+)='(.+)'")
-	m := re.FindAllStringSubmatch(content, -1)
-	if m == nil {
-		// No matches
-		s.pristine = true
-		return nil
-	}
-
-	// Add existing aliases
-	for _, a := range m {
-		if len(a) < 3 {
-			return fmt.Errorf("unable to find alias matches")
-		}
-
-		name := a[2]
-		alias := a[1]
-		aliasOnly := false
-		if !strings.Contains(alias, "nostromo run") {
-			aliasOnly = true
-		}
-
-		s.commands[name] = &model.Command{
-			Name:      name,
-			Alias:     a[1],
-			AliasOnly: aliasOnly,
-		}
 	}
 
 	return nil
@@ -181,9 +151,6 @@ func (s *startupFile) apply(manifest *model.Manifest) error {
 	if manifest == nil {
 		return fmt.Errorf("manifest must not be nil")
 	}
-
-	// Forget previous aliases
-	s.commands = map[string]*model.Command{}
 
 	// Since nostromo works by aliasing only the top level commands,
 	// iterate the manifest's list and update.
@@ -304,11 +271,11 @@ func (s *startupFile) makeAliasBlock() string {
 	var aliases []string
 	for _, k := range keys {
 		c := s.commands[k]
-		cmd := fmt.Sprintf("nostromo run %s \"$*\"", c.Alias)
+		cmd := fmt.Sprintf("nostromo eval %s \"$*\"", c.Alias)
 		if c.AliasOnly {
-			cmd = c.Name
+			cmd = fmt.Sprintf("'%s'", c.Name)
 		}
-		alias := strings.TrimSpace(fmt.Sprintf("alias %s='%s'", c.Alias, cmd))
+		alias := strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s) }", c.Alias, cmd))
 		aliases = append(aliases, alias)
 	}
 	zsh := ""

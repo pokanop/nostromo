@@ -150,7 +150,7 @@ nostromo also provides the ability to add substitutions at each one of these sco
 
 A substitution can be added with:
 ```sh
-nostromo add foo.bar sub //some/long/string sls
+nostromo add sub foo.bar //some/long/string sls
 ```
 Subsequent calls to `foo bar` would replace the subs before running. This command:
 ```sh

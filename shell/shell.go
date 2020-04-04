@@ -47,6 +47,21 @@ func Run(command, language string, verbose bool) error {
 	return cmd.Wait()
 }
 
+func EvalString(command, language string, verbose bool) (string, error) {
+	if len(command) == 0 {
+		return "", fmt.Errorf("cannot run empty command")
+	}
+
+	command = strings.TrimSuffix(command, "\n")
+
+	cmdStr := buildEvalCmd(command, language)
+	if verbose {
+		log.Debugf("executing: %s\n", cmdStr)
+	}
+
+	return cmdStr, nil
+}
+
 // Commit manifest updates to shell initialization files
 //
 // Loads all shell config files and replaces nostromo aliases
@@ -126,5 +141,22 @@ func buildExecArgs(cmd, language string) (string, []string) {
 			return "zsh", []string{"-ic", cmd}
 		}
 		return "bash", []string{"-ic", cmd}
+	}
+}
+
+func buildEvalCmd(cmd, language string) string {
+	switch language {
+	case "ruby":
+		return "ruby -e " + cmd
+	case "python":
+		return "python -c " + cmd
+	case "perl":
+		return "perl -e " + cmd
+	case "js":
+		return "node -e " + cmd
+	case "sh":
+		fallthrough
+	default:
+		return cmd
 	}
 }

@@ -277,6 +277,31 @@ func Run(args []string) {
 	}
 }
 
+// EvalString returns a command that can be used with `eval`
+func EvalString(args []string) {
+	log.SetEcho(true)
+
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	m := cfg.Manifest()
+
+	language, cmd, err := m.ExecutionString(sanitizeArgs(args))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	cmdStr, err := shell.EvalString(cmd, language, m.Config.Verbose)
+	if err != nil {
+		log.Error(err)
+	}
+
+	log.Print(cmdStr)
+}
+
 // Find matching commands and substitutions
 func Find(name string) {
 	cfg := checkConfig()
@@ -348,7 +373,7 @@ func checkConfigCommon(quiet bool) *config.Config {
 		return nil
 	}
 
-	log.SetOptions(cfg.Manifest().Config.Verbose)
+	log.SetVerbose(cfg.Manifest().Config.Verbose)
 
 	return cfg
 }
@@ -372,7 +397,11 @@ func saveConfig(cfg *config.Config) error {
 
 func sanitizeArgs(args []string) []string {
 	sanitizedArgs := []string{}
-	for _, arg := range args {
+	if args == nil {
+		return sanitizedArgs
+	}
+
+	for _, arg := range strings.Split(strings.Join(args, " "), " ") {
 		if len(arg) > 0 {
 			sanitizedArgs = append(sanitizedArgs, strings.TrimSpace(arg))
 		}
