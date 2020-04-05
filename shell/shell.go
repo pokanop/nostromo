@@ -147,13 +147,13 @@ func buildExecArgs(cmd, language string) (string, []string) {
 func buildEvalCmd(cmd, language string) string {
 	switch language {
 	case "ruby":
-		return "ruby -e " + cmd
+		return fmt.Sprintf("ruby -e '%s'", cmd)
 	case "python":
-		return "python -c " + cmd
+		return fmt.Sprintf("python -c '%s'", cmd)
 	case "perl":
-		return "perl -e " + cmd
+		return fmt.Sprintf("perl -e '%s'", cmd)
 	case "js":
-		return "node -e " + cmd
+		return fmt.Sprintf("node -e '%s'", cmd)
 	case "sh":
 		fallthrough
 	default:
