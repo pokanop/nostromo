@@ -81,12 +81,12 @@ Aliases to commands is one of the core features provided by nostromo. Instead of
 
 To add an alias (or command in nostromo parlance), simply run:
 ```sh
-nostromo add cmd foo "echo bar" -d "My magical foo command that prints bar"
+nostromo add cmd foo "echo bar"
 ```
 
 Descriptions for your commands can easily be added as well:
 ```sh
-nostromo add cmd
+nostromo add cmd foo "echo bar" -d "My magical foo command that prints bar"
 ```
 Re-source your `.bashrc` / `.zshrc` and just like that you can run `foo` like any other alias.
 
