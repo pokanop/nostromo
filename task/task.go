@@ -236,27 +236,6 @@ func RemoveSubstitution(keyPath, alias string) {
 	}
 }
 
-// Run a command from the manifest
-func Run(args []string) {
-	cfg := checkConfig()
-	if cfg == nil {
-		return
-	}
-
-	m := cfg.Manifest()
-
-	language, cmd, err := m.ExecutionString(stringutil.SanitizeArgs(args))
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
-	err = shell.Run(cmd, language, m.Config.Verbose)
-	if err != nil {
-		log.Error(err)
-	}
-}
-
 // EvalString returns a command that can be used with `eval`
 func EvalString(args []string) {
 	log.SetEcho(true)

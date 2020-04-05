@@ -3,7 +3,6 @@ package shell
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/pokanop/nostromo/log"
@@ -20,32 +19,6 @@ const (
 )
 
 var validLanguages = []string{"ruby", "python", "perl", "js", "sh"}
-
-// Run a command on the shell
-func Run(command, language string, verbose bool) error {
-	if len(command) == 0 {
-		return fmt.Errorf("cannot run empty command")
-	}
-
-	command = strings.TrimSuffix(command, "\n")
-
-	name, args := buildExecArgs(command, language)
-	if verbose {
-		log.Debugf("executing: %s %s\n", name, strings.Join(args, " "))
-	}
-	cmd := exec.Command(name, args...)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-
-	err := cmd.Start()
-	if err != nil {
-		return err
-	}
-
-	return cmd.Wait()
-}
 
 func EvalString(command, language string, verbose bool) (string, error) {
 	if len(command) == 0 {
@@ -122,26 +95,6 @@ func IsSupportedLanguage(language string) bool {
 		}
 	}
 	return false
-}
-
-func buildExecArgs(cmd, language string) (string, []string) {
-	switch language {
-	case "ruby":
-		return "ruby", []string{"-e", cmd}
-	case "python":
-		return "python", []string{"-c", cmd}
-	case "perl":
-		return "perl", []string{"-e", cmd}
-	case "js":
-		return "node", []string{"-e", cmd}
-	case "sh":
-		fallthrough
-	default:
-		if Which() == Zsh {
-			return "zsh", []string{"-ic", cmd}
-		}
-		return "bash", []string{"-ic", cmd}
-	}
 }
 
 func buildEvalCmd(cmd, language string) string {
