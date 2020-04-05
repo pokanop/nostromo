@@ -1,8 +1,6 @@
 package task
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/pokanop/nostromo/config"
@@ -26,7 +24,7 @@ func InitConfig() {
 	cfg := checkConfigQuiet()
 
 	if cfg == nil {
-		cfg = config.NewConfig(config.ConfigPath, model.NewManifest())
+		cfg = config.NewConfig(config.Path, model.NewManifest())
 		err := pathutil.EnsurePath("~/.nostromo")
 		if err != nil {
 			log.Error(err)
@@ -34,25 +32,6 @@ func InitConfig() {
 		}
 
 		log.Highlight("nostromo config created")
-	} else if filepath.Ext(cfg.Path()) == ".json" {
-		// Deprecated config file treated as new config
-		// Need to update to yaml
-		p := cfg.Path()
-		m := cfg.Manifest()
-		cfg = config.NewConfig(config.ConfigPath, m)
-		err := pathutil.EnsurePath("~/.nostromo")
-		if err != nil {
-			log.Error(err)
-			return
-		}
-
-		err = os.Remove(pathutil.Abs(p))
-		if err != nil {
-			log.Error(err)
-			return
-		}
-
-		log.Highlight("nostromo config exists, upgraded")
 	} else {
 		log.Highlight("nostromo config exists, updating")
 	}
@@ -361,14 +340,11 @@ func checkConfig() *config.Config {
 }
 
 func checkConfigCommon(quiet bool) *config.Config {
-	cfg, err := config.Parse(config.ConfigPath)
-	if err != nil {
-		cfg, err = config.Parse(config.ConfigFallbackPath)
-	}
-
+	cfg, err := config.Parse(config.Path)
 	if err != nil {
 		if !quiet {
 			log.Error(err)
+			log.Info("unable to open config file, be sure to run `nostromo init` if you haven't already")
 		}
 		return nil
 	}

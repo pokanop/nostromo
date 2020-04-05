@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -13,10 +12,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// ConfigPath for standard nostromo config
+// Path for standard nostromo config
 const (
-	ConfigPath         = "~/.nostromo/manifest.yaml"
-	ConfigFallbackPath = "~/.nostromo/manifest.json"
+	Path = "~/.nostromo/manifest.yaml"
 )
 
 // Config manages working with nostromo configuration files
@@ -47,9 +45,7 @@ func Parse(path string) (*Config, error) {
 
 	var m *model.Manifest
 	ext := filepath.Ext(path)
-	if ext == ".json" {
-		err = json.Unmarshal(b, &m)
-	} else if ext == ".yaml" {
+	if ext == ".yaml" {
 		err = yaml.Unmarshal(b, &m)
 	} else {
 		return nil, fmt.Errorf("invalid file format: %s", ext)
@@ -86,9 +82,7 @@ func (c *Config) Save() error {
 	var b []byte
 	var err error
 	ext := filepath.Ext(c.path)
-	if ext == ".json" {
-		b, err = json.Marshal(c.manifest)
-	} else if ext == ".yaml" {
+	if ext == ".yaml" {
 		b, err = yaml.Marshal(c.manifest)
 	} else {
 		return fmt.Errorf("invalid file format: %s", ext)

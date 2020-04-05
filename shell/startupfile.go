@@ -175,17 +175,13 @@ func (s *startupFile) apply(manifest *model.Manifest) error {
 }
 
 func (s *startupFile) canCommit() bool {
-	return !s.pristine || s.preferred
+	return !s.pristine || (s.preferred && len(s.updatedContent) > 0)
 }
 
 func (s *startupFile) commit() error {
 	// Only update preferred init files, clean up other files if possible
 	if !s.canCommit() {
 		return fmt.Errorf("commit now allowed")
-	}
-
-	if len(s.updatedContent) == 0 {
-		return fmt.Errorf("no updates to commit")
 	}
 
 	// Save a timestamped backup

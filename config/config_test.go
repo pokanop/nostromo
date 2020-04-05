@@ -17,7 +17,6 @@ func TestParse(t *testing.T) {
 		{"missing path", "/does/not/exist/.nostromo", true},
 		{"bad file contents", "../testdata/bad.json", true},
 		{"bad extension", "../testdata/bad.ext", true},
-		{"json file format", "../testdata/manifest.json", false},
 		{"yaml file format", "../testdata/manifest.yaml", false},
 	}
 
@@ -51,7 +50,6 @@ func TestSave(t *testing.T) {
 		{"nil manifest", "path", nil, true},
 		{"no perms", "/tmp/no-perms/.nostromo", fakeManifest(), true},
 		{"bad extension", "/tmp/bad.ext", fakeManifest(), true},
-		{"json file format", "/tmp/manifest.json", fakeManifest(), false},
 		{"yaml file format", "/tmp/manifest.yaml", fakeManifest(), false},
 	}
 
