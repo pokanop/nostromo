@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/shivamMg/ppds/tree"
 	"math"
 	"reflect"
 	"testing"
@@ -368,6 +369,56 @@ func TestFields(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if actual := test.command.Fields(); !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
+func TestCommand_Children(t *testing.T) {
+	commands := map[string]*Command{
+		"foo": &Command{},
+		"bar": &Command{},
+	}
+	type fields struct {
+		Commands map[string]*Command
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []tree.Node
+	}{
+		{"children", fields{commands}, []tree.Node{commands["foo"], commands["bar"]}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Command{
+				Commands: tt.fields.Commands,
+			}
+			if got := c.Children(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Children() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCommandData(t *testing.T) {
+	type fields struct {
+		Alias string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   interface{}
+	}{
+		{"data", fields{"foo"}, "foo"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Command{
+				Alias: tt.fields.Alias,
+			}
+			if got := c.Data(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Data() = %v, want %v", got, tt.want)
 			}
 		})
 	}

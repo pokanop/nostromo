@@ -15,7 +15,7 @@ func TestParse(t *testing.T) {
 	}{
 		{"invalid path", "", true},
 		{"missing path", "/does/not/exist/.nostromo", true},
-		{"bad file contents", "../testdata/bad.json", true},
+		{"bad file contents", "../testdata/bad.yaml", true},
 		{"bad extension", "../testdata/bad.ext", true},
 		{"yaml file format", "../testdata/manifest.yaml", false},
 	}

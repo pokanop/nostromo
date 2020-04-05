@@ -1,6 +1,7 @@
 package task
 
 import (
+	"github.com/pokanop/nostromo/stringutil"
 	"strings"
 
 	"github.com/pokanop/nostromo/config"
@@ -244,7 +245,7 @@ func Run(args []string) {
 
 	m := cfg.Manifest()
 
-	language, cmd, err := m.ExecutionString(sanitizeArgs(args))
+	language, cmd, err := m.ExecutionString(stringutil.SanitizeArgs(args))
 	if err != nil {
 		log.Error(err)
 		return
@@ -267,7 +268,7 @@ func EvalString(args []string) {
 
 	m := cfg.Manifest()
 
-	language, cmd, err := m.ExecutionString(sanitizeArgs(args))
+	language, cmd, err := m.ExecutionString(stringutil.SanitizeArgs(args))
 	if err != nil {
 		log.Error(err)
 		return
@@ -295,11 +296,11 @@ func Find(name string) {
 
 	for _, cmd := range m.Commands {
 		cmd.Walk(func(c *model.Command, s *bool) {
-			if containsCaseInsensitive(c.Name, name) || containsCaseInsensitive(c.Alias, name) {
+			if stringutil.ContainsCaseInsensitive(c.Name, name) || stringutil.ContainsCaseInsensitive(c.Alias, name) {
 				matchingCmds = append(matchingCmds, c)
 			}
 			for _, sub := range c.Subs {
-				if containsCaseInsensitive(sub.Name, name) || containsCaseInsensitive(sub.Alias, name) {
+				if stringutil.ContainsCaseInsensitive(sub.Name, name) || stringutil.ContainsCaseInsensitive(sub.Alias, name) {
 					matchingSubs = append(matchingSubs, c)
 				}
 			}
@@ -369,24 +370,6 @@ func saveConfig(cfg *config.Config) error {
 	}
 
 	return nil
-}
-
-func sanitizeArgs(args []string) []string {
-	sanitizedArgs := []string{}
-	if args == nil {
-		return sanitizedArgs
-	}
-
-	for _, arg := range strings.Split(strings.Join(args, " "), " ") {
-		if len(arg) > 0 {
-			sanitizedArgs = append(sanitizedArgs, strings.TrimSpace(arg))
-		}
-	}
-	return sanitizedArgs
-}
-
-func containsCaseInsensitive(s, substr string) bool {
-	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
 }
 
 func logFields(mapper log.FieldMapper, verbose bool) {

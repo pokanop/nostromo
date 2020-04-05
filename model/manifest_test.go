@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/shivamMg/ppds/tree"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -28,6 +29,7 @@ func TestManifestAddCommand(t *testing.T) {
 		{"multi existing command", "0-one-alias.0-two-alias.0-three-alias", "command", fakeManifest(1, 3), false, 3},
 		{"multi all new commands", "one-alias.two-alias.three-alias", "command", fakeManifest(2, 1), false, 5},
 		{"multi many new commands", "one-alias.two-alias.three-alias.four-alias", "command", fakeManifest(3, 4), false, 16},
+		{"alias only", "new alias", "command", fakeManifestAliasesOnly(1, 1), false, 2},
 	}
 
 	for _, test := range tests {
@@ -232,20 +234,21 @@ func TestManifestExecutionString(t *testing.T) {
 	tests := []struct {
 		name     string
 		manifest *Manifest
-		keyPath  string
+		args     []string
 		expErr   bool
 		expected string
 	}{
-		{"empty key path", fakeManifest(1, 1), "", true, ""},
-		{"missing key path", fakeManifest(1, 1), "missing.key.path", true, ""},
-		{"valid single key path", fakeManifest(1, 1), "0-one-alias", false, "0-one"},
-		{"valid nth key path", fakeManifest(1, 4), "0-one-alias.0-two-alias.0-three-alias", false, "0-one 0-two 0-three"},
-		{"valid repeat sub key path", fakeSimilarManifest(3, 4), "1-one-alias.two-alias.three-alias", false, "1-one two three"},
+		{"empty key path", fakeManifest(1, 1), []string{}, true, ""},
+		{"missing key path", fakeManifest(1, 1), keypath.Keys("missing.key.path"), true, ""},
+		{"valid single key path", fakeManifest(1, 1), keypath.Keys("0-one-alias"), false, "0-one"},
+		{"valid nth key path", fakeManifest(1, 4), keypath.Keys("0-one-alias.0-two-alias.0-three-alias"), false, "0-one 0-two 0-three"},
+		{"valid repeat sub key path", fakeSimilarManifest(3, 4), keypath.Keys("1-one-alias.two-alias.three-alias"), false, "1-one two three"},
+		{"valid single key path args", fakeManifest(1, 1), []string{"0-one-alias", "arg1 arg2"}, false, "0-one arg1 arg2"},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, actual, err := test.manifest.ExecutionString(keypath.Keys(test.keyPath))
+			_, actual, err := test.manifest.ExecutionString(test.args)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -300,9 +303,77 @@ func TestManifestFields(t *testing.T) {
 	}
 }
 
+func TestManifestData(t *testing.T) {
+	type fields struct {
+		Version  string
+		Config   *Config
+		Commands map[string]*Command
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   interface{}
+	}{
+		{"data", fields{"1.0", &Config{true, true}, map[string]*Command{"foo": &Command{}}}, "manifest"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Manifest{
+				Version:  tt.fields.Version,
+				Config:   tt.fields.Config,
+				Commands: tt.fields.Commands,
+			}
+			if got := m.Data(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Data() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestManifestChildren(t *testing.T) {
+	commands := map[string]*Command{
+		"foo": &Command{},
+		"bar": &Command{},
+	}
+	type fields struct {
+		Version  string
+		Config   *Config
+		Commands map[string]*Command
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []tree.Node
+	}{
+		{"children", fields{"1.0", &Config{true, true}, commands}, []tree.Node{commands["foo"], commands["bar"]}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Manifest{
+				Version:  tt.fields.Version,
+				Config:   tt.fields.Config,
+				Commands: tt.fields.Commands,
+			}
+			if got := m.Children(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Children() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func fakeManifest(n, depth int) *Manifest {
 	m := NewManifest()
 	m.Config.Verbose = true
+	for i := 0; i < n; i++ {
+		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
+		m.Commands[c.Alias] = c
+	}
+	return m
+}
+
+func fakeManifestAliasesOnly(n, depth int) *Manifest {
+	m := NewManifest()
+	m.Config.AliasesOnly = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
 		m.Commands[c.Alias] = c

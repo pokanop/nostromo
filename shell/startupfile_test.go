@@ -111,6 +111,64 @@ func TestPreferredStartupFiles(t *testing.T) {
 	}
 }
 
+func TestCurrentStartupFile(t *testing.T) {
+	type args struct {
+		env   string
+		files []*startupFile
+	}
+	tests := []struct {
+		name string
+		args args
+		want *startupFile
+	}{
+		{"nil files", args{"", nil}, nil},
+		{"not startup file", args{"zsh", []*startupFile{makeStartupFileCommon(".foo", "", true)}}, nil},
+		{"zsh", args{"zsh", []*startupFile{makeStartupFileCommon(".zshrc", "", true)}}, makeStartupFileCommon(".zshrc", "", true)},
+		{"bash", args{"bash", []*startupFile{makeStartupFileCommon(".bashrc", "", true)}}, makeStartupFileCommon(".bashrc", "", true)},
+	}
+	for _, tt := range tests {
+		os.Setenv("SHELL", tt.args.env)
+		t.Run(tt.name, func(t *testing.T) {
+			if got := currentStartupFile(tt.args.files); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("currentStartupFile() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStartupFileCanCommit(t *testing.T) {
+	type fields struct {
+		updatedContent string
+		preferred      bool
+		pristine       bool
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   bool
+	}{
+		{"pristine preferred updated", fields{"foo", true, true}, true},
+		{"pristine not preferred updated", fields{"foo", false, true}, false},
+		{"pristine not preferred not updated", fields{"", false, true}, false},
+		{"pristine preferred not updated", fields{"", true, true}, false},
+		{"not pristine preferred updated", fields{"foo", true, false}, true},
+		{"not pristine not preferred updated", fields{"foo", false, false}, true},
+		{"not pristine not preferred not updated", fields{"", false, false}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &startupFile{
+				updatedContent: tt.fields.updatedContent,
+				preferred:      tt.fields.preferred,
+				pristine:       tt.fields.pristine,
+			}
+			if got := s.canCommit(); got != tt.want {
+				t.Errorf("canCommit() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func makeManifest(cmds ...string) *model.Manifest {
 	return makeManifestLong(true, false, cmds...)
 }
@@ -128,7 +186,11 @@ func makeManifestLong(match bool, aliasOnly bool, cmds ...string) *model.Manifes
 }
 
 func makeStartupFile(preferred bool) *startupFile {
-	s := newStartupFile("path", "", os.ModeAppend)
+	return makeStartupFileCommon("path", "", preferred)
+}
+
+func makeStartupFileCommon(name, content string, preferred bool) *startupFile {
+	s := newStartupFile(name, content, os.ModeAppend)
 	s.preferred = preferred
 	return s
 }
