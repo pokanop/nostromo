@@ -267,11 +267,13 @@ func (s *startupFile) makeAliasBlock() string {
 	var aliases []string
 	for _, k := range keys {
 		c := s.commands[k]
-		cmd := fmt.Sprintf("nostromo eval %s \"$*\"", c.Alias)
+		var alias string
 		if c.AliasOnly {
-			cmd = fmt.Sprintf("'%s'", c.Name)
+			alias = fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
+		} else {
+			cmd := fmt.Sprintf("nostromo eval %s \"$*\"", c.Alias)
+			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s) }", c.Alias, cmd))
 		}
-		alias := strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s) }", c.Alias, cmd))
 		aliases = append(aliases, alias)
 	}
 	zsh := ""
