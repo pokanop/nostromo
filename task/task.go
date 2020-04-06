@@ -1,16 +1,15 @@
 package task
 
 import (
-	"github.com/pokanop/nostromo/stringutil"
-	"strings"
-
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 	"github.com/pokanop/nostromo/shell"
+	"github.com/pokanop/nostromo/stringutil"
 	"github.com/pokanop/nostromo/version"
 	"github.com/shivamMg/ppds/tree"
+	"strings"
 )
 
 var ver *version.Info
@@ -80,14 +79,6 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 		} else if asYAML {
 			log.Regular(m.AsYAML())
 		}
-
-		lines, err := shell.InitFileLines()
-		if err != nil {
-			return
-		}
-
-		log.Bold("[profile]")
-		log.Regular(strings.TrimSpace(lines))
 	} else if asTree {
 		tree.PrintHr(m)
 	} else {
@@ -109,6 +100,14 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 			}
 		}
 	}
+
+	lines, err := shell.InitFileLines()
+	if err != nil {
+		return
+	}
+
+	log.Bold("[profile]")
+	log.Regular(strings.TrimSpace(lines))
 }
 
 // SetConfig updates properties for nostromo settings
