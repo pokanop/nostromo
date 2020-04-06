@@ -41,7 +41,7 @@ You can set using -m or --mode when adding a command or globally using:
   nostromo manifest set mode <mode>`,
 	Args: addCmdArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		name := ""
+		var name string
 		if len(args) > 1 {
 			name = args[1]
 		}
@@ -72,7 +72,7 @@ func addCmdArgs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("must provide command or code snippet")
 	}
 	if codeValid() && !shell.IsSupportedLanguage(language) {
-		return fmt.Errorf("invalid code snippet and language, must be in [%s]", strings.Join(shell.ValidLanguages(), ","))
+		return fmt.Errorf("invalid code snippet and language, must be in [%s]", strings.Join(shell.SupportedLanguages(), ","))
 	}
 	return nil
 }

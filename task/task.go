@@ -5,6 +5,7 @@ import (
 	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
+	"github.com/pokanop/nostromo/prompt"
 	"github.com/pokanop/nostromo/shell"
 	"github.com/pokanop/nostromo/stringutil"
 	"github.com/pokanop/nostromo/version"
@@ -149,6 +150,39 @@ func GetConfig(key string) {
 	}
 
 	log.Highlight(cfg.Get(key))
+}
+
+// AddInteractive adds a command or substitution through user prompts
+func AddInteractive() {
+	isCmd := prompt.Choose("Choose what you would like to add", []string{"command", "substitution"}) == 0
+	keypath := prompt.String("Enter a key path to attach your command (root)")
+	if isCmd {
+		cmd := prompt.StringRequired("The actual command to run")
+		alias := prompt.StringRequired("The alias or shortcut to use")
+		description := prompt.String("Provide a description for your command")
+		languages := shell.SupportedLanguages()
+		language := languages[prompt.Choose("Choose a language to use (sh)", languages)]
+		var snippet string
+		if language != "sh" {
+			snippet = prompt.StringRequired("Provide the code snippet to run")
+		}
+		aliasOnly := prompt.Confirm("Is this command a standard alias")
+		var mode string
+		if !aliasOnly {
+			modes := model.SupportedModes()
+			mode = modes[prompt.Choose("Choose a command mode to use (concatenate)", modes)]
+		}
+		if len(keypath) == 0 {
+			keypath = alias
+		} else {
+			keypath = strings.Join([]string{keypath, alias}, ".")
+		}
+		AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode)
+	} else {
+		sub := prompt.StringRequired("Original value to replace")
+		alias := prompt.StringRequired("Substitution to use")
+		AddSubstitution(keypath, sub, alias)
+	}
 }
 
 // AddCommand to the manifest

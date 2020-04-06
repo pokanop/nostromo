@@ -81,8 +81,8 @@ func Which() Shell {
 	return Bash
 }
 
-// ValidLanguages that can be executed
-func ValidLanguages() []string {
+// SupportedLanguages that can be executed
+func SupportedLanguages() []string {
 	return validLanguages
 }
 

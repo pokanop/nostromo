@@ -361,7 +361,7 @@ func TestFields(t *testing.T) {
 				"substitutions": "one-sub",
 				"code":          false,
 				"keypath":       "one-alias",
-				"mode": "concatenate",
+				"mode":          "concatenate",
 			},
 		},
 	}
@@ -467,15 +467,15 @@ func fakeBuiltCommand(startDepth, endDepth int, keyPath, command string) *Comman
 func TestCommandEffectiveCommand(t *testing.T) {
 	type fields struct {
 		Name string
-		Code        *Code
-		Mode        Mode
+		Code *Code
+		Mode Mode
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		want   string
 	}{
-		{"use code", fields{"",&Code{"js", "code"}, ConcatenateMode}, "code"},
+		{"use code", fields{"", &Code{"js", "code"}, ConcatenateMode}, "code"},
 		{"concatenate", fields{"command", nil, ConcatenateMode}, "command"},
 		{"independent", fields{"command", nil, IndependentMode}, "command;"},
 		{"exclusive", fields{"command", nil, ExclusiveMode}, "command;"},
@@ -485,8 +485,8 @@ func TestCommandEffectiveCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Command{
 				Name: tt.fields.Name,
-				Code:        tt.fields.Code,
-				Mode:        tt.fields.Mode,
+				Code: tt.fields.Code,
+				Mode: tt.fields.Mode,
 			}
 			if got := c.effectiveCommand(); got != tt.want {
 				t.Errorf("effectiveCommand() = %v, want %v", got, tt.want)

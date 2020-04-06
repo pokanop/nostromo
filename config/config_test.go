@@ -212,7 +212,7 @@ func TestFields(t *testing.T) {
 			map[string]interface{}{
 				"verbose":     false,
 				"aliasesOnly": false,
-				"mode": model.ConcatenateMode.String(),
+				"mode":        model.ConcatenateMode.String(),
 			},
 		},
 	}

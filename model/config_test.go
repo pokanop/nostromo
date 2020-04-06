@@ -35,7 +35,7 @@ func TestConfigFields(t *testing.T) {
 			map[string]interface{}{
 				"verbose":     true,
 				"aliasesOnly": false,
-				"mode": "concatenate",
+				"mode":        "concatenate",
 			},
 		},
 	}
