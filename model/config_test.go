@@ -11,7 +11,7 @@ func TestConfigKeys(t *testing.T) {
 		manifest *Manifest
 		expected []string
 	}{
-		{"keys", fakeManifest(1, 1), []string{"verbose", "aliasesOnly"}},
+		{"keys", fakeManifest(1, 1), []string{"verbose", "aliasesOnly", "mode"}},
 	}
 
 	for _, test := range tests {
@@ -35,6 +35,7 @@ func TestConfigFields(t *testing.T) {
 			map[string]interface{}{
 				"verbose":     true,
 				"aliasesOnly": false,
+				"mode": "concatenate",
 			},
 		},
 	}

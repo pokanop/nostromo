@@ -180,7 +180,7 @@ func makeManifestLong(match bool, aliasOnly bool, cmds ...string) *model.Manifes
 		if !match {
 			cmd = ""
 		}
-		m.AddCommand(alias, cmd, "", nil, aliasOnly)
+		m.AddCommand(alias, cmd, "", nil, aliasOnly, "concatenate")
 	}
 	return m
 }

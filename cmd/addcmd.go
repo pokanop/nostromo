@@ -14,6 +14,7 @@ var (
 	code        string
 	language    string
 	aliasOnly   bool
+	mode        string
 )
 
 // addcmdCmd represents the addcmd command
@@ -26,14 +27,25 @@ the alias which can be run as "key path" for the actual command provided.
 
 This will create appropriate command scopes for all levels in
 the provided key path. A command scope can a tree of sub commands
-and substitutions.`,
+and substitutions.
+
+A command's mode indicates how it will be executed. By default, nostromo
+concatenates parent and child commands along the tree. There are 3 modes
+available to commands:
+
+  concatenate  Concatenate this command with subcommands exactly as defined
+  independent  Execute this command with subcommands using ';' to separate
+  exclusive    Execute this and only this command ignoring parent commands
+
+You can set using -m or --mode when adding a command or globally using:
+  nostromo manifest set mode <mode>`,
 	Args: addCmdArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		name := ""
 		if len(args) > 1 {
 			name = args[1]
 		}
-		task.AddCommand(args[0], name, description, code, language, aliasOnly)
+		task.AddCommand(args[0], name, description, code, language, aliasOnly, mode)
 	},
 }
 
@@ -45,10 +57,7 @@ func init() {
 	addcmdCmd.Flags().StringVarP(&code, "code", "c", "", "Code snippet to run for this command")
 	addcmdCmd.Flags().StringVarP(&language, "language", "l", "", "Language of code snippet (e.g., ruby, python, perl, js)")
 	addcmdCmd.Flags().BoolVarP(&aliasOnly, "alias-only", "a", false, "Add shell alias only, not a nostromo command")
-}
-
-func codeEmpty() bool {
-	return len(code) == 0 && len(language) == 0
+	addcmdCmd.Flags().StringVarP(&mode, "mode", "m", "", "Set the mode for the command (concatenate, independent, exclusive)")
 }
 
 func codeValid() bool {
