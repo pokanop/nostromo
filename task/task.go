@@ -73,7 +73,7 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 	m := cfg.Manifest()
 
 	if asJSON || asYAML {
-		log.Highlight("[manifest]")
+		log.Bold("[manifest]")
 		if asJSON {
 			log.Regular(m.AsJSON())
 			log.Regular()
@@ -86,19 +86,19 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 			return
 		}
 
-		log.Highlight("[profile]")
+		log.Bold("[profile]")
 		log.Regular(strings.TrimSpace(lines))
 	} else if asTree {
 		tree.PrintHr(m)
 	} else {
-		log.Regular("[manifest]")
+		log.Bold("[manifest]")
 		logFields(m, m.Config.Verbose)
 
-		log.Regular("\n[config]")
+		log.Bold("\n[config]")
 		logFields(m.Config, m.Config.Verbose)
 
 		if len(m.Commands) > 0 {
-			log.Regular("\n[commands]")
+			log.Bold("\n[commands]")
 			for _, cmd := range m.Commands {
 				cmd.Walk(func(c *model.Command, s *bool) {
 					logFields(c, m.Config.Verbose)

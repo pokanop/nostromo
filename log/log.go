@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"github.com/logrusorgru/aurora"
 	"strings"
 )
 
@@ -56,6 +57,22 @@ func Highlightf(format string, a ...interface{}) {
 		return
 	}
 	fmt.Print(opt.theme.formatHighlight(fmt.Sprintf(format, a...)))
+}
+
+func Bold(a ...interface{}) {
+	if opt.echo {
+		echo(a...)
+		return
+	}
+	fmt.Println(aurora.Bold(joined(a...)))
+}
+
+func Boldf(format string, a ...interface{}) {
+	if opt.echo {
+		echof(format, a...)
+		return
+	}
+	fmt.Print(aurora.Bold(fmt.Sprintf(format, a...)))
 }
 
 // Debug logs a debug message
