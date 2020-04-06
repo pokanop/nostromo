@@ -22,7 +22,7 @@ func (t *defaultTheme) formatLevel(level logLevel, text string) aurora.Value {
 	case errorLevel:
 		return aurora.Red(text)
 	default:
-		return aurora.White(text)
+		return aurora.Reset(text)
 	}
 }
 
@@ -31,14 +31,14 @@ func (t *defaultTheme) formatStyle(style fieldStyle, text string) aurora.Value {
 	case keyFieldStyle, headerFieldStyle:
 		return aurora.Blue(text)
 	case valueFieldStyle, cellFieldStyle:
-		return aurora.White(text)
+		fallthrough
 	default:
-		return aurora.White(text)
+		return aurora.Reset(text)
 	}
 }
 
 func (t *defaultTheme) formatRegular(text string) aurora.Value {
-	return aurora.White(text)
+	return aurora.Reset(text)
 }
 
 func (t *defaultTheme) formatHighlight(text string) aurora.Value {
@@ -58,7 +58,7 @@ func (t *grayscaleTheme) formatLevel(level logLevel, text string) aurora.Value {
 	case errorLevel:
 		return aurora.Gray(1-1, text).BgGray(24 - 1)
 	default:
-		return aurora.White(text)
+		return aurora.Reset(text)
 	}
 }
 
@@ -67,14 +67,14 @@ func (t *grayscaleTheme) formatStyle(style fieldStyle, text string) aurora.Value
 	case keyFieldStyle, headerFieldStyle:
 		return aurora.Gray(24-1, text)
 	case valueFieldStyle, cellFieldStyle:
-		return aurora.White(text)
+		fallthrough
 	default:
-		return aurora.White(text)
+		return aurora.Reset(text)
 	}
 }
 
 func (t *grayscaleTheme) formatRegular(text string) aurora.Value {
-	return aurora.White(text)
+	return aurora.Reset(text)
 }
 
 func (t *grayscaleTheme) formatHighlight(text string) aurora.Value {

@@ -71,7 +71,6 @@ func Table(mapper FieldMapper) {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetColMinWidth(0, 12)
-	// table.SetColMinWidth(1, 68)
 	table.SetColWidth(68)
 
 	for _, key := range keys {
