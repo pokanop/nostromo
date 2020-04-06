@@ -463,3 +463,34 @@ func fakeBuiltCommand(startDepth, endDepth int, keyPath, command string) *Comman
 	}
 	return first
 }
+
+func TestCommandEffectiveCommand(t *testing.T) {
+	type fields struct {
+		Name string
+		Code        *Code
+		Mode        Mode
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{"use code", fields{"",&Code{"js", "code"}, ConcatenateMode}, "code"},
+		{"concatenate", fields{"command", nil, ConcatenateMode}, "command"},
+		{"independent", fields{"command", nil, IndependentMode}, "command;"},
+		{"exclusive", fields{"command", nil, ExclusiveMode}, "command;"},
+		{"empty command", fields{"", nil, ExclusiveMode}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Command{
+				Name: tt.fields.Name,
+				Code:        tt.fields.Code,
+				Mode:        tt.fields.Mode,
+			}
+			if got := c.effectiveCommand(); got != tt.want {
+				t.Errorf("effectiveCommand() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

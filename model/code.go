@@ -7,5 +7,5 @@ type Code struct {
 }
 
 func (c *Code) valid() bool {
-	return len(c.Snippet) > 0 && len(c.Language) > 0
+	return c != nil && len(c.Snippet) > 0 && len(c.Language) > 0
 }
