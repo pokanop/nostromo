@@ -69,8 +69,7 @@ func InitFileLines() (string, error) {
 	if prefFile == nil {
 		return "", fmt.Errorf("could not find current init file")
 	}
-
-	return prefFile.makeAliasBlock(), nil
+	return prefFile.contentBlock()
 }
 
 // Which shell is currently running
