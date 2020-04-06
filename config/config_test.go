@@ -128,6 +128,7 @@ func TestGet(t *testing.T) {
 		{"missing key", "missing", "key not found"},
 		{"verbose", "verbose", "true"},
 		{"aliasesOnly", "aliasesOnly", "true"},
+		{"mode", "mode", "concatenate"},
 	}
 
 	for _, test := range tests {
@@ -158,6 +159,10 @@ func TestSet(t *testing.T) {
 		{"aliasesOnly empty", "aliasesOnly", "", true, ""},
 		{"aliasesOnly true", "aliasesOnly", "true", false, "true"},
 		{"aliasesOnly false", "aliasesOnly", "false", false, "false"},
+		{"mode concatenate", "mode", "concatenate", false, "concatenate"},
+		{"mode independent", "mode", "independent", false, "independent"},
+		{"mode exclusive", "mode", "exclusive", false, "exclusive"},
+		{"mode invalid", "mode", "invalid", true, ""},
 	}
 
 	for _, test := range tests {
