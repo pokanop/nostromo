@@ -18,7 +18,7 @@ func TestManifestAddCommand(t *testing.T) {
 		name     string
 		keyPath  string
 		command  string
-		mode Mode
+		mode     Mode
 		manifest *Manifest
 		expErr   bool
 		expected int
@@ -27,7 +27,7 @@ func TestManifestAddCommand(t *testing.T) {
 		{"empty command", "0-one-alias", "", ConcatenateMode, fakeManifest(1, 1), false, 1},
 		{"single new command", "missing", "command", ConcatenateMode, fakeManifest(0, 0), false, 1},
 		{"single existing command", "0-one-alias", "", ConcatenateMode, fakeManifest(1, 1), false, 1},
-		{"multi new command", "0-one-alias.0-two-alias.three-alias", "command",  ConcatenateMode, fakeManifest(1, 2), false, 3},
+		{"multi new command", "0-one-alias.0-two-alias.three-alias", "command", ConcatenateMode, fakeManifest(1, 2), false, 3},
 		{"multi existing command", "0-one-alias.0-two-alias.0-three-alias", "command", ConcatenateMode, fakeManifest(1, 3), false, 3},
 		{"multi all new commands", "one-alias.two-alias.three-alias", "command", ConcatenateMode, fakeManifest(2, 1), false, 5},
 		{"multi many new commands", "one-alias.two-alias.three-alias.four-alias", "command", ConcatenateMode, fakeManifest(3, 4), false, 16},
