@@ -55,6 +55,8 @@ func DestroyConfig() {
 		return
 	}
 
+	log.Highlight("nostromo config deleted")
+
 	err = shell.Commit(model.NewManifest())
 	if err != nil {
 		log.Error(err)
@@ -98,6 +100,12 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 					}
 				})
 			}
+		} else if m.Config.Verbose {
+			log.Regular()
+		}
+
+		if !m.Config.Verbose {
+			log.Regular()
 		}
 	}
 
@@ -107,7 +115,11 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 	}
 
 	log.Bold("[profile]")
-	log.Regular(strings.TrimSpace(lines))
+	if len(lines) > 0 {
+		log.Regular(strings.TrimSpace(lines))
+	} else {
+		log.Regular("empty")
+	}
 }
 
 // SetConfig updates properties for nostromo settings
@@ -140,7 +152,7 @@ func GetConfig(key string) {
 }
 
 // AddCommand to the manifest
-func AddCommand(keyPath, command, description, code, language string, aliasOnly bool) {
+func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string) {
 	cfg := checkConfig()
 	if cfg == nil {
 		return
@@ -153,7 +165,7 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 		Snippet:  code,
 	}
 
-	err := m.AddCommand(keyPath, command, description, snippet, aliasOnly)
+	err := m.AddCommand(keyPath, command, description, snippet, aliasOnly, mode)
 	if err != nil {
 		log.Error(err)
 		return

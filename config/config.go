@@ -130,6 +130,8 @@ func (c *Config) Get(key string) string {
 		return strconv.FormatBool(c.manifest.Config.Verbose)
 	case "aliasesOnly":
 		return strconv.FormatBool(c.manifest.Config.AliasesOnly)
+	case "mode":
+		return c.manifest.Config.Mode.String()
 	}
 	return "key not found"
 }
@@ -150,6 +152,12 @@ func (c *Config) Set(key, value string) error {
 			return err
 		}
 		c.manifest.Config.AliasesOnly = aliasesOnly
+		return nil
+	case "mode":
+		if !model.IsModeSupported(value) {
+			return fmt.Errorf("invalid mode, supported modes: %s", model.SupportedModes())
+		}
+		c.manifest.Config.Mode = model.ModeFromString(value)
 		return nil
 	}
 	return fmt.Errorf("key not found")

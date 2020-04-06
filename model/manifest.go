@@ -38,14 +38,19 @@ func (m *Manifest) Link() {
 }
 
 // AddCommand tree up to key path
-func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, aliasOnly bool) error {
+func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, aliasOnly bool, mode string) error {
 	if len(keyPath) == 0 {
 		return fmt.Errorf("invalid key path")
 	}
 
+	// Use config mode if not supplied on CLI
+	if len(mode) == 0 {
+		mode = m.Config.Mode.String()
+	}
+
 	// Only need to create one command for alias only mode
 	if m.Config.AliasesOnly || aliasOnly {
-		cmd := newCommand(command, keyPath, description, code, true)
+		cmd := newCommand(command, keyPath, description, code, true, mode)
 		m.Commands[cmd.Alias] = cmd
 		return nil
 	}
@@ -55,12 +60,12 @@ func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, 
 	cmd := m.Commands[key]
 	if cmd == nil {
 		// Create new command to build our the rest
-		cmd = newCommand("", key, "", nil, false)
+		cmd = newCommand("", key, "", nil, false, mode)
 		m.Commands[cmd.Alias] = cmd
 	}
 
 	// Modify or build the rest of the key path of commands
-	cmd.build(keyPath, command, description, code, aliasOnly)
+	cmd.build(keyPath, command, description, code, aliasOnly, mode)
 
 	return nil
 }

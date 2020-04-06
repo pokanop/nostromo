@@ -19,6 +19,7 @@ type Command struct {
 	Commands    map[string]*Command      `json:"commands"`
 	Subs        map[string]*Substitution `json:"subs"`
 	Code        *Code                    `json:"code"`
+	Mode        Mode                     `json:"mode"`
 }
 
 func (c *Command) String() string {
@@ -27,7 +28,7 @@ func (c *Command) String() string {
 
 // Keys as ordered list of fields for logging
 func (c *Command) Keys() []string {
-	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code"}
+	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode"}
 }
 
 // Fields interface for logging
@@ -40,6 +41,7 @@ func (c *Command) Fields() map[string]interface{} {
 		"commands":      joinedCommands(c.Commands),
 		"substitutions": joinedSubs(c.Subs),
 		"code":          c.Code.valid(),
+		"mode":          c.Mode.String(),
 	}
 }
 
@@ -63,7 +65,7 @@ func (c *Command) Walk(fn func(*Command, *bool)) {
 }
 
 // newCommand returns a newly initialized command
-func newCommand(name, alias, description string, code *Code, aliasOnly bool) *Command {
+func newCommand(name, alias, description string, code *Code, aliasOnly bool, mode string) *Command {
 	// Default alias to same as command name
 	if len(alias) == 0 {
 		alias = name
@@ -82,7 +84,22 @@ func newCommand(name, alias, description string, code *Code, aliasOnly bool) *Co
 		Commands:    map[string]*Command{},
 		Subs:        map[string]*Substitution{},
 		Code:        code,
+		Mode:        ModeFromString(mode),
 	}
+}
+
+func (c *Command) effectiveCommand() string {
+	if c.Code.valid() {
+		return c.Code.Snippet
+	} else if len(c.Name) > 0 {
+		switch c.Mode {
+		case ConcatenateMode:
+			return c.Name
+		case IndependentMode, ExclusiveMode:
+			return c.Name + ";"
+		}
+	}
+	return ""
 }
 
 // addCommand at this scope
@@ -177,7 +194,12 @@ func (c *Command) shortestKeyPath(keyPath string) string {
 
 // executionString to run the command with provided arguments
 func (c *Command) executionString(args []string) string {
-	cmd := c.expand()
+	var cmd string
+	if c.Mode == ExclusiveMode { // Only run this command
+		cmd = c.Name
+	} else {
+		cmd = c.expand()
+	}
 	subs := []string{}
 	for _, arg := range args {
 		subs = append(subs, c.substitute(arg))
@@ -189,10 +211,9 @@ func (c *Command) executionString(args []string) string {
 func (c *Command) expand() string {
 	cmds := []string{}
 	c.reverseWalk(func(cmd *Command, stop *bool) {
-		if cmd.Code.valid() {
-			cmds = append(cmds, cmd.Code.Snippet)
-		} else if len(cmd.Name) > 0 {
-			cmds = append(cmds, cmd.Name)
+		val := cmd.effectiveCommand()
+		if len(val) > 0 {
+			cmds = append(cmds, val)
 		}
 	})
 	return strings.Join(reversed(cmds), " ")
@@ -259,7 +280,7 @@ func (c *Command) link(parent *Command) {
 	}
 }
 
-func (c *Command) build(keyPath, command, description string, code *Code, aliasOnly bool) {
+func (c *Command) build(keyPath, command, description string, code *Code, aliasOnly bool, mode string) {
 	if len(keyPath) == 0 {
 		return
 	}
@@ -279,7 +300,7 @@ func (c *Command) build(keyPath, command, description string, code *Code, aliasO
 		last = cmd
 		cmd = cmd.Commands[key]
 		if cmd == nil {
-			cmd = newCommand("", key, "", nil, false)
+			cmd = newCommand("", key, "", nil, false, mode)
 			last.addCommand(cmd)
 		}
 	}
@@ -289,6 +310,7 @@ func (c *Command) build(keyPath, command, description string, code *Code, aliasO
 	cmd.Description = description
 	cmd.Code = code
 	cmd.AliasOnly = aliasOnly
+	cmd.Mode = ModeFromString(mode)
 }
 
 func reversed(strs []string) []string {

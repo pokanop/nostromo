@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/pokanop/nostromo/keypath"
@@ -17,24 +18,25 @@ func TestManifestAddCommand(t *testing.T) {
 		name     string
 		keyPath  string
 		command  string
+		mode Mode
 		manifest *Manifest
 		expErr   bool
 		expected int
 	}{
-		{"empty key path", "", "command", fakeManifest(1, 1), true, 1},
-		{"empty command", "0-one-alias", "", fakeManifest(1, 1), false, 1},
-		{"single new command", "missing", "command", fakeManifest(0, 0), false, 1},
-		{"single existing command", "0-one-alias", "", fakeManifest(1, 1), false, 1},
-		{"multi new command", "0-one-alias.0-two-alias.three-alias", "command", fakeManifest(1, 2), false, 3},
-		{"multi existing command", "0-one-alias.0-two-alias.0-three-alias", "command", fakeManifest(1, 3), false, 3},
-		{"multi all new commands", "one-alias.two-alias.three-alias", "command", fakeManifest(2, 1), false, 5},
-		{"multi many new commands", "one-alias.two-alias.three-alias.four-alias", "command", fakeManifest(3, 4), false, 16},
-		{"alias only", "new alias", "command", fakeManifestAliasesOnly(1, 1), false, 2},
+		{"empty key path", "", "command", ConcatenateMode, fakeManifest(1, 1), true, 1},
+		{"empty command", "0-one-alias", "", ConcatenateMode, fakeManifest(1, 1), false, 1},
+		{"single new command", "missing", "command", ConcatenateMode, fakeManifest(0, 0), false, 1},
+		{"single existing command", "0-one-alias", "", ConcatenateMode, fakeManifest(1, 1), false, 1},
+		{"multi new command", "0-one-alias.0-two-alias.three-alias", "command",  ConcatenateMode, fakeManifest(1, 2), false, 3},
+		{"multi existing command", "0-one-alias.0-two-alias.0-three-alias", "command", ConcatenateMode, fakeManifest(1, 3), false, 3},
+		{"multi all new commands", "one-alias.two-alias.three-alias", "command", ConcatenateMode, fakeManifest(2, 1), false, 5},
+		{"multi many new commands", "one-alias.two-alias.three-alias.four-alias", "command", ConcatenateMode, fakeManifest(3, 4), false, 16},
+		{"alias only", "new alias", "command", ConcatenateMode, fakeManifestAliasesOnly(1, 1), false, 2},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := test.manifest.AddCommand(test.keyPath, test.command, "", nil, false)
+			err := test.manifest.AddCommand(test.keyPath, test.command, "", nil, false, test.mode.String())
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -192,8 +194,8 @@ func TestAsJSON(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			expected := string(b)
-			if actual := test.manifest.AsJSON(); actual != expected {
+			expected := strings.Trim(string(b), " \n")
+			if actual := strings.Trim(test.manifest.AsJSON(), " \n"); actual != expected {
 				t.Errorf("expected: %s, actual: %s", expected, actual)
 			}
 		})
@@ -222,8 +224,8 @@ func TestAsYAML(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			expected := string(b)
-			if actual := test.manifest.AsYAML(); actual != expected {
+			expected := strings.Trim(string(b), " \n")
+			if actual := strings.Trim(test.manifest.AsYAML(), " \n"); actual != expected {
 				t.Errorf("expected: %s, actual: %s", expected, actual)
 			}
 		})
@@ -314,7 +316,7 @@ func TestManifestData(t *testing.T) {
 		fields fields
 		want   interface{}
 	}{
-		{"data", fields{"1.0", &Config{true, true}, map[string]*Command{"foo": &Command{}}}, "manifest"},
+		{"data", fields{"1.0", &Config{true, true, ConcatenateMode}, map[string]*Command{"foo": &Command{}}}, "manifest"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -345,7 +347,7 @@ func TestManifestChildren(t *testing.T) {
 		fields fields
 		want   []tree.Node
 	}{
-		{"children", fields{"1.0", &Config{true, true}, commands}, []tree.Node{commands["foo"], commands["bar"]}},
+		{"children", fields{"1.0", &Config{true, true, ConcatenateMode}, commands}, []tree.Node{commands["foo"], commands["bar"]}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

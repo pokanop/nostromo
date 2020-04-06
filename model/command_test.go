@@ -21,14 +21,14 @@ func TestNewCommand(t *testing.T) {
 		code        *Code
 		expected    *Command
 	}{
-		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
-		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
-		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}}},
+		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode}},
+		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode}},
+		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode}},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual := newCommand(test.cmdName, test.alias, test.description, test.code, test.aliasOnly)
+			actual := newCommand(test.cmdName, test.alias, test.description, test.code, test.aliasOnly, ConcatenateMode.String())
 			if !reflect.DeepEqual(test.expected, actual) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
@@ -300,7 +300,7 @@ func TestBuild(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.command.build(test.keyPath, test.commandStr, "", &Code{}, test.aliasOnly)
+			test.command.build(test.keyPath, test.commandStr, "", &Code{}, test.aliasOnly, ConcatenateMode.String())
 			if !reflect.DeepEqual(test.expected, test.command) {
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
 			}
@@ -332,7 +332,7 @@ func TestKeys(t *testing.T) {
 		command  *Command
 		expected []string
 	}{
-		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code"}},
+		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode"}},
 	}
 
 	for _, test := range tests {
@@ -361,6 +361,7 @@ func TestFields(t *testing.T) {
 				"substitutions": "one-sub",
 				"code":          false,
 				"keypath":       "one-alias",
+				"mode": "concatenate",
 			},
 		},
 	}
@@ -434,7 +435,7 @@ func fakeCommandWithPrefix(depth int, prefix string) *Command {
 	var cmd *Command
 	for i := 0; i < depth; i++ {
 		name := depthKeys[i+1]
-		cmd = newCommand(prefix+name, prefix+name+"-alias", "", nil, false)
+		cmd = newCommand(prefix+name, prefix+name+"-alias", "", nil, false, ConcatenateMode.String())
 		cmd.addSubstitution(&Substitution{prefix + name, prefix + name + "-sub"})
 		if lastCmd != nil {
 			lastCmd.addCommand(cmd)
@@ -461,4 +462,35 @@ func fakeBuiltCommand(startDepth, endDepth int, keyPath, command string) *Comman
 		cmd.Name = command
 	}
 	return first
+}
+
+func TestCommandEffectiveCommand(t *testing.T) {
+	type fields struct {
+		Name string
+		Code        *Code
+		Mode        Mode
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{"use code", fields{"",&Code{"js", "code"}, ConcatenateMode}, "code"},
+		{"concatenate", fields{"command", nil, ConcatenateMode}, "command"},
+		{"independent", fields{"command", nil, IndependentMode}, "command;"},
+		{"exclusive", fields{"command", nil, ExclusiveMode}, "command;"},
+		{"empty command", fields{"", nil, ExclusiveMode}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Command{
+				Name: tt.fields.Name,
+				Code:        tt.fields.Code,
+				Mode:        tt.fields.Mode,
+			}
+			if got := c.effectiveCommand(); got != tt.want {
+				t.Errorf("effectiveCommand() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

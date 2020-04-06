@@ -2,7 +2,8 @@
   "version": "1.0",
   "config": {
     "verbose": true,
-    "aliasesOnly": false
+    "aliasesOnly": false,
+    "mode": 0
   },
   "commands": {
     "0-one-alias": {
@@ -42,7 +43,8 @@
                   "code": {
                     "language": "",
                     "snippet": ""
-                  }
+                  },
+                  "mode": 0
                 }
               },
               "subs": {
@@ -54,7 +56,8 @@
               "code": {
                 "language": "",
                 "snippet": ""
-              }
+              },
+              "mode": 0
             }
           },
           "subs": {
@@ -66,7 +69,8 @@
           "code": {
             "language": "",
             "snippet": ""
-          }
+          },
+          "mode": 0
         }
       },
       "subs": {
@@ -78,7 +82,8 @@
       "code": {
         "language": "",
         "snippet": ""
-      }
+      },
+      "mode": 0
     },
     "1-one-alias": {
       "keyPath": "1-one-alias",
@@ -117,7 +122,8 @@
                   "code": {
                     "language": "",
                     "snippet": ""
-                  }
+                  },
+                  "mode": 0
                 }
               },
               "subs": {
@@ -129,7 +135,8 @@
               "code": {
                 "language": "",
                 "snippet": ""
-              }
+              },
+              "mode": 0
             }
           },
           "subs": {
@@ -141,7 +148,8 @@
           "code": {
             "language": "",
             "snippet": ""
-          }
+          },
+          "mode": 0
         }
       },
       "subs": {
@@ -153,7 +161,8 @@
       "code": {
         "language": "",
         "snippet": ""
-      }
+      },
+      "mode": 0
     }
   }
 }
