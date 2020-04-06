@@ -96,6 +96,8 @@ nostromo add cmd foo "echo bar" -d "My magical foo command that prints bar"
 ```
 Re-source your `.bashrc` / `.zshrc` and just like that you can run `foo` like any other alias.
 
+You can now add commands and substitutions **interactively** by using just `nostromo add` without any arguments. This command will walk through prompts to guide adding new commands easily.
+
 #### Keypaths
 nostromo uses the concept of keypaths to simplify building commands and accessing the command tree. A keypath is simply a `.` delimited string that represents the path to the command.
 
