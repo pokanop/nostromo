@@ -8,37 +8,91 @@ import (
 	"strings"
 )
 
-// String prompt.
-func String(prompt string, args ...interface{}) string {
+func stringWithDefault(prompt, def string) string {
 	var s string
-	log.Boldf(prompt+": ", args...)
+	log.Boldf(prompt + ": ")
 	reader := bufio.NewReader(os.Stdin)
 	s, _ = reader.ReadString('\n')
-	return strings.Trim(s, "\n")
-}
-
-// String prompt (required).
-func StringRequired(prompt string, args ...interface{}) (s string) {
-	for strings.Trim(s, " ") == "" {
-		s = String(prompt, args...)
+	s = strings.Trim(s, "\n")
+	if len(s) == 0 {
+		s = def
 	}
 	return s
 }
 
-// Confirm continues prompting until the input is boolean-ish.
-func Confirm(prompt string, args ...interface{}) bool {
+// String prompt with default.
+func String(prompt, def string) string {
+	return stringWithDefault(prompt, def)
+}
+
+// String prompt without a default(required).
+func StringRequired(prompt string) (s string) {
+	for strings.Trim(s, " ") == "" {
+		s = stringWithDefault(prompt, "")
+	}
+	return s
+}
+
+func confirmWithDefault(prompt, def string) bool {
+	switch stringWithDefault(prompt, def) {
+	case "Yes", "yes", "y", "Y":
+		return true
+	case "No", "no", "n", "N":
+		return false
+	}
+	return false
+}
+
+// Confirm prompts for input that is boolean-ish or defaults.
+func Confirm(prompt string, def bool) bool {
+	if def {
+		return confirmWithDefault(prompt, "y")
+	}
+	return confirmWithDefault(prompt, "n")
+}
+
+// ConfirmRequired continues prompting until the input is boolean-ish.
+func ConfirmRequired(prompt string) bool {
 	for {
-		switch String(prompt, args...) {
-		case "Yes", "yes", "y", "Y":
-			return true
-		case "No", "no", "n", "N":
-			return false
+		if result := confirmWithDefault(prompt, ""); result {
+			return result
 		}
 	}
 }
 
-// Choose prompts for a single selection from `list`, returning in the index.
-func Choose(prompt string, list []string) int {
+// Choose prompts for a single selection from `list` with a default, returning in the index.
+func Choose(prompt string, list []string, def int) int {
+	log.Regular()
+	for i, val := range list {
+		log.Regularf("  %d) %s\n", i+1, val)
+	}
+
+	log.Regular()
+	i := -1
+
+	s := stringWithDefault(prompt, list[def])
+
+	// index
+	n, err := strconv.Atoi(s)
+	if err == nil {
+		if n > 0 && n <= len(list) {
+			i = n - 1
+			return i
+		} else {
+			return def
+		}
+	}
+
+	// value
+	i = indexOf(s, list)
+	if i != -1 {
+		return i
+	}
+	return def
+}
+
+// ChooseRequired continues prompting for a single selection from `list` until valid, returning in the index.
+func ChooseRequired(prompt string, list []string) int {
 	log.Regular()
 	for i, val := range list {
 		log.Regularf("  %d) %s\n", i+1, val)
@@ -48,7 +102,7 @@ func Choose(prompt string, list []string) int {
 	i := -1
 
 	for {
-		s := String(prompt)
+		s := stringWithDefault(prompt, "")
 
 		// index
 		n, err := strconv.Atoi(s)

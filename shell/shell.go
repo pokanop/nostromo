@@ -18,7 +18,7 @@ const (
 	Zsh
 )
 
-var validLanguages = []string{"ruby", "python", "perl", "js", "sh"}
+var validLanguages = []string{"sh", "ruby", "python", "perl", "js"}
 
 func EvalString(command, language string, verbose bool) (string, error) {
 	if len(command) == 0 {

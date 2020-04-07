@@ -20,6 +20,8 @@ const (
 	ExclusiveMode
 )
 
+var supportedModeStrings = []string{ConcatenateMode.String(), IndependentMode.String(), ExclusiveMode.String()}
+
 var supportedModes = map[string]Mode{
 	ConcatenateMode.String(): ConcatenateMode,
 	IndependentMode.String(): IndependentMode,
@@ -54,9 +56,5 @@ func ModeFromString(mode string) Mode {
 }
 
 func SupportedModes() []string {
-	var modes []string
-	for _, mode := range supportedModes {
-		modes = append(modes, mode.String())
-	}
-	return modes
+	return supportedModeStrings
 }

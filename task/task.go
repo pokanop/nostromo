@@ -154,33 +154,73 @@ func GetConfig(key string) {
 
 // AddInteractive adds a command or substitution through user prompts
 func AddInteractive() {
-	isCmd := prompt.Choose("Choose what you would like to add", []string{"command", "substitution"}) == 0
-	keypath := prompt.String("Enter a key path to attach your command (root)")
+	log.Highlight("Awesome! Let's add a new command or substitution to nostromo.")
+	log.Regularf("Follow the prompts below to get started.\n\n")
+
+	log.Regular("A nostromo command is a powerful shell alias that can be used to run one or many scoped commands.\n" +
+		"Substitutions are scoped so sub commands all inherit them. You can have nostromo swap arguments on the command\n" +
+		"line when it sees them simplifying your workflow.")
+	isCmd := prompt.Choose("Choose what you would like to add (command)", []string{"command", "substitution"}, 0) == 0
+	if !isCmd {
+		log.Highlight("\nGreat, let's add a substitution to an existing command.\n")
+	} else {
+		log.Highlight("\nGreat, let's build a new command.\n")
+	}
+
+	var keypath string
 	if isCmd {
-		cmd := prompt.StringRequired("The actual command to run")
-		alias := prompt.StringRequired("The alias or shortcut to use")
-		description := prompt.String("Provide a description for your command")
+		log.Regular("A key path is a dot '.' delimited path to where you want to add your command.\n" +
+			"Leave this blank if you want to add this to the root of the command tree.\n")
+		keypath = prompt.String("Enter a key path (e.g., 'foo.bar') to attach your command (root)", "")
+
+		log.Regular("\nBy default the command you provide is expected to run in the shell. However, nostromo provides the\n" +
+			"functionality to run code as well in some popular languages.")
 		languages := shell.SupportedLanguages()
-		language := languages[prompt.Choose("Choose a language to use (sh)", languages)]
+		language := languages[prompt.Choose("Choose a language to run your command (sh)", languages, 0)]
+		var cmd string
 		var snippet string
-		if language != "sh" {
-			snippet = prompt.StringRequired("Provide the code snippet to run")
+		if language == "sh" {
+			cmd = prompt.StringRequired("Enter the shell command (e.g., 'echo foo') to run")
+		} else {
+			snippet = prompt.StringRequired("Enter a single line code snippet to run")
 		}
-		aliasOnly := prompt.Confirm("Is this command a standard alias")
+		alias := prompt.StringRequired("Enter the alias or shortcut (e.g., 'foo') to use")
+		description := prompt.String("Enter a description (e.g., 'prints foo') for your command", "")
+
+		log.Regular("\nCommands added to nostromo can be composed to build declarative tools effectively. However, if you\n" +
+			"just want to use a plain old alias you can do that as well and manage them from nostromo.\n")
+		aliasOnly := prompt.Confirm("Create a standard alias only or make magic (y/N)", false)
 		var mode string
 		if !aliasOnly {
+			log.Highlight("\nGlad to see you're creating a nostromo command.\n")
+			log.Regular("Now you can run this command in several different modes. By default, commands are \"concatenated\"\n" +
+				"together so as nostromo walks the key path it builds up a final command to run.\n\n" +
+				"However, you can choose to run a command \"independently\", which effectively adds a ';' after the command\n" +
+				"to indicate to the shell to run separately. Or even \"exclusively\" which will ignore parent commands\n" +
+				"and only run this one. The flexibility is provided to meet most needs.")
 			modes := model.SupportedModes()
-			mode = modes[prompt.Choose("Choose a command mode to use (concatenate)", modes)]
+			mode = modes[prompt.Choose("Choose a command mode to use (concatenate)", modes, 0)]
 		}
 		if len(keypath) == 0 {
 			keypath = alias
 		} else {
 			keypath = strings.Join([]string{keypath, alias}, ".")
 		}
+		log.Highlight("\nCreating command...\n")
 		AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode)
 	} else {
-		sub := prompt.StringRequired("Original value to replace")
-		alias := prompt.StringRequired("Substitution to use")
+		log.Regularf("A key path is a dot '.' delimited path to where you want to add your command.\n")
+		log.Regular("Substitutions are added to an existing command node so you must specify where you would like to add it.\n")
+		keypath := prompt.StringRequired("Enter a key path (e.g., 'foo.bar') to attach your command")
+
+		log.Regular("\nThe original value is generally a longer string that you want to substitute with a shorthand version.\n" +
+			"These might be long arguments that you want to sub out when you invoke your commands simplifying the call.\n")
+		sub := prompt.StringRequired("Enter the original value")
+
+		log.Regular("\nThe substitution is the value you will use on the CLI to run your nostromo command.\n" +
+			"It's the shorter version of what you want nostromo to swap out into the actual call.\n")
+		alias := prompt.StringRequired("Enter the substitution")
+		log.Highlight("\nAdding substitution...\n")
 		AddSubstitution(keypath, sub, alias)
 	}
 }
