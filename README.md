@@ -249,12 +249,11 @@ nostromo manifest set mode independent
 ### Shell Completion
 nostromo provides completion scripts to allow tab completion. This is added by default to your shell init file:
 ```sh
-eval "$(nostromo completion)" # for bash
-eval "$(nostromo completion --zsh)" # for zsh
+eval "$(nostromo completion)"
 ```
 
-Even your commands added by nostromo get the full red carpet treatment with shell completion 😎
-Be sure to add a description and tab completion will show hints at each junction of your command. Cool right!
+Even your commands added by nostromo get the full red carpet treatment with shell completion.
+Be sure to add a description and tab completion will show hints at each junction of your command. Cool right! 😎
 
 ### Execute Code Snippets
 nostromo provides the ability to supply code snippets in the following languages for execution, in lieu of the standard shell command:
