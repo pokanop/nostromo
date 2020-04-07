@@ -96,7 +96,8 @@ nostromo add cmd foo "echo bar" -d "My magical foo command that prints bar"
 ```
 Re-source your `.bashrc` / `.zshrc` and just like that you can run `foo` like any other alias.
 
-You can now add commands and substitutions **interactively** by using just `nostromo add` without any arguments. This command will walk through prompts to guide adding new commands easily.
+#### Interactive Mode
+You can also add commands and substitutions **interactively** by using just `nostromo add` without any arguments. This command will walk through prompts to guide adding new commands easily.
 
 #### Keypaths
 nostromo uses the concept of keypaths to simplify building commands and accessing the command tree. A keypath is simply a `.` delimited string that represents the path to the command.
@@ -159,6 +160,7 @@ then the actual execution would result in:
 echo oof rab zab
 ```
 
+#### Substitutions
 nostromo also provides the ability to add substitutions at each one of these scopes in the command tree. So if you want to shorten common strings that are otherwise long into substitutions, you can attach them to a parent scope and nostromo will replace them at execution time for all instances.
 
 A substitution can be added with:
@@ -173,25 +175,6 @@ would finally result in the following since the substitution is in scope:
 ```sh
 oof rab zab //some/long/string
 ```
-
-### Command Execution Modes
-A command's mode indicates how it will be executed. By default, nostromo concatenates parent and child commands along the tree. There are 3 modes available to commands:
-```sh
-  concatenate  Concatenate this command with subcommands exactly as defined
-  independent  Execute this command with subcommands using ';' to separate
-  exclusive    Execute this and only this command ignoring parent commands
-```
-
-The mode can be set when adding a command with the `-m` or `--mode` flag:
-```sh
-nostromo add cmd foo.bar.baz -m exclusive "echo baz"
-```
-
-A global setting can also be set to automatically change the mode from the default `concatenate` mode using:
-```sh
-nostromo manifest set mode independent
-```
-> All subsequent commands would inherit the above mode if set.
 
 ### Complex Command Tree
 Given features like **keypaths** and **scope** you can build a complex set of commands and effectively your own tool 🤯 that performs additive functionality with each command node.
@@ -243,6 +226,25 @@ nostromo manifest show
 +--------------+-------------------------------------------+
 ...
 ```
+
+#### Execution Modes
+A command's mode indicates how it will be executed. By default, nostromo concatenates parent and child commands along the tree. There are 3 modes available to commands:
+```sh
+  concatenate  Concatenate this command with subcommands exactly as defined
+  independent  Execute this command with subcommands using ';' to separate
+  exclusive    Execute this and only this command ignoring parent commands
+```
+
+The mode can be set when adding a command with the `-m` or `--mode` flag:
+```sh
+nostromo add cmd foo.bar.baz -m exclusive "echo baz"
+```
+
+A global setting can also be set to automatically change the mode from the default `concatenate` mode using:
+```sh
+nostromo manifest set mode independent
+```
+> All subsequent commands would inherit the above mode if set.
 
 ### Shell Completion
 nostromo provides completion scripts to allow tab completion. This is added by default to your shell init file:
