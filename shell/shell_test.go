@@ -10,7 +10,7 @@ func TestValidLanguages(t *testing.T) {
 		name string
 		want []string
 	}{
-		{"valid languages", []string{"ruby", "python", "perl", "js", "sh"}},
+		{"valid languages", []string{"sh", "ruby", "python", "perl", "js"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
