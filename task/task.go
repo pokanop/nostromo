@@ -10,6 +10,7 @@ import (
 	"github.com/pokanop/nostromo/stringutil"
 	"github.com/pokanop/nostromo/version"
 	"github.com/shivamMg/ppds/tree"
+	"github.com/spf13/cobra"
 	"strings"
 )
 
@@ -150,6 +151,31 @@ func GetConfig(key string) {
 	}
 
 	log.Highlight(cfg.Get(key))
+}
+
+func GenerateCompletions(cmd *cobra.Command) {
+	cfg := checkConfig()
+	if cfg == nil {
+		return
+	}
+
+	// Generate completions for nostromo
+	s, err := shell.Completion(cmd)
+	if err != nil {
+		log.Error(err)
+	}
+	log.Print(s)
+
+	// Generate completions for manifest commands
+	completions, err := shell.ManifestCompletion(cfg.Manifest())
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	for _, completion := range completions {
+		log.Print(completion)
+	}
 }
 
 // AddInteractive adds a command or substitution through user prompts

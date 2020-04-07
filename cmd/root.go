@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Long: `Nostromo is a CLI to manage aliases through simple commands to add and remove
 scoped aliases and substitutions.
 
-Managing aliases can be tedius and difficult to set up. Nostromo makes this process easy
+Managing aliases can be tedious and difficult to set up. Nostromo makes this process easy
 and reliable. The tool adds shortcuts to your .bashrc that call into the nostromo binary.
 Nostromo reads and manages all aliases within its own config file.
 This is used to find and execute the actual command intended as well as any

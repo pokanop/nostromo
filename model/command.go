@@ -2,6 +2,8 @@ package model
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
+	"sort"
 	"strings"
 
 	"github.com/pokanop/nostromo/keypath"
@@ -62,6 +64,20 @@ func (c *Command) Children() []tree.Node {
 // Walk the command tree and run supplied func
 func (c *Command) Walk(fn func(*Command, *bool)) {
 	c.forwardWalk(fn)
+}
+
+// CobraCommand returns a cobra.Command for this command
+func (c *Command) CobraCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:       c.Alias,
+		Short:     c.Description,
+		Long:      c.Description,
+		ValidArgs: c.commandList(),
+	}
+	for _, childCmd := range c.Commands {
+		cmd.AddCommand(childCmd.CobraCommand())
+	}
+	return cmd
 }
 
 // newCommand returns a newly initialized command
@@ -311,6 +327,15 @@ func (c *Command) build(keyPath, command, description string, code *Code, aliasO
 	cmd.Code = code
 	cmd.AliasOnly = aliasOnly
 	cmd.Mode = ModeFromString(mode)
+}
+
+func (c *Command) commandList() []string {
+	var cmds []string
+	for _, cmd := range c.Commands {
+		cmds = append(cmds, cmd.Alias)
+	}
+	sort.Strings(cmds)
+	return cmds
 }
 
 func reversed(strs []string) []string {
