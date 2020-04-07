@@ -253,7 +253,8 @@ eval "$(nostromo completion)" # for bash
 eval "$(nostromo completion --zsh)" # for zsh
 ```
 
-In a future enhancement, nostromo will have the capability to supply completion scripts for your custom commands 😎
+Even your commands added by nostromo get the full red carpet treatment with shell completion 😎
+Be sure to add a description and tab completion will show hints at each junction of your command. Cool right!
 
 ### Execute Code Snippets
 nostromo provides the ability to supply code snippets in the following languages for execution, in lieu of the standard shell command:
