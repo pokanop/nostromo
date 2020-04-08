@@ -20,6 +20,15 @@ const (
 
 var validLanguages = []string{"sh", "ruby", "python", "perl", "js"}
 
+var (
+	initFiles = loadStartupFiles()
+	prefFiles = preferredStartupFiles(initFiles)
+	prefFile  = currentStartupFile(initFiles)
+)
+
+// Only for testing
+var testMode = false
+
 func EvalString(command, language string, verbose bool) (string, error) {
 	if len(command) == 0 {
 		return "", fmt.Errorf("cannot run empty command")
@@ -40,8 +49,6 @@ func EvalString(command, language string, verbose bool) (string, error) {
 // Loads all shell config files and replaces nostromo aliases
 // with manifest's commands.
 func Commit(manifest *model.Manifest) error {
-	initFiles := loadStartupFiles()
-	prefFiles := preferredStartupFiles(initFiles)
 	if len(prefFiles) == 0 {
 		return fmt.Errorf("could not find preferred init file [%s]", strings.Join(preferredFilenames, ", "))
 	}
@@ -64,8 +71,6 @@ func Commit(manifest *model.Manifest) error {
 
 // InitFileLines returns the shell initialization file lines
 func InitFileLines() (string, error) {
-	initFiles := loadStartupFiles()
-	prefFile := currentStartupFile(initFiles)
 	if prefFile == nil {
 		return "", fmt.Errorf("could not find current init file")
 	}
@@ -111,4 +116,24 @@ func buildEvalCmd(cmd, language string) string {
 	default:
 		return cmd
 	}
+}
+
+func shellWrapperFunc() string {
+	return `__nostromo_cmd() { command nostromo $* }
+nostromo() { __nostromo_cmd $* && eval "$(__nostromo_cmd completion)" }`
+}
+
+func shellAliasFuncs(m *model.Manifest) string {
+	var aliases []string
+	for _, c := range m.Commands {
+		var alias string
+		if c.AliasOnly {
+			alias = fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
+		} else {
+			cmd := fmt.Sprintf("nostromo eval %s \"$*\"", c.Alias)
+			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s) }", c.Alias, cmd))
+		}
+		aliases = append(aliases, alias)
+	}
+	return fmt.Sprintf("\n%s\n", strings.Join(aliases, "\n"))
 }

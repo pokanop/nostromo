@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // addCmd represents the add command
@@ -11,7 +12,7 @@ var addCmd = &cobra.Command{
 	Short: "Add commands or substitutions to nostromo",
 	Long:  "Add commands or substitutions to nostromo",
 	Run: func(cmd *cobra.Command, args []string) {
-		task.AddInteractive()
+		os.Exit(task.AddInteractive())
 	},
 }
 

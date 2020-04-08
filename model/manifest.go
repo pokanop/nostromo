@@ -38,9 +38,9 @@ func (m *Manifest) Link() {
 }
 
 // AddCommand tree up to key path
-func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, aliasOnly bool, mode string) error {
+func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, aliasOnly bool, mode string) (bool, error) {
 	if len(keyPath) == 0 {
-		return fmt.Errorf("invalid key path")
+		return false, fmt.Errorf("invalid key path")
 	}
 
 	// Use config mode if not supplied on CLI
@@ -52,40 +52,45 @@ func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, 
 	if m.Config.AliasesOnly || aliasOnly {
 		cmd := newCommand(command, keyPath, description, code, true, mode)
 		m.Commands[cmd.Alias] = cmd
-		return nil
+		return true, nil
 	}
 
 	// Build the root command first using the first key
+	var isRoot bool
 	key := keypath.Keys(keyPath)[0]
 	cmd := m.Commands[key]
 	if cmd == nil {
 		// Create new command to build our the rest
 		cmd = newCommand("", key, "", nil, false, mode)
 		m.Commands[cmd.Alias] = cmd
+		isRoot = true
 	}
 
 	// Modify or build the rest of the key path of commands
 	cmd.build(keyPath, command, description, code, aliasOnly, mode)
 
-	return nil
+	return isRoot, nil
 }
 
 // RemoveCommand tree at key path
-func (m *Manifest) RemoveCommand(keyPath string) error {
+func (m *Manifest) RemoveCommand(keyPath string) (bool, error) {
 	cmd := m.Find(keyPath)
 	if cmd == nil {
-		return fmt.Errorf("command not found")
+		return false, fmt.Errorf("command not found")
 	}
+
+	// Track if root command
+	_, isRoot := m.Commands[keyPath]
 
 	parent := cmd.parent
 	if parent == nil {
 		delete(m.Commands, keyPath)
-		return nil
+		return isRoot, nil
 	}
 
 	parent.removeCommand(cmd)
 
-	return nil
+	return isRoot, nil
 }
 
 // AddSubstitution with name and alias at key path

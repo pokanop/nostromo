@@ -44,6 +44,8 @@ func Completion(cmd *cobra.Command) (string, error) {
 // ManifestCompletion scripts for a manifest
 func ManifestCompletion(m *model.Manifest) ([]string, error) {
 	var completions []string
+	completions = append(completions, shellWrapperFunc())
+	completions = append(completions, shellAliasFuncs(m))
 	for _, cmd := range m.Commands {
 		s, err := CommandCompletion(cmd)
 		if err != nil {

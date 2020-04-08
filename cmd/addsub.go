@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // addsubCmd represents the addsub command
@@ -19,7 +20,7 @@ the provided key path. A command scope can a tree of sub commands
 and substitutions.`,
 	Args: cobra.MinimumNArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
-		task.AddSubstitution(args[0], args[1], args[2])
+		os.Exit(task.AddSubstitution(args[0], args[1], args[2]))
 	},
 }
 

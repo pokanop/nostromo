@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/pokanop/nostromo/shell"
@@ -45,7 +46,7 @@ You can set using -m or --mode when adding a command or globally using:
 		if len(args) > 1 {
 			name = args[1]
 		}
-		task.AddCommand(args[0], name, description, code, language, aliasOnly, mode)
+		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode))
 	},
 }
 

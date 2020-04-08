@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
@@ -20,7 +21,7 @@ and profile changes.
 
 The config file is located at ~/.nostromo/config`,
 	Run: func(cmd *cobra.Command, args []string) {
-		task.ShowConfig(asJSON, asYAML, asTree)
+		os.Exit(task.ShowConfig(asJSON, asYAML, asTree))
 	},
 }
 

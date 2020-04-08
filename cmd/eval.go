@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // evalCmd represents the eval command
@@ -34,7 +35,7 @@ commands that need to be run across the scope of the command.`,
 	Args:               cobra.MinimumNArgs(1),
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		task.EvalString(args)
+		os.Exit(task.EvalString(args))
 	},
 }
 

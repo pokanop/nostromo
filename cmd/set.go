@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // setCmd represents the set command
@@ -18,7 +19,7 @@ Use this command to set values for these settings:
   mode: concatenate | independent | exclusive`,
 	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		task.SetConfig(args[0], args[1])
+		os.Exit(task.SetConfig(args[0], args[1]))
 	},
 }
 

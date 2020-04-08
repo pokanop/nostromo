@@ -22,7 +22,7 @@ func SetVersion(v *version.Info) {
 }
 
 // InitConfig of nostromo config file if not already initialized
-func InitConfig() {
+func InitConfig() int {
 	cfg := checkConfigQuiet()
 
 	if cfg == nil {
@@ -30,7 +30,7 @@ func InitConfig() {
 		err := pathutil.EnsurePath("~/.nostromo")
 		if err != nil {
 			log.Error(err)
-			return
+			return -1
 		}
 
 		log.Highlight("nostromo config created")
@@ -38,23 +38,26 @@ func InitConfig() {
 		log.Highlight("nostromo config exists, updating")
 	}
 
-	err := saveConfig(cfg)
+	err := saveConfig(cfg, true)
 	if err != nil {
 		log.Error(err)
+		return -1
 	}
+
+	return 0
 }
 
 // DestroyConfig deletes nostromo config file
-func DestroyConfig() {
+func DestroyConfig() int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	err := cfg.Delete()
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
 
 	log.Highlight("nostromo config deleted")
@@ -62,15 +65,17 @@ func DestroyConfig() {
 	err = shell.Commit(model.NewManifest())
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
+
+	return 0
 }
 
 // ShowConfig for nostromo config file
-func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
+func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	m := cfg.Manifest()
@@ -113,7 +118,7 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 
 	lines, err := shell.InitFileLines()
 	if err != nil {
-		return
+		return -1
 	}
 
 	log.Bold("[profile]")
@@ -122,64 +127,71 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) {
 	} else {
 		log.Regular("empty")
 	}
+
+	return 0
 }
 
 // SetConfig updates properties for nostromo settings
-func SetConfig(key, value string) {
+func SetConfig(key, value string) int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	err := cfg.Set(key, value)
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
 
-	err = saveConfig(cfg)
+	err = saveConfig(cfg, false)
 	if err != nil {
 		log.Error(err)
+		return -1
 	}
+
+	return 0
 }
 
 // GetConfig reads properties from nostromo settings
-func GetConfig(key string) {
+func GetConfig(key string) int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	log.Highlight(cfg.Get(key))
+	return 0
 }
 
-func GenerateCompletions(cmd *cobra.Command) {
-	cfg := checkConfig()
-	if cfg == nil {
-		return
-	}
-
+func GenerateCompletions(cmd *cobra.Command) int {
 	// Generate completions for nostromo
 	s, err := shell.Completion(cmd)
 	if err != nil {
-		log.Error(err)
+		return -1
 	}
 	log.Print(s)
+
+	cfg := checkConfigQuiet()
+	if cfg == nil {
+		return 0
+	}
 
 	// Generate completions for manifest commands
 	completions, err := shell.ManifestCompletion(cfg.Manifest())
 	if err != nil {
-		log.Error(err)
-		return
+		return 0
 	}
 
 	for _, completion := range completions {
 		log.Print(completion)
 	}
+
+	return 0
 }
 
 // AddInteractive adds a command or substitution through user prompts
-func AddInteractive() {
+func AddInteractive() int {
 	log.Highlight("Awesome! Let's add a new command or substitution to nostromo.")
 	log.Regularf("Follow the prompts below to get started.\n\n")
 
@@ -233,7 +245,8 @@ func AddInteractive() {
 			keypath = strings.Join([]string{keypath, alias}, ".")
 		}
 		log.Highlight("\nCreating command...\n")
-		AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode)
+
+		return AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode)
 	} else {
 		log.Regularf("A key path is a dot '.' delimited path to where you want to add your command.\n")
 		log.Regular("Substitutions are added to an existing command node so you must specify where you would like to add it.\n")
@@ -247,15 +260,16 @@ func AddInteractive() {
 			"It's the shorter version of what you want nostromo to swap out into the actual call.\n")
 		alias := prompt.StringRequired("Enter the substitution")
 		log.Highlight("\nAdding substitution...\n")
-		AddSubstitution(keypath, sub, alias)
+
+		return AddSubstitution(keypath, sub, alias)
 	}
 }
 
 // AddCommand to the manifest
-func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string) {
+func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string) int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	m := cfg.Manifest()
@@ -265,50 +279,55 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 		Snippet:  code,
 	}
 
-	err := m.AddCommand(keyPath, command, description, snippet, aliasOnly, mode)
+	_, err := m.AddCommand(keyPath, command, description, snippet, aliasOnly, mode)
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
 
 	cmd := m.Find(keyPath)
 	if cmd == nil {
 		log.Error("unable to find newly created command")
-		return
+		return -1
 	}
 
-	err = saveConfig(cfg)
+	err = saveConfig(cfg, false)
 	if err != nil {
 		log.Error(err)
+		return -1
 	}
 
 	logFields(cmd, m.Config.Verbose)
+	return 0
 }
 
 // RemoveCommand from the manifest
-func RemoveCommand(keyPath string) {
+func RemoveCommand(keyPath string) int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
-	err := cfg.Manifest().RemoveCommand(keyPath)
+	_, err := cfg.Manifest().RemoveCommand(keyPath)
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
 
-	err = saveConfig(cfg)
+	err = saveConfig(cfg, false)
 	if err != nil {
 		log.Error(err)
+		return -1
 	}
+
+	return 0
 }
 
 // AddSubstitution to the manifest
-func AddSubstitution(keyPath, name, alias string) {
+func AddSubstitution(keyPath, name, alias string) int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	m := cfg.Manifest()
@@ -316,44 +335,48 @@ func AddSubstitution(keyPath, name, alias string) {
 	err := m.AddSubstitution(keyPath, name, alias)
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
 
-	err = saveConfig(cfg)
+	err = saveConfig(cfg, false)
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
 
 	logFields(m.Find(keyPath), m.Config.Verbose)
+	return 0
 }
 
 // RemoveSubstitution from the manifest
-func RemoveSubstitution(keyPath, alias string) {
+func RemoveSubstitution(keyPath, alias string) int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	err := cfg.Manifest().RemoveSubstitution(keyPath, alias)
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
 
-	err = saveConfig(cfg)
+	err = saveConfig(cfg, false)
 	if err != nil {
 		log.Error(err)
+		return -1
 	}
+
+	return 0
 }
 
 // EvalString returns a command that can be used with `eval`
-func EvalString(args []string) {
+func EvalString(args []string) int {
 	log.SetEcho(true)
 
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	m := cfg.Manifest()
@@ -361,28 +384,30 @@ func EvalString(args []string) {
 	language, cmd, err := m.ExecutionString(stringutil.SanitizeArgs(args))
 	if err != nil {
 		log.Error(err)
-		return
+		return -1
 	}
 
 	cmdStr, err := shell.EvalString(cmd, language, m.Config.Verbose)
 	if err != nil {
 		log.Error(err)
+		return -1
 	}
 
 	log.Print(cmdStr)
+	return 0
 }
 
 // Find matching commands and substitutions
-func Find(name string) {
+func Find(name string) int {
 	cfg := checkConfig()
 	if cfg == nil {
-		return
+		return -1
 	}
 
 	m := cfg.Manifest()
 
-	matchingCmds := []*model.Command{}
-	matchingSubs := []*model.Command{}
+	var matchingCmds []*model.Command
+	var matchingSubs []*model.Command
 
 	for _, cmd := range m.Commands {
 		cmd.Walk(func(c *model.Command, s *bool) {
@@ -399,7 +424,7 @@ func Find(name string) {
 
 	if len(matchingCmds) == 0 && len(matchingSubs) == 0 {
 		log.Highlight("no matching commands or substitutions found")
-		return
+		return -1
 	}
 
 	log.Regular("[commands]")
@@ -420,6 +445,8 @@ func Find(name string) {
 			log.Regular()
 		}
 	}
+
+	return 0
 }
 
 func checkConfigQuiet() *config.Config {
@@ -445,7 +472,7 @@ func checkConfigCommon(quiet bool) *config.Config {
 	return cfg
 }
 
-func saveConfig(cfg *config.Config) error {
+func saveConfig(cfg *config.Config, commit bool) error {
 	m := cfg.Manifest()
 	m.Version = ver.SemVer
 
@@ -454,9 +481,11 @@ func saveConfig(cfg *config.Config) error {
 		return err
 	}
 
-	err = shell.Commit(m)
-	if err != nil {
-		return err
+	if commit {
+		err = shell.Commit(m)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

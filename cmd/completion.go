@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // completionCmd represents the completion command
@@ -19,7 +20,7 @@ Note that "nostromo init" will add this automatically.
 # In ~/.bashrc, ~/.bash_profile or ~/.zshrc
 eval "$(nostromo completion)"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		task.GenerateCompletions(cmd)
+		os.Exit(task.GenerateCompletions(cmd))
 	},
 }
 

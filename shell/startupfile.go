@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -166,7 +165,7 @@ func (s *startupFile) apply(manifest *model.Manifest) error {
 
 	// Add aliases to preferred init files only
 	if s.preferred {
-		content += s.makeAliasBlock()
+		content += s.makeNostromoBlock()
 	}
 
 	s.updatedContent = content
@@ -253,28 +252,6 @@ func (s *startupFile) contentIndexes() (int, int) {
 	return start, end
 }
 
-func (s *startupFile) makeAliasBlock() string {
-	if len(s.commands) == 0 {
-		return ""
-	}
-
-	keys := make([]string, 0, len(s.commands))
-	for k := range s.commands {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	var aliases []string
-	for _, k := range keys {
-		c := s.commands[k]
-		var alias string
-		if c.AliasOnly {
-			alias = fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
-		} else {
-			cmd := fmt.Sprintf("nostromo eval %s \"$*\"", c.Alias)
-			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s) }", c.Alias, cmd))
-		}
-		aliases = append(aliases, alias)
-	}
-	return fmt.Sprintf("\n%s\n%s\n\n%s\n%s\n", beginBlockComment, sourceCompletion, strings.Join(aliases, "\n"), endBlockComment)
+func (s *startupFile) makeNostromoBlock() string {
+	return fmt.Sprintf("\n%s\n%s\n%s\n", beginBlockComment, sourceCompletion, endBlockComment)
 }
