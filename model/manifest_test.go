@@ -36,7 +36,7 @@ func TestManifestAddCommand(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := test.manifest.AddCommand(test.keyPath, test.command, "", nil, false, test.mode.String())
+			_, err := test.manifest.AddCommand(test.keyPath, test.command, "", nil, false, test.mode.String())
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -66,7 +66,7 @@ func TestManifestRemoveCommand(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := test.manifest.RemoveCommand(test.keyPath)
+			_, err := test.manifest.RemoveCommand(test.keyPath)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
