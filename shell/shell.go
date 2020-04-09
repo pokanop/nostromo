@@ -130,7 +130,7 @@ func shellAliasFuncs(m *model.Manifest) string {
 		if c.AliasOnly {
 			alias = fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
 		} else {
-			cmd := fmt.Sprintf("nostromo eval %s \"$*\"", c.Alias)
+			cmd := fmt.Sprintf("__nostromo_cmd eval %s \"$*\"", c.Alias)
 			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s) }", c.Alias, cmd))
 		}
 		aliases = append(aliases, alias)

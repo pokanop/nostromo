@@ -226,8 +226,8 @@ func AddInteractive() int {
 		description := prompt.String("Enter a description (e.g., 'prints foo') for your command", "")
 
 		log.Regular("\nCommands added to nostromo can be composed to build declarative tools effectively. However, if you\n" +
-			"just want to use a plain old alias you can do that as well and manage them from nostromo.\n")
-		aliasOnly := prompt.Confirm("Create a standard alias only or make magic (y/N)", false)
+			"just want to use a boring old alias you can do that as well and manage them from nostromo.\n")
+		aliasOnly := prompt.Confirm("Create a standard alias - say no :) (y/N)", false)
 		var mode string
 		if !aliasOnly {
 			log.Highlight("\nGlad to see you're creating a nostromo command.\n")
