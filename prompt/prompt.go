@@ -68,7 +68,7 @@ func Choose(prompt string, list []string, def int) int {
 	}
 
 	log.Regular()
-	i := -1
+	var i int
 
 	s := stringWithDefault(prompt, list[def])
 
@@ -78,9 +78,8 @@ func Choose(prompt string, list []string, def int) int {
 		if n > 0 && n <= len(list) {
 			i = n - 1
 			return i
-		} else {
-			return def
 		}
+		return def
 	}
 
 	// value

@@ -68,7 +68,7 @@ func Bold(a ...interface{}) {
 	fmt.Println(aurora.Bold(joined(a...)))
 }
 
-// Bold log text with format.
+// Boldf log text with format.
 func Boldf(format string, a ...interface{}) {
 	if opt.echo {
 		echof(format, a...)
