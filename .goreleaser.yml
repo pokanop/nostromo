@@ -57,9 +57,11 @@ brews:
     # Caveats for the user of your binary.
     # Default is empty.
     caveats: >+
-      Initialize nostromo and create a manifest under ~/.nostromo by running:
+      Initialize nostromo which will create a manifest under ~/.nostromo by running:
 
         nostromo init
+
+      Be sure to source your shell profile after initializing nostromo for auto-complete to work.
       
       You can get started by running the following interactive command:
 
