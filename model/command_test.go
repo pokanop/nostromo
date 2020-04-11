@@ -378,8 +378,8 @@ func TestFields(t *testing.T) {
 
 func TestCommand_Children(t *testing.T) {
 	commands := map[string]*Command{
-		"foo": &Command{},
-		"bar": &Command{},
+		"foo": {},
+		"bar": {},
 	}
 	type fields struct {
 		Commands map[string]*Command

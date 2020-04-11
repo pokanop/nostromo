@@ -316,7 +316,7 @@ func TestManifestData(t *testing.T) {
 		fields fields
 		want   interface{}
 	}{
-		{"data", fields{"1.0", &Config{true, true, ConcatenateMode}, map[string]*Command{"foo": &Command{}}}, "manifest"},
+		{"data", fields{"1.0", &Config{true, true, ConcatenateMode}, map[string]*Command{"foo": {}}}, "manifest"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -334,8 +334,8 @@ func TestManifestData(t *testing.T) {
 
 func TestManifestChildren(t *testing.T) {
 	commands := map[string]*Command{
-		"foo": &Command{},
-		"bar": &Command{},
+		"foo": {},
+		"bar": {},
 	}
 	type fields struct {
 		Version  string

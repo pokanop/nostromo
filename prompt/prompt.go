@@ -25,7 +25,7 @@ func String(prompt, def string) string {
 	return stringWithDefault(prompt, def)
 }
 
-// String prompt without a default(required).
+// StringRequired prompt without a default.
 func StringRequired(prompt string) (s string) {
 	for strings.Trim(s, " ") == "" {
 		s = stringWithDefault(prompt, "")

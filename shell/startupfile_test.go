@@ -8,7 +8,6 @@ import (
 )
 
 func TestStartupFile(t *testing.T) {
-	testMode = true
 
 	tests := []struct {
 		name        string

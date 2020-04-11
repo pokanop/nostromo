@@ -26,9 +26,7 @@ var (
 	prefFile  = currentStartupFile(initFiles)
 )
 
-// Only for testing
-var testMode = false
-
+// EvalString returns the command as a string to evaluate or an error.
 func EvalString(command, language string, verbose bool) (string, error) {
 	if len(command) == 0 {
 		return "", fmt.Errorf("cannot run empty command")

@@ -163,6 +163,7 @@ func GetConfig(key string) int {
 	return 0
 }
 
+// GenerateCompletions for all manifest commands and nostromo itself.
 func GenerateCompletions(cmd *cobra.Command) int {
 	// Generate completions for nostromo
 	s, err := shell.Completion(cmd)
@@ -204,11 +205,10 @@ func AddInteractive() int {
 		log.Highlight("\nGreat, let's build a new command.\n")
 	}
 
-	var keypath string
 	if isCmd {
 		log.Regular("A key path is a dot '.' delimited path to where you want to add your command.\n" +
 			"Leave this blank if you want to add this to the root of the command tree.\n")
-		keypath = prompt.String("Enter a key path (e.g., 'foo.bar') to attach your command (root)", "")
+		keypath := prompt.String("Enter a key path (e.g., 'foo.bar') to attach your command (root)", "")
 
 		log.Regular("\nBy default the command you provide is expected to run in the shell. However, nostromo provides the\n" +
 			"functionality to run code as well in some popular languages.")
@@ -246,22 +246,22 @@ func AddInteractive() int {
 		log.Highlight("\nCreating command...\n")
 
 		return AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode)
-	} else {
-		log.Regularf("A key path is a dot '.' delimited path to where you want to add your command.\n")
-		log.Regular("Substitutions are added to an existing command node so you must specify where you would like to add it.\n")
-		keypath := prompt.StringRequired("Enter a key path (e.g., 'foo.bar') to attach your command")
-
-		log.Regular("\nThe original value is generally a longer string that you want to substitute with a shorthand version.\n" +
-			"These might be long arguments that you want to sub out when you invoke your commands simplifying the call.\n")
-		sub := prompt.StringRequired("Enter the original value")
-
-		log.Regular("\nThe substitution is the value you will use on the CLI to run your nostromo command.\n" +
-			"It's the shorter version of what you want nostromo to swap out into the actual call.\n")
-		alias := prompt.StringRequired("Enter the substitution")
-		log.Highlight("\nAdding substitution...\n")
-
-		return AddSubstitution(keypath, sub, alias)
 	}
+
+	log.Regularf("A key path is a dot '.' delimited path to where you want to add your command.\n")
+	log.Regular("Substitutions are added to an existing command node so you must specify where you would like to add it.\n")
+	keypath := prompt.StringRequired("Enter a key path (e.g., 'foo.bar') to attach your command")
+
+	log.Regular("\nThe original value is generally a longer string that you want to substitute with a shorthand version.\n" +
+		"These might be long arguments that you want to sub out when you invoke your commands simplifying the call.\n")
+	sub := prompt.StringRequired("Enter the original value")
+
+	log.Regular("\nThe substitution is the value you will use on the CLI to run your nostromo command.\n" +
+		"It's the shorter version of what you want nostromo to swap out into the actual call.\n")
+	alias := prompt.StringRequired("Enter the substitution")
+	log.Highlight("\nAdding substitution...\n")
+
+	return AddSubstitution(keypath, sub, alias)
 }
 
 // AddCommand to the manifest

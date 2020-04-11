@@ -1,5 +1,6 @@
 package model
 
+// Mode represents the execution mode for a command.
 type Mode int
 
 const (
@@ -55,6 +56,7 @@ func ModeFromString(mode string) Mode {
 	return m
 }
 
+// SupportedModes returns a list of supported modes as strings.
 func SupportedModes() []string {
 	return supportedModeStrings
 }
