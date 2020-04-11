@@ -12,7 +12,7 @@
 nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
 
 <p align="center">
-  <img src="images/nostromo-intro.gif" alt="nostromo">
+  <img src="images/nostromo-intro.gif" alt="nostromo" style="height: 500px">
 </p>
 
 Managing aliases can be tedious and difficult to set up. nostromo makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` / `.zshrc` that call into the nostromo binary. It reads and manages all aliases within its manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.

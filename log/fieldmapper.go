@@ -16,7 +16,7 @@ const (
 	cellFieldStyle
 )
 
-var omitKeysCompact = []string{"description", "code"}
+var omitKeysCompact = []string{"description", "code", "mode", "aliasOnly"}
 
 // FieldMapper type returns fields as a map for logging
 type FieldMapper interface {

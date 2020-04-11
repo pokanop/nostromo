@@ -30,7 +30,7 @@ func (c *Command) String() string {
 
 // Keys as ordered list of fields for logging
 func (c *Command) Keys() []string {
-	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode"}
+	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly"}
 }
 
 // Fields interface for logging
@@ -44,6 +44,7 @@ func (c *Command) Fields() map[string]interface{} {
 		"substitutions": joinedSubs(c.Subs),
 		"code":          c.Code.valid(),
 		"mode":          c.Mode.String(),
+		"aliasOnly": c.AliasOnly,
 	}
 }
 
