@@ -84,7 +84,6 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 		log.Bold("[manifest]")
 		if asJSON {
 			log.Regular(m.AsJSON())
-			log.Regular()
 		} else if asYAML {
 			log.Regular(m.AsYAML())
 		}
@@ -114,18 +113,18 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 		if !m.Config.Verbose {
 			log.Regular()
 		}
-	}
 
-	lines, err := shell.InitFileLines()
-	if err != nil {
-		return -1
-	}
+		lines, err := shell.InitFileLines()
+		if err != nil {
+			return -1
+		}
 
-	log.Bold("[profile]")
-	if len(lines) > 0 {
-		log.Regular(strings.TrimSpace(lines))
-	} else {
-		log.Regular("empty")
+		log.Bold("[profile]")
+		if len(lines) > 0 {
+			log.Regular(strings.TrimSpace(lines))
+		} else {
+			log.Regular("empty")
+		}
 	}
 
 	return 0
