@@ -17,7 +17,7 @@ Use this command to set values for these settings:
   verbose: true | false
   aliasesOnly: true | false
   mode: concatenate | independent | exclusive`,
-	Args: cobra.MinimumNArgs(2),
+	Args:      cobra.MinimumNArgs(2),
 	ValidArgs: []string{"verbose", "aliasesOnly", "mode"},
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.SetConfig(args[0], args[1]))

@@ -332,7 +332,7 @@ func TestKeys(t *testing.T) {
 		command  *Command
 		expected []string
 	}{
-		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode"}},
+		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly"}},
 	}
 
 	for _, test := range tests {
@@ -362,6 +362,7 @@ func TestFields(t *testing.T) {
 				"code":          false,
 				"keypath":       "one-alias",
 				"mode":          "concatenate",
+				"aliasOnly":     false,
 			},
 		},
 	}

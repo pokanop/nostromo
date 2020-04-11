@@ -44,7 +44,7 @@ func (c *Command) Fields() map[string]interface{} {
 		"substitutions": joinedSubs(c.Subs),
 		"code":          c.Code.valid(),
 		"mode":          c.Mode.String(),
-		"aliasOnly": c.AliasOnly,
+		"aliasOnly":     c.AliasOnly,
 	}
 }
 
