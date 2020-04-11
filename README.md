@@ -12,7 +12,7 @@
 nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
 
 <p align="center">
-  <img src="images/nostromo-intro.gif" alt="nostromo" style="border-radius: 15px; width: 800px">
+  <img src="images/nostromo-intro.gif" alt="nostromo" style="border-radius: 15px">
 </p>
 
 Managing aliases can be tedious and difficult to set up. nostromo makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` / `.zshrc` that call into the nostromo binary. It reads and manages all aliases within its manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
@@ -102,7 +102,7 @@ nostromo add cmd foo "echo bar" -d "My magical foo command that prints bar"
 You can also add commands and substitutions **interactively** by using just `nostromo add` without any arguments. This command will walk through prompts to guide adding new commands easily.
 
 <p align="center">
-  <img src="images/nostromo-interactive.gif" alt="nostromo" style="border-radius: 15px; width: 800px">
+  <img src="images/nostromo-interactive.gif" alt="nostromo" style="border-radius: 15px">
 </p>
 
 #### Keypaths
@@ -195,13 +195,13 @@ nostromo manifest show
 With nostromo, you can also visualize the command tree (or manifest) in several other ways including as `json`, `yaml` and a tree itself.
 
 <p align="center">
-  <img src="images/nostromo-tree.gif" alt="nostromo" style="border-radius: 15px; width: 800px">
+  <img src="images/nostromo-tree.gif" alt="nostromo" style="border-radius: 15px">
 </p>
 
 Setting the `verbose` config item prints more detailed information as well.
 
 <p align="center">
-  <img src="images/nostromo-verbose.gif" alt="nostromo" style="border-radius: 15px; width: 800px">
+  <img src="images/nostromo-verbose.gif" alt="nostromo" style="border-radius: 15px">
 </p>
 
 #### Execution Modes
