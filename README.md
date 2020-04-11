@@ -12,7 +12,7 @@
 nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
 
 <p align="center">
-  <img src="images/nostromo-intro.gif" alt="nostromo" style="height: 500px">
+  <img src="images/nostromo-intro.gif" alt="nostromo" style="border-radius: 15px; width: 800px">
 </p>
 
 Managing aliases can be tedious and difficult to set up. nostromo makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` / `.zshrc` that call into the nostromo binary. It reads and manages all aliases within its manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
@@ -101,21 +101,9 @@ nostromo add cmd foo "echo bar" -d "My magical foo command that prints bar"
 #### Interactive Mode
 You can also add commands and substitutions **interactively** by using just `nostromo add` without any arguments. This command will walk through prompts to guide adding new commands easily.
 
-```sh
-❯ nostromo add
-Awesome! Let's add a new command or substitution to nostromo.
-Follow the prompts below to get started.
-
-A nostromo command is a powerful shell alias that can be used to run one or many scoped commands.
-Substitutions are scoped so sub commands all inherit them. You can have nostromo swap arguments on the command
-line when it sees them simplifying your workflow.
-
-  1) command
-  2) substitution
-
-Choose what you would like to add (command): 1
-...
-```
+<p align="center">
+  <img src="images/nostromo-interactive.gif" alt="nostromo" style="border-radius: 15px; width: 800px">
+</p>
 
 #### Keypaths
 nostromo uses the concept of keypaths to simplify building commands and accessing the command tree. A keypath is simply a `.` delimited string that represents the path to the command.
@@ -178,6 +166,8 @@ then the actual execution would result in:
 echo oof rab zab
 ```
 
+> Standard behavior is to `concatenate` but you can easily change this with the `mode` flag when using `add` or globally. More information under Execution Modes.
+
 #### Substitutions
 nostromo also provides the ability to add substitutions at each one of these scopes in the command tree. So if you want to shorten common strings that are otherwise long into substitutions, you can attach them to a parent scope and nostromo will replace them at execution time for all instances.
 
@@ -203,47 +193,16 @@ nostromo manifest show
 ```
 
 With nostromo, you can also visualize the command tree (or manifest) in several other ways including as `json`, `yaml` and a tree itself.
-```
-nostromo manifest show --tree
-manifest ┬─ ard
-         ├─ certs ── sync
-         ├─ cls
-         ├─ config ┬─ nostromo
-         │         ├─ zsh
-         │         └─ bash
-         ├─ dock ┬─ vol
-         │       ├─ clean
-         │       ├─ nuke
-         │       ├─ rmi
-         │       └─ stop
-         ├─ install ── helm
-         └─ ip ┬─ hosts
-               ├─ local
-               └─ public
-```
+
+<p align="center">
+  <img src="images/nostromo-tree.gif" alt="nostromo" style="border-radius: 15px; width: 800px">
+</p>
 
 Setting the `verbose` config item prints more detailed information as well.
-```
-nostromo manifest set verbose true
-nostromo manifest show
-...
-+--------------+------------------------------------------+
-| keypath      | ip.local                                 |
-| alias        | local                                    |
-| command      | ipconfig getifaddr en1                   |
-| description  | Get the local IP address of this machine |
-| code         | false                                    |
-+--------------+------------------------------------------+
 
-+--------------+-------------------------------------------+
-| keypath      | ip.public                                 |
-| alias        | public                                    |
-| command      | curl -Ss icanhazip.com                    |
-| description  | Get the public IP address of this machine |
-| code         | false                                     |
-+--------------+-------------------------------------------+
-...
-```
+<p align="center">
+  <img src="images/nostromo-verbose.gif" alt="nostromo" style="border-radius: 15px; width: 800px">
+</p>
 
 #### Execution Modes
 A command's mode indicates how it will be executed. By default, nostromo concatenates parent and child commands along the tree. There are 3 modes available to commands:
@@ -258,7 +217,7 @@ The mode can be set when adding a command with the `-m` or `--mode` flag:
 nostromo add cmd foo.bar.baz -m exclusive "echo baz"
 ```
 
-A global setting can also be set to automatically change the mode from the default `concatenate` mode using:
+A global setting can also be set to change the mode from the default `concatenate` with:
 ```sh
 nostromo manifest set mode independent
 ```
