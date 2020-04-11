@@ -61,11 +61,11 @@ brews:
 
         nostromo init
 
-      Be sure to source your shell profile after initializing nostromo for auto-complete to work.
-      
       You can get started by running the following interactive command:
 
         nostromo add
+
+      Be sure to source your shell profile after initializing nostromo for auto-complete to work.
         
 
     # Your app's homepage.
