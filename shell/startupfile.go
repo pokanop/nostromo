@@ -15,23 +15,23 @@ import (
 
 const (
 	beginBlockComment = "# nostromo [section begin]"
-	endBlockComment		= "# nostromo [section end]"
-	sourceCompletion	= "eval \"$(nostromo completion)\""
+	endBlockComment   = "# nostromo [section end]"
+	sourceCompletion  = "eval \"$(nostromo completion)\""
 )
 
 var (
-	startupFilenames = []string{".profile", ".bash_profile", ".bashrc", ".zshrc"}
-	preferredFilenames	 = []string{".bashrc", ".zshrc"}
+	startupFilenames   = []string{".profile", ".bash_profile", ".bashrc", ".zshrc"}
+	preferredFilenames = []string{".bashrc", ".zshrc"}
 )
 
 type startupFile struct {
-	path					 string
-	mode					 os.FileMode
-	content				 string
+	path           string
+	mode           os.FileMode
+	content        string
 	updatedContent string
-	commands			 map[string]*model.Command
-	preferred			 bool
-	pristine			 bool
+	commands       map[string]*model.Command
+	preferred      bool
+	pristine       bool
 }
 
 func isPreferredFilename(filename string) bool {
@@ -92,8 +92,8 @@ func findStartupFile(name string) (string, os.FileMode, error) {
 	}
 
 	// zsh doesn't always have a ~/.zshrc file, and if it doesn't,
-  // it does have a $ZDOTDIR/.zshrc
-  // https://wiki.archlinux.org/index.php/Zsh#Startup.2FShutdown_files
+	// it does have a $ZDOTDIR/.zshrc
+	// https://wiki.archlinux.org/index.php/Zsh#Startup.2FShutdown_files
 	zdotDir := os.Getenv("ZDOTDIR")
 	var path string
 	if zdotDir != "" {
@@ -133,9 +133,9 @@ func parseStartupFile(path string, mode os.FileMode) (*startupFile, error) {
 
 func newStartupFile(path, content string, mode os.FileMode) *startupFile {
 	return &startupFile{
-		path:			 path,
-		mode:			 mode,
-		content:	 content,
+		path:      path,
+		mode:      mode,
+		content:   content,
 		commands:  map[string]*model.Command{},
 		preferred: isPreferredFilename(path),
 	}

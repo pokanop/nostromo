@@ -15,7 +15,7 @@ import (
 // Path for standard nostromo config
 const (
 	DefaultManifestFile = "manifest.yaml"
-	DefaultBaseDir = "~/.nostromo"
+	DefaultBaseDir      = "~/.nostromo"
 )
 
 // Config manages working with nostromo configuration files
