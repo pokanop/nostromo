@@ -26,8 +26,10 @@ func InitConfig() int {
 	cfg := checkConfigQuiet()
 
 	if cfg == nil {
-		cfg = config.NewConfig(config.Path, model.NewManifest())
-		err := pathutil.EnsurePath("~/.nostromo")
+		baseDir := config.GetBaseDir()
+		configPath := config.GetConfigPath()
+		cfg = config.NewConfig(configPath, model.NewManifest())
+		err := pathutil.EnsurePath(baseDir)
 		if err != nil {
 			log.Error(err)
 			return -1
@@ -457,7 +459,8 @@ func checkConfig() *config.Config {
 }
 
 func checkConfigCommon(quiet bool) *config.Config {
-	cfg, err := config.Parse(config.Path)
+	configPath := config.GetConfigPath()
+	cfg, err := config.Parse(configPath)
 	if err != nil {
 		if !quiet {
 			log.Error(err)

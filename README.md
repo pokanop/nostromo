@@ -60,6 +60,9 @@ This command will initialize nostromo and create a manifest under `~/.nostromo`:
 nostromo init
 ```
 
+To customize the directory (and change it from `~/.nostromo`), set the
+`NOSTROMO_HOME` environment variable to a location of your choosing.
+
 To destroy the manifest and start over you can always run:
 ```sh
 nostromo destroy

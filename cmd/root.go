@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/task"
 	"github.com/pokanop/nostromo/version"
@@ -55,10 +56,11 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	viper.SetConfigName("env")             // name of config file (without extension)
-	viper.AddConfigPath("$HOME")           // adding home directory as first search path
-	viper.AddConfigPath("$HOME/.nostromo") // adding .nostromo directory to search path
-	viper.AutomaticEnv()                   // read in environment variables that match
+	nostromoPath := config.GetBaseDir()		 // get base path. (by default ~/.nostromo)
+	viper.SetConfigName("env")						 // name of config file (without extension)
+	viper.AddConfigPath("$HOME")					 // adding home directory as first search path
+	viper.AddConfigPath(nostromoPath)			 // adding nostromo directory to search path
+	viper.AutomaticEnv()									 // read in environment variables that match
 }
 
 func printUsage(cmd *cobra.Command) {

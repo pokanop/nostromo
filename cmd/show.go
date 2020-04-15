@@ -19,7 +19,9 @@ var showCmd = &cobra.Command{
 	Long: `Prints nostromo config with command tree
 and profile changes.
 
-The config file is located at ~/.nostromo/config`,
+By default the config file is located at ~/.nostromo/manifest.yaml.
+
+Customize this with the $NOSTROMO_HOME environment variable`,
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.ShowConfig(asJSON, asYAML, asTree))
 	},
