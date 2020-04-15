@@ -14,7 +14,8 @@ import (
 
 // Path for standard nostromo config
 const (
-	Path = "~/.nostromo/manifest.yaml"
+	DefaultManifestFile = "manifest.yaml"
+	DefaultBaseDir = "~/.nostromo"
 )
 
 // Config manages working with nostromo configuration files
@@ -28,6 +29,23 @@ type Config struct {
 // NewConfig returns a new nostromo config
 func NewConfig(path string, manifest *model.Manifest) *Config {
 	return &Config{path, manifest}
+}
+
+// GetBaseDir returns the base directory for nostromo files
+func GetBaseDir() string {
+	customDir := os.Getenv("NOSTROMO_HOME")
+
+	if customDir != "" {
+		return customDir
+	}
+
+	return DefaultBaseDir
+}
+
+// GetConfigPath joins the base directory and the manifest file
+func GetConfigPath() string {
+	baseDir := GetBaseDir()
+	return filepath.Join(baseDir, DefaultManifestFile)
 }
 
 // Parse nostromo config at path into a `Manifest` object

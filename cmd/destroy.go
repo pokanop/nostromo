@@ -11,8 +11,10 @@ var destroyCmd = &cobra.Command{
 	Use:   "destroy",
 	Short: "Delete nostromo configuration",
 	Long: `Deletes nostromo config file.
-	
-The config file is located at ~/.nostromo/config`,
+
+By default the config file is located at ~/.nostromo/manifest.yaml.
+
+Customize this with the $NOSTROMO_HOME environment variable`,
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.DestroyConfig())
 	},
