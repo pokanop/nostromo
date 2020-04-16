@@ -257,26 +257,6 @@ func TestWalk(t *testing.T) {
 	}
 }
 
-func TestReversed(t *testing.T) {
-	tests := []struct {
-		name     string
-		strs     []string
-		expected []string
-	}{
-		{"nil strs", nil, nil},
-		{"empty strs", []string{}, []string{}},
-		{"valid strs", []string{"a", "b", "c"}, []string{"c", "b", "a"}},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			if actual := reversed(test.strs); !reflect.DeepEqual(actual, test.expected) {
-				t.Errorf("expected: %s, actual: %s", test.expected, actual)
-			}
-		})
-	}
-}
-
 func TestBuild(t *testing.T) {
 	tests := []struct {
 		name       string
