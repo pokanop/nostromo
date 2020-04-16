@@ -94,6 +94,7 @@ func TestReplaceShellVars(t *testing.T) {
 		{"more shell vars", args{"cmd $1 $2 $3", []string{"arg1", "arg2"}}, "cmd arg1 arg2 $3"},
 		{"less shell vars", args{"cmd $1 $2", []string{"arg1", "arg2", "arg3"}}, "cmd arg1 arg2 arg3"},
 		{"shell vars no space", args{"cmd $1foo$2bar", []string{"arg1", "arg2", "arg3"}}, "cmd arg1fooarg2bar arg3"},
+		{"repeat shell vars", args{"cmd $1 $2 $1 $2", []string{"arg1", "arg2"}}, "cmd arg1 arg2 arg1 arg2"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
