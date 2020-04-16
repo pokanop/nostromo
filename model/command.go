@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"github.com/pokanop/nostromo/stringutil"
 	"github.com/spf13/cobra"
 	"sort"
 	"strings"
@@ -217,23 +218,22 @@ func (c *Command) executionString(args []string) string {
 	} else {
 		cmd = c.expand()
 	}
-	subs := []string{}
+	var subs []string
 	for _, arg := range args {
 		subs = append(subs, c.substitute(arg))
 	}
-
-	return strings.TrimSpace(fmt.Sprintf("%s %s", cmd, strings.Join(subs, " ")))
+	return stringutil.ReplaceShellVars(cmd, subs)
 }
 
 func (c *Command) expand() string {
-	cmds := []string{}
+	var cmds []string
 	c.reverseWalk(func(cmd *Command, stop *bool) {
 		val := cmd.effectiveCommand()
 		if len(val) > 0 {
 			cmds = append(cmds, val)
 		}
 	})
-	return strings.Join(reversed(cmds), " ")
+	return strings.Join(stringutil.ReversedStrings(cmds), " ")
 }
 
 func (c *Command) substitute(arg string) string {
@@ -337,18 +337,6 @@ func (c *Command) commandList() []string {
 	}
 	sort.Strings(cmds)
 	return cmds
-}
-
-func reversed(strs []string) []string {
-	if strs == nil {
-		return nil
-	}
-
-	r := []string{}
-	for i := len(strs) - 1; i >= 0; i-- {
-		r = append(r, strs[i])
-	}
-	return r
 }
 
 func joinedSubs(subMap map[string]*Substitution) string {

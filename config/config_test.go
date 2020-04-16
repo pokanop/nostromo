@@ -237,7 +237,7 @@ func fakeManifest() *model.Manifest {
 func TestGetBaseDir(t *testing.T) {
 	tests := []struct {
 		name string
-		env string
+		env  string
 		want string
 	}{
 		{"default", "", "~/.nostromo"},
