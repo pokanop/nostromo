@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -231,4 +232,26 @@ func fakeManifest() *model.Manifest {
 	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
 	m.AddSubstitution("one.two", "name", "alias")
 	return m
+}
+
+func TestGetBaseDir(t *testing.T) {
+	tests := []struct {
+		name string
+		env string
+		want string
+	}{
+		{"default", "", "~/.nostromo"},
+		{"override", "~/.config", "~/.config"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if len(tt.env) > 0 {
+				os.Setenv("NOSTROMO_HOME", tt.env)
+			}
+
+			if got := GetBaseDir(); got != tt.want {
+				t.Errorf("GetBaseDir() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
