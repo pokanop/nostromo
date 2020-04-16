@@ -91,7 +91,17 @@ func findStartupFile(name string) (string, os.FileMode, error) {
 		return "", 0, err
 	}
 
-	path := filepath.Join(home, name)
+	// zsh doesn't always have a ~/.zshrc file, and if it doesn't,
+	// it does have a $ZDOTDIR/.zshrc
+	// https://wiki.archlinux.org/index.php/Zsh#Startup.2FShutdown_files
+	zdotDir := os.Getenv("ZDOTDIR")
+	var path string
+	if zdotDir != "" {
+		path = filepath.Join(zdotDir, name)
+	} else {
+		path = filepath.Join(home, name)
+	}
+
 	info, err := os.Stat(path)
 	if err != nil {
 		return "", 0, err
