@@ -47,6 +47,11 @@ func ManifestCompletion(m *model.Manifest) ([]string, error) {
 	completions = append(completions, shellWrapperFunc())
 	completions = append(completions, shellAliasFuncs(m))
 	for _, cmd := range m.Commands {
+		// Skip completion scripts for leaf nodes or pure aliases.
+		// This allows for it to fallback to the shell's lookups.
+		if cmd.AliasOnly || len(cmd.Commands) == 0 {
+			continue
+		}
 		s, err := CommandCompletion(cmd)
 		if err != nil {
 			return nil, err
