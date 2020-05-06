@@ -117,8 +117,8 @@ func buildEvalCmd(cmd, language string) string {
 }
 
 func shellWrapperFunc() string {
-	return `__nostromo_cmd() { command nostromo $* }
-nostromo() { __nostromo_cmd $* && eval "$(__nostromo_cmd completion)" }`
+	return `__nostromo_cmd() { command nostromo $*; }
+nostromo() { __nostromo_cmd $* && eval "$(__nostromo_cmd completion)"; }`
 }
 
 func shellAliasFuncs(m *model.Manifest) string {
@@ -129,7 +129,7 @@ func shellAliasFuncs(m *model.Manifest) string {
 			alias = fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
 		} else {
 			cmd := fmt.Sprintf("__nostromo_cmd eval %s \"$*\"", c.Alias)
-			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s) }", c.Alias, cmd))
+			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s); }", c.Alias, cmd))
 		}
 		aliases = append(aliases, alias)
 	}
