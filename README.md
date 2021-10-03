@@ -1,4 +1,4 @@
-[![Travis (.org)](https://img.shields.io/travis/pokanop/nostromo)](https://travis-ci.org/pokanop/nostromo)
+[![Travis (.com)](https://img.shields.io/travis/com/pokanop/nostromo)](https://app.travis-ci.com/pokanop/nostromo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/pokanop/nostromo)](https://goreportcard.com/report/github.com/pokanop/nostromo)
 [![Coveralls github](https://img.shields.io/coveralls/github/pokanop/nostromo)](https://coveralls.io/github/pokanop/nostromo)
 [![GitHub](https://img.shields.io/github/license/pokanop/nostromo)](https://github.com/pokanop/nostromo/blob/master/LICENSE)
