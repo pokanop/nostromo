@@ -13,7 +13,7 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.4.0
-	golang.org/x/sys v0.0.0-20191008105621-543471e840be // indirect
-	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	golang.org/x/text v0.3.3 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )
