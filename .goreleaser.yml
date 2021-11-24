@@ -7,28 +7,27 @@ before:
     # you may remove this if you don't need go generate
     - go generate ./...
 builds:
-- env:
-  - CGO_ENABLED=0
+  - env:
+      - CGO_ENABLED=0
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: '{{ .Tag }}-next'
 changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
+      - '^docs:'
+      - '^test:'
 brews:
-  -
-    # Name template of the recipe
+  - # Name template of the recipe
     # Default to project name
     name: nostromo
 
@@ -36,13 +35,13 @@ brews:
     # same kind. We will probably unify this in the next major version like it is done with scoop.
 
     # Github repository to push the tap to.
-    github:
+    tap:
       owner: pokanop
       name: homebrew-pokanop
 
     # Template for the url which is determined by the given Token (github or gitlab)
     # Default for github is "https://github.com/<repo_owner>/<repo_name>/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-    url_template: "https://github.com/pokanop/nostromo/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    url_template: 'https://github.com/pokanop/nostromo/releases/download/{{ .Tag }}/{{ .ArtifactName }}'
 
     # Git author used to commit to the repository.
     # Defaults are shown.
@@ -58,23 +57,24 @@ brews:
     # Default is empty.
     caveats: >+
       Initialize nostromo which will create a manifest under ~/.nostromo by running:
-
+      
         nostromo init
-
+      
       You can get started by running the following interactive command:
-
+      
         nostromo add
-
+      
       Be sure to source your shell profile after initializing nostromo for auto-complete to work.
-
+      
+      
 
     # Your app's homepage.
     # Default is empty.
-    homepage: "https://nostromo.sh"
+    homepage: 'https://nostromo.sh'
 
     # Your app's description.
     # Default is empty.
-    description: "nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions."
+    description: 'nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.'
 
     # Setting this will prevent goreleaser to actually try to commit the updated
     # formula - instead, the formula file will be stored on the dist folder only,
