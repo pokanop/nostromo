@@ -26,9 +26,9 @@ var addcmdCmd = &cobra.Command{
 A key path is a '.' delimited string, e.g., "key.path" which represents
 the alias which can be run as "key path" for the actual command provided.
 
-This will create appropriate command scopes for all levels in
-the provided key path. A command scope can a tree of sub commands
-and substitutions.
+This will create appropriate command scopes for all levels in the provided
+key path. A command scope can contain a tree of sub commands and 
+substitutions.
 
 A command's mode indicates how it will be executed. By default, nostromo
 concatenates parent and child commands along the tree. There are 3 modes
@@ -46,7 +46,7 @@ You can set using -m or --mode when adding a command or globally using:
 		if len(args) > 1 {
 			name = args[1]
 		}
-		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode))
+		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode, false))
 	},
 }
 
