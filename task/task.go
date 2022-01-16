@@ -1,6 +1,8 @@
 package task
 
 import (
+	"strings"
+
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
@@ -11,7 +13,6 @@ import (
 	"github.com/pokanop/nostromo/version"
 	"github.com/shivamMg/ppds/tree"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 var ver *version.Info
@@ -247,7 +248,7 @@ func AddInteractive() int {
 		}
 		log.Highlight("\nCreating command...\n")
 
-		return AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode)
+		return AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode, false)
 	}
 
 	log.Regularf("A key path is a dot '.' delimited path to where you want to add your command.\n")
@@ -267,13 +268,18 @@ func AddInteractive() int {
 }
 
 // AddCommand to the manifest
-func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string) int {
+func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string, update bool) int {
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
 	}
 
 	m := cfg.Manifest()
+
+	if update && m.Find(keyPath) == nil {
+		log.Error("no matching command found to update")
+		return -1
+	}
 
 	snippet := &model.Code{
 		Language: language,
