@@ -189,7 +189,7 @@ func TestKeys(t *testing.T) {
 		config   *Config
 		expected []string
 	}{
-		{"keys", NewConfig("path", fakeManifest()), []string{"verbose", "aliasesOnly", "mode"}},
+		{"keys", NewConfig("path", fakeManifest()), []string{"verbose", "aliasesOnly", "mode", "backupCount"}},
 	}
 
 	for _, test := range tests {
@@ -214,6 +214,7 @@ func TestFields(t *testing.T) {
 				"verbose":     false,
 				"aliasesOnly": false,
 				"mode":        model.ConcatenateMode.String(),
+				"backupCount": 10,
 			},
 		},
 	}
