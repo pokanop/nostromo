@@ -40,14 +40,11 @@ func Execute() {
 
 // SetVersion to inject version info
 func SetVersion(v, c, d string) {
-	ver = &version.Info{
-		SemVer:    v,
-		GitCommit: c,
-		BuildDate: d,
-	}
+	ver = version.NewInfo(v, c, d)
 
-	// Update task package
+	// Update dependent packages
 	task.SetVersion(ver)
+	config.SetVersion(ver)
 }
 
 func init() {

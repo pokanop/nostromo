@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/pokanop/nostromo/model"
+	"github.com/pokanop/nostromo/version"
 )
 
 func TestGetConfigPath(t *testing.T) {
@@ -324,4 +325,15 @@ func fakeManifest() *model.Manifest {
 	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
 	m.AddSubstitution("one.two", "name", "alias")
 	return m
+}
+
+func fakeManifest() *model.Manifest {
+    m := model.NewManifest(&version.Info{})
+    m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
+    m.AddSubstitution("one.two", "name", "alias")
+    return m
+}
+
+func init() {
+	SetVersion(version.NewInfo("", "", ""))
 }

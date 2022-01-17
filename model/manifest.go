@@ -7,21 +7,28 @@ import (
 
 	"github.com/pokanop/nostromo/keypath"
 	"github.com/pokanop/nostromo/log"
+	"github.com/pokanop/nostromo/version"
 	"github.com/shivamMg/ppds/tree"
 	"gopkg.in/yaml.v2"
 )
 
-// Manifest is the main container for nostromo based commands
-type Manifest struct {
+type ManifestV0 struct {
 	Version  string              `json:"version"`
 	Config   *Config             `json:"config"`
 	Commands map[string]*Command `json:"commands"`
 }
 
+// Manifest is the main container for nostromo based commands
+type Manifest struct {
+	Version  *version.Info       `json:"version"`
+	Config   *Config             `json:"config"`
+	Commands map[string]*Command `json:"commands"`
+}
+
 // NewManifest returns a newly initialized manifest
-func NewManifest() *Manifest {
+func NewManifest(version *version.Info) *Manifest {
 	return &Manifest{
-		Version:  "1.0",
+		Version:  version,
 		Config:   NewConfig(),
 		Commands: map[string]*Command{},
 	}

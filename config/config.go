@@ -13,6 +13,7 @@ import (
 	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
+	"github.com/pokanop/nostromo/version"
 	"gopkg.in/yaml.v2"
 )
 
@@ -22,6 +23,13 @@ const (
 	DefaultBaseDir      = "~/.nostromo"
 	DefaultBackupsDir   = "backups"
 )
+
+var ver *version.Info
+
+// SetVersion should be called before any task to ensure manifest is updated
+func SetVersion(v *version.Info) {
+	ver = v
+}
 
 // Config manages working with nostromo configuration files
 // The file format is YAML this just provides convenience around converting
@@ -74,7 +82,11 @@ func Parse(path string) (*Config, error) {
 	}
 	ext := filepath.Ext(path)
 	if ext == ".yaml" {
-		err = yaml.Unmarshal(b, &m)
+		// Attempt to parse legacy manifest versions first
+		m = parseV0(b)
+		if m == nil {
+			err = yaml.Unmarshal(b, &m)
+		}
 	} else {
 		return nil, fmt.Errorf("invalid file format: %s", ext)
 	}
@@ -110,6 +122,9 @@ func (c *Config) save(backup bool) error {
 	if c.manifest == nil {
 		return fmt.Errorf("manifest is nil")
 	}
+
+	// Update version
+	c.manifest.Version.Update(ver)
 
 	var b []byte
 	var err error
@@ -284,4 +299,17 @@ func ensureBackupDir() (string, error) {
 		return "", err
 	}
 	return pathutil.Abs(backupDir), nil
+}
+
+func parseV0(data []byte) *model.Manifest {
+	var prev *model.ManifestV0
+	if err := yaml.Unmarshal(data, &prev); err != nil {
+		return nil
+	}
+
+	// Create new manifest with current version and migrate data
+	m := model.NewManifest(ver)
+	m.Config = prev.Config
+	m.Commands = prev.Commands
+	return m
 }

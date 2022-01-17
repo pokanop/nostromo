@@ -1,4 +1,8 @@
-version: "1.0"
+version:
+  uuid: ""
+  semver: ""
+  gitcommit: ""
+  builddate: ""
 config:
   verbose: true
   aliasesonly: false
