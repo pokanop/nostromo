@@ -57,7 +57,7 @@ func TestSave(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			c := NewConfig(test.path, test.manifest)
-			err := c.Save()
+			err := c.save(false)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -83,7 +83,7 @@ func TestDelete(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			c := NewConfig(test.path, test.manifest)
 			if test.manifest != nil {
-				err := c.Save()
+				err := c.save(false)
 				if err != nil {
 					t.Errorf("unable to save temporary manifest: %s", err)
 				}
