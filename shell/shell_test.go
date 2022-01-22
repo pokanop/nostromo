@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/pokanop/nostromo/model"
+	"github.com/pokanop/nostromo/version"
 )
 
 func TestValidLanguages(t *testing.T) {
@@ -107,7 +108,7 @@ nostromo() { __nostromo_cmd $* && eval "$(__nostromo_cmd completion)"; }` {
 // }
 
 func fakeManifest(aliasOnly bool) *model.Manifest {
-	m := model.NewManifest()
+	m := model.NewManifest(&version.Info{})
 	m.Config.AliasesOnly = aliasOnly
 	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
 	m.AddSubstitution("one.two", "name", "alias")

@@ -321,17 +321,10 @@ func TestBackup(t *testing.T) {
 }
 
 func fakeManifest() *model.Manifest {
-	m := model.NewManifest()
+	m := model.NewManifest(&version.Info{})
 	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
 	m.AddSubstitution("one.two", "name", "alias")
 	return m
-}
-
-func fakeManifest() *model.Manifest {
-    m := model.NewManifest(&version.Info{})
-    m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
-    m.AddSubstitution("one.two", "name", "alias")
-    return m
 }
 
 func init() {
