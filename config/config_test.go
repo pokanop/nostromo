@@ -242,13 +242,6 @@ func TestFields(t *testing.T) {
 	}
 }
 
-func fakeManifest() *model.Manifest {
-	m := model.NewManifest()
-	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
-	m.AddSubstitution("one.two", "name", "alias")
-	return m
-}
-
 func TestGetBaseDir(t *testing.T) {
 	tests := []struct {
 		name string
@@ -324,4 +317,11 @@ func TestBackup(t *testing.T) {
 			}
 		})
 	}
+}
+
+func fakeManifest() *model.Manifest {
+	m := model.NewManifest()
+	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
+	m.AddSubstitution("one.two", "name", "alias")
+	return m
 }

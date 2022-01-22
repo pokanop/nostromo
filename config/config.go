@@ -228,7 +228,7 @@ func (c *Config) Backup() error {
 	}
 
 	// Copy existing manifest to backup path
-	ts := fmt.Sprintf("%d", time.Now().UnixMilli())
+	ts := fmt.Sprintf("%d", int64(time.Nanosecond)*time.Now().UnixNano()/int64(time.Millisecond))
 	basename := strings.TrimSuffix(DefaultManifestFile, filepath.Ext(DefaultManifestFile))
 	destinationFile := filepath.Join(backupDir, basename+"_"+ts+".yaml")
 	sourceFile := pathutil.Abs(GetConfigPath())
