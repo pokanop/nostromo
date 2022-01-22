@@ -5,8 +5,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
+	"strings"
+	"time"
 
+	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 	"gopkg.in/yaml.v2"
@@ -16,6 +20,7 @@ import (
 const (
 	DefaultManifestFile = "manifest.yaml"
 	DefaultBaseDir      = "~/.nostromo"
+	DefaultBackupsDir   = "backups"
 )
 
 // Config manages working with nostromo configuration files
@@ -61,7 +66,12 @@ func Parse(path string) (*Config, error) {
 		return nil, err
 	}
 
-	var m *model.Manifest
+	// Initialize manifest with some defaults
+	m := &model.Manifest{
+		Config: &model.Config{
+			BackupCount: 10,
+		},
+	}
 	ext := filepath.Ext(path)
 	if ext == ".yaml" {
 		err = yaml.Unmarshal(b, &m)
@@ -89,6 +99,10 @@ func (c *Config) Manifest() *model.Manifest {
 
 // Save nostromo config to file
 func (c *Config) Save() error {
+	return c.save(true)
+}
+
+func (c *Config) save(backup bool) error {
 	if len(c.path) == 0 {
 		return fmt.Errorf("invalid path to save")
 	}
@@ -108,6 +122,13 @@ func (c *Config) Save() error {
 
 	if err != nil {
 		return err
+	}
+
+	// Save backup if requested
+	if backup {
+		if err = c.Backup(); err != nil {
+			return err
+		}
 	}
 
 	err = ioutil.WriteFile(pathutil.Abs(c.path), b, 0644)
@@ -150,6 +171,8 @@ func (c *Config) Get(key string) string {
 		return strconv.FormatBool(c.manifest.Config.AliasesOnly)
 	case "mode":
 		return c.manifest.Config.Mode.String()
+	case "backupCount":
+		return strconv.FormatInt(int64(c.manifest.Config.BackupCount), 10)
 	}
 	return "key not found"
 }
@@ -177,6 +200,88 @@ func (c *Config) Set(key, value string) error {
 		}
 		c.manifest.Config.Mode = model.ModeFromString(value)
 		return nil
+	case "backupCount":
+		count, err := strconv.ParseInt(value, 10, 0)
+		if err != nil {
+			return err
+		}
+		c.manifest.Config.BackupCount = int(count)
+		return nil
 	}
 	return fmt.Errorf("key not found")
+}
+
+// Backup manifest at config path based on timestamp
+func (c *Config) Backup() error {
+	// Before saving backup, prune old files
+	c.pruneBackups()
+
+	// Prevent backups if max count is 0
+	if c.manifest.Config.BackupCount == 0 {
+		return nil
+	}
+
+	// Create backups under base dir in a folder
+	backupDir, err := ensureBackupDir()
+	if err != nil {
+		return err
+	}
+
+	// Copy existing manifest to backup path
+	ts := fmt.Sprintf("%d", int64(time.Nanosecond)*time.Now().UnixNano()/int64(time.Millisecond))
+	basename := strings.TrimSuffix(DefaultManifestFile, filepath.Ext(DefaultManifestFile))
+	destinationFile := filepath.Join(backupDir, basename+"_"+ts+".yaml")
+	sourceFile := pathutil.Abs(GetConfigPath())
+
+	input, err := ioutil.ReadFile(sourceFile)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(destinationFile, input, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Config) pruneBackups() {
+	backupDir, err := ensureBackupDir()
+	if err != nil {
+		return
+	}
+
+	// Read all files, sort by timestamp, and drop items > max count
+	files, err := ioutil.ReadDir(backupDir)
+	if err != nil {
+		log.Warningf("unable to read backup dir: %s\n", err)
+		return
+	}
+
+	sort.SliceStable(files, func(i, j int) bool {
+		return files[i].ModTime().After(files[j].ModTime())
+	})
+
+	// Add one more to backup count since a new backup will be created
+	maxCount := c.manifest.Config.BackupCount - 1
+	if maxCount < 0 {
+		maxCount = 0
+	}
+	if len(files) > maxCount {
+		for _, file := range files[maxCount:] {
+			filename := filepath.Join(backupDir, file.Name())
+			if err := os.Remove(filename); err != nil {
+				log.Warningf("failed to prune backup file %s: %s\n", filename, err)
+			}
+		}
+	}
+}
+
+func ensureBackupDir() (string, error) {
+	backupDir := filepath.Join(GetBaseDir(), DefaultBackupsDir)
+	if err := pathutil.EnsurePath(backupDir); err != nil {
+		return "", err
+	}
+	return pathutil.Abs(backupDir), nil
 }

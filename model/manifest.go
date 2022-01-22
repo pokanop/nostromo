@@ -22,7 +22,7 @@ type Manifest struct {
 func NewManifest() *Manifest {
 	return &Manifest{
 		Version:  "1.0",
-		Config:   &Config{},
+		Config:   NewConfig(),
 		Commands: map[string]*Command{},
 	}
 }

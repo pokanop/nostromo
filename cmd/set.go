@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // setCmd represents the set command
@@ -14,11 +15,12 @@ var setCmd = &cobra.Command{
 Nostromo config items are saved in the manifest.
 
 Use this command to set values for these settings:
-  verbose: true | false
-  aliasesOnly: true | false
-  mode: concatenate | independent | exclusive`,
+  verbose: boolean
+  aliasesOnly: boolean
+  mode: concatenate | independent | exclusive
+  backupCount: number`,
 	Args:      cobra.MinimumNArgs(2),
-	ValidArgs: []string{"verbose", "aliasesOnly", "mode"},
+	ValidArgs: []string{"verbose", "aliasesOnly", "mode", "backupCount"},
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.SetConfig(args[0], args[1]))
 	},

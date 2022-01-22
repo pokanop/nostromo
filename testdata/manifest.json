@@ -3,7 +3,8 @@
   "config": {
     "verbose": true,
     "aliasesOnly": false,
-    "mode": 0
+    "mode": 0,
+    "backupCount": 10
   },
   "commands": {
     "0-one-alias": {

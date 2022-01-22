@@ -3,6 +3,8 @@ package shell
 import (
 	"reflect"
 	"testing"
+
+	"github.com/pokanop/nostromo/model"
 )
 
 func TestValidLanguages(t *testing.T) {
@@ -74,4 +76,41 @@ func TestEvalString(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestShellWrapperFunc(t *testing.T) {
+	if shellWrapperFunc() != `__nostromo_cmd() { command nostromo $*; }
+nostromo() { __nostromo_cmd $* && eval "$(__nostromo_cmd completion)"; }` {
+		t.Errorf("shell wrapper func not as expected")
+	}
+}
+
+// func TestShellAliasFuncs(t *testing.T) {
+// 	tests := []struct {
+// 		name     string
+// 		manifest *model.Manifest
+// 		expected string
+// 	}{
+// 		{"no alias", fakeManifest(false), "\none() { eval $(__nostromo_cmd eval one \"$*\"); }\ntwo() { eval $(__nostromo_cmd eval two \"$*\"); }\n"},
+// 		{"alias only", fakeManifest(true), ""},
+// 	}
+
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			actual := shellAliasFuncs(tt.manifest)
+// 			fmt.Printf("<start>%s<end>", actual)
+// 			if tt.expected != actual {
+// 				t.Errorf("shell alias funcs incorrect expected: %s, actual: %s", tt.expected, actual)
+// 			}
+// 		})
+// 	}
+// }
+
+func fakeManifest(aliasOnly bool) *model.Manifest {
+	m := model.NewManifest()
+	m.Config.AliasesOnly = aliasOnly
+	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
+	m.AddSubstitution("one.two", "name", "alias")
+	m.AddCommand("two", "command", "", &model.Code{}, false, "concatenate")
+	return m
 }

@@ -1,12 +1,22 @@
 package config
 
 import (
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/pokanop/nostromo/model"
 )
+
+func TestGetConfigPath(t *testing.T) {
+	expected := "~/.nostromo/manifest.yaml"
+	if actual := GetConfigPath(); actual != expected {
+		t.Errorf("wrong config path, expected: %s, actual: %s", expected, actual)
+	}
+}
 
 func TestParse(t *testing.T) {
 	tests := []struct {
@@ -57,7 +67,7 @@ func TestSave(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			c := NewConfig(test.path, test.manifest)
-			err := c.Save()
+			err := c.save(false)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -83,7 +93,7 @@ func TestDelete(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			c := NewConfig(test.path, test.manifest)
 			if test.manifest != nil {
-				err := c.Save()
+				err := c.save(false)
 				if err != nil {
 					t.Errorf("unable to save temporary manifest: %s", err)
 				}
@@ -130,6 +140,7 @@ func TestGet(t *testing.T) {
 		{"verbose", "verbose", "true"},
 		{"aliasesOnly", "aliasesOnly", "true"},
 		{"mode", "mode", "concatenate"},
+		{"backupCount", "backupCount", "10"},
 	}
 
 	for _, test := range tests {
@@ -164,6 +175,9 @@ func TestSet(t *testing.T) {
 		{"mode independent", "mode", "independent", false, "independent"},
 		{"mode exclusive", "mode", "exclusive", false, "exclusive"},
 		{"mode invalid", "mode", "invalid", true, ""},
+		{"backupCount empty", "backupCount", "", true, ""},
+		{"backupCount 5", "backupCount", "5", false, "5"},
+		{"backupCount 100", "backupCount", "100", false, "100"},
 	}
 
 	for _, test := range tests {
@@ -189,7 +203,7 @@ func TestKeys(t *testing.T) {
 		config   *Config
 		expected []string
 	}{
-		{"keys", NewConfig("path", fakeManifest()), []string{"verbose", "aliasesOnly", "mode"}},
+		{"keys", NewConfig("path", fakeManifest()), []string{"verbose", "aliasesOnly", "mode", "backupCount"}},
 	}
 
 	for _, test := range tests {
@@ -214,6 +228,7 @@ func TestFields(t *testing.T) {
 				"verbose":     false,
 				"aliasesOnly": false,
 				"mode":        model.ConcatenateMode.String(),
+				"backupCount": 10,
 			},
 		},
 	}
@@ -225,13 +240,6 @@ func TestFields(t *testing.T) {
 			}
 		})
 	}
-}
-
-func fakeManifest() *model.Manifest {
-	m := model.NewManifest()
-	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
-	m.AddSubstitution("one.two", "name", "alias")
-	return m
 }
 
 func TestGetBaseDir(t *testing.T) {
@@ -254,4 +262,66 @@ func TestGetBaseDir(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestBackup(t *testing.T) {
+	tests := []struct {
+		name        string
+		baseDir     string
+		backupCount int
+		expErr      bool
+	}{
+		{"invalid path", "/does/not/exist", 1, true},
+		{"valid path", "/tmp", 1, false},
+		{"no backups", "/tmp", 0, false},
+		{"some backups", "/tmp", 5, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			os.Setenv("NOSTROMO_HOME", tt.baseDir)
+
+			c, err := Parse("../testdata/manifest.yaml")
+			if err != nil {
+				t.Errorf("failed to parse manifest: %s", err)
+			}
+
+			if tt.expErr == false {
+				c.path = filepath.Join(tt.baseDir, "manifest.yaml")
+				err = c.save(false)
+				if err != nil {
+					t.Errorf("failed to save manifest: %s", err)
+				}
+			}
+
+			c.manifest.Config.BackupCount = tt.backupCount
+			err = c.Backup()
+			if err != nil {
+				if tt.expErr == true {
+					return
+				}
+				t.Errorf("failed to backup: %s", err)
+			}
+
+			for i := 0; i < 9; i++ {
+				time.Sleep(10 * time.Millisecond)
+				c.Backup()
+			}
+
+			backupDir, err := ensureBackupDir()
+			files, err := ioutil.ReadDir(backupDir)
+			if err != nil {
+				t.Errorf("could not read backup dir: %s", err)
+			}
+			if len(files) != tt.backupCount {
+				t.Errorf("expected %d backup files but got %d", tt.backupCount, len(files))
+			}
+		})
+	}
+}
+
+func fakeManifest() *model.Manifest {
+	m := model.NewManifest()
+	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
+	m.AddSubstitution("one.two", "name", "alias")
+	return m
 }
