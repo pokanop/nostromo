@@ -12,6 +12,7 @@ import (
 
 	"github.com/pokanop/nostromo/keypath"
 	"github.com/pokanop/nostromo/pathutil"
+	"github.com/pokanop/nostromo/version"
 )
 
 func TestManifestAddCommand(t *testing.T) {
@@ -291,7 +292,7 @@ func TestManifestFields(t *testing.T) {
 			"keys",
 			fakeManifest(1, 1),
 			map[string]interface{}{
-				"version":  "1.0",
+				"version":  &version.Info{},
 				"commands": "0-one-alias",
 			},
 		},
@@ -308,7 +309,7 @@ func TestManifestFields(t *testing.T) {
 
 func TestManifestData(t *testing.T) {
 	type fields struct {
-		Version  string
+		Version  *version.Info
 		Config   *Config
 		Commands map[string]*Command
 	}
@@ -317,7 +318,7 @@ func TestManifestData(t *testing.T) {
 		fields fields
 		want   interface{}
 	}{
-		{"data", fields{"1.0", &Config{true, true, ConcatenateMode, 10}, map[string]*Command{"foo": {}}}, "manifest"},
+		{"data", fields{&version.Info{}, &Config{true, true, ConcatenateMode, 10}, map[string]*Command{"foo": {}}}, "manifest"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -339,7 +340,7 @@ func TestManifestChildren(t *testing.T) {
 		"bar": {},
 	}
 	type fields struct {
-		Version  string
+		Version  *version.Info
 		Config   *Config
 		Commands map[string]*Command
 	}
@@ -348,7 +349,7 @@ func TestManifestChildren(t *testing.T) {
 		fields fields
 		want   []tree.Node
 	}{
-		{"children", fields{"1.0", &Config{true, true, ConcatenateMode, 10}, commands}, []tree.Node{commands["foo"], commands["bar"]}},
+		{"children", fields{&version.Info{}, &Config{true, true, ConcatenateMode, 10}, commands}, []tree.Node{commands["foo"], commands["bar"]}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -365,7 +366,7 @@ func TestManifestChildren(t *testing.T) {
 }
 
 func fakeManifest(n, depth int) *Manifest {
-	m := NewManifest()
+	m := NewManifest(&version.Info{})
 	m.Config.Verbose = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
@@ -375,7 +376,7 @@ func fakeManifest(n, depth int) *Manifest {
 }
 
 func fakeManifestAliasesOnly(n, depth int) *Manifest {
-	m := NewManifest()
+	m := NewManifest(&version.Info{})
 	m.Config.AliasesOnly = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
@@ -385,7 +386,7 @@ func fakeManifestAliasesOnly(n, depth int) *Manifest {
 }
 
 func fakeSimilarManifest(n, depth int) *Manifest {
-	m := NewManifest()
+	m := NewManifest(&version.Info{})
 	for i := 0; i < n; i++ {
 		c := fakeCommand(depth)
 		c.Alias = strconv.Itoa(i) + "-" + c.Alias

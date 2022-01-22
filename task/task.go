@@ -29,7 +29,7 @@ func InitConfig() int {
 	if cfg == nil {
 		baseDir := config.GetBaseDir()
 		configPath := config.GetConfigPath()
-		cfg = config.NewConfig(configPath, model.NewManifest())
+		cfg = config.NewConfig(configPath, model.NewManifest(ver))
 		err := pathutil.EnsurePath(baseDir)
 		if err != nil {
 			log.Error(err)
@@ -65,7 +65,7 @@ func DestroyConfig() int {
 
 	log.Highlight("nostromo config deleted")
 
-	err = shell.Commit(model.NewManifest())
+	err = shell.Commit(model.NewManifest(ver))
 	if err != nil {
 		log.Error(err)
 		return -1
@@ -482,7 +482,6 @@ func checkConfigCommon(quiet bool) *config.Config {
 
 func saveConfig(cfg *config.Config, commit bool) error {
 	m := cfg.Manifest()
-	m.Version = ver.SemVer
 
 	err := cfg.Save()
 	if err != nil {

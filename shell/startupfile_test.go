@@ -1,14 +1,15 @@
 package shell
 
 import (
-	"github.com/pokanop/nostromo/model"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/pokanop/nostromo/model"
+	"github.com/pokanop/nostromo/version"
 )
 
 func TestStartupFile(t *testing.T) {
-
 	tests := []struct {
 		name        string
 		path        string
@@ -23,12 +24,12 @@ func TestStartupFile(t *testing.T) {
 		{"nil manifest", ".profile", "", nil, false, true, false, true, ""},
 		{"malformed block 1", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion)\"\nalias foo='nostromo eval foo \"$*\"'\nalias bar='nostromo eval bar \"$*\"'", makeManifest("foo", "baz"), true, false, true, true, ""},
 		{"malformed block 2", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion)\"\nalias foo='nostromo eval foo \"$*\"'\nalias bar='nostromo eval bar \"$*\"'# nostromo [section begin]", makeManifest("foo", "baz"), true, false, true, true, ""},
-		{"empty profile", ".profile", "", model.NewManifest(), false, true, false, false, ""},
-		{"empty bash_profile", ".bash_profile", "", model.NewManifest(), false, true, false, false, ""},
-		{"empty bashrc", ".bashrc", "", model.NewManifest(), true, true, false, false, "\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
-		{"empty zshrc", ".zshrc", "", model.NewManifest(), true, true, false, false, "\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
-		{"existing non-preferred no commands", ".profile", "export PATH=/usr/local/bin\nexport FOO=bar", model.NewManifest(), false, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar"},
-		{"existing preferred no commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar", model.NewManifest(), true, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
+		{"empty profile", ".profile", "", model.NewManifest(&version.Info{}), false, true, false, false, ""},
+		{"empty bash_profile", ".bash_profile", "", model.NewManifest(&version.Info{}), false, true, false, false, ""},
+		{"empty bashrc", ".bashrc", "", model.NewManifest(&version.Info{}), true, true, false, false, "\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
+		{"empty zshrc", ".zshrc", "", model.NewManifest(&version.Info{}), true, true, false, false, "\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
+		{"existing non-preferred no commands", ".profile", "export PATH=/usr/local/bin\nexport FOO=bar", model.NewManifest(&version.Info{}), false, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar"},
+		{"existing preferred no commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar", model.NewManifest(&version.Info{}), true, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -169,7 +170,7 @@ func makeManifest(cmds ...string) *model.Manifest {
 }
 
 func makeManifestLong(match bool, aliasOnly bool, cmds ...string) *model.Manifest {
-	m := model.NewManifest()
+	m := model.NewManifest(&version.Info{})
 	for _, cmd := range cmds {
 		alias := cmd
 		if !match {
