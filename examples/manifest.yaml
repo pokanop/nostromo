@@ -1,0 +1,372 @@
+version:
+  uuid: ed18610b-3b89-4408-bbed-e9a07753f775
+  semver: 0.8.0
+  gitcommit: 8185870fd83f5f165ce76fb0a70e5cd7aff1a8cd
+  builddate: "2022-01-22T08:33:26Z"
+config:
+  verbose: false
+  aliasesonly: false
+  mode: 0
+  backupcount: 5
+commands:
+  c:
+    keypath: c
+    name: clear
+    alias: c
+    aliasonly: true
+    description: Clear the console
+    commands: {}
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  copy:
+    keypath: copy
+    name: ""
+    alias: copy
+    aliasonly: false
+    description: ""
+    commands:
+      ssh:
+        keypath: copy.ssh
+        name: cat ~/.ssh/id_rsa.pub | pbcopy
+        alias: ssh
+        aliasonly: false
+        description: Copy ssh public key to pasteboard
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  dock:
+    keypath: dock
+    name: ""
+    alias: dock
+    aliasonly: false
+    description: ""
+    commands:
+      clean:
+        keypath: dock.clean
+        name: docker ps -a -q |xargs docker rm
+        alias: clean
+        aliasonly: false
+        description: Remove Docker containers using docker rm
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      rmi:
+        keypath: dock.rmi
+        name: docker rmi $(docker images -q)
+        alias: rmi
+        aliasonly: false
+        description: Remove Docker images using docker rmi
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      stop:
+        keypath: dock.stop
+        name: docker ps -q |xargs docker stop
+        alias: stop
+        aliasonly: false
+        description: Stop running Docker containers
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      vol:
+        keypath: dock.vol
+        name: docker volume rm $(docker volume ls -qf dangling=true)
+        alias: vol
+        aliasonly: false
+        description: Remove dangling Docker volumes
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  edit:
+    keypath: edit
+    name: ""
+    alias: edit
+    aliasonly: false
+    description: ""
+    commands:
+      bash:
+        keypath: edit.bash
+        name: vim ~/.bashrc
+        alias: bash
+        aliasonly: false
+        description: Edit bashrc config file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      bash_profile:
+        keypath: edit.bash_profile
+        name: vim ~/.bash_profile
+        alias: bash_profile
+        aliasonly: false
+        description: Edit bash_profile config file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      nostromo:
+        keypath: edit.nostromo
+        name: vim ~/.nostromo/manifest.yaml
+        alias: nostromo
+        aliasonly: false
+        description: Edit nostromo manifest file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      p10k:
+        keypath: edit.p10k
+        name: vim ~/.p10k.zsh
+        alias: p10k
+        aliasonly: false
+        description: Edit p10k config file in vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      profile:
+        keypath: edit.profile
+        name: vim ~/.profile
+        alias: profile
+        aliasonly: false
+        description: Edit profile config file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      ssh:
+        keypath: edit.ssh
+        name: vim ~/.ssh/config
+        alias: ssh
+        aliasonly: false
+        description: Edit ssh config file in vim
+        commands:
+          hosts:
+            keypath: edit.ssh.hosts
+            name: vim ~/.ssh/hosts
+            alias: hosts
+            aliasonly: false
+            description: Edit ssh hosts file in vim
+            commands: {}
+            subs: {}
+            code:
+              language: ""
+              snippet: ""
+            mode: 2
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      zsh:
+        keypath: edit.zsh
+        name: vim ~/.zshrc
+        alias: zsh
+        aliasonly: false
+        description: Edit zsh config file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  gcdf:
+    keypath: gcdf
+    name: git clean -df
+    alias: gcdf
+    aliasonly: true
+    description: ""
+    commands: {}
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  ios:
+    keypath: ios
+    name: ""
+    alias: ios
+    aliasonly: false
+    description: ""
+    commands:
+      record:
+        keypath: ios.record
+        name: xcrun simctl io booted recordVideo $1 --codec h264
+        alias: record
+        aliasonly: false
+        description: Record a video of iOS Simulator
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      snap:
+        keypath: ios.snap
+        name: xcrun simctl io booted screenshot $1
+        alias: snap
+        aliasonly: false
+        description: Take a screenshot on iOS Simulator
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  ip:
+    keypath: ip
+    name: ""
+    alias: ip
+    aliasonly: false
+    description: ""
+    commands:
+      local:
+        keypath: ip.local
+        name: ifconfig en0 | grep --word-regexp inet | awk "{print $2}"
+        alias: local
+        aliasonly: false
+        description: Print local IP address
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      public:
+        keypath: ip.public
+        name: curl ifconfig.me
+        alias: public
+        aliasonly: false
+        description: Print public IP address
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  nuke:
+    keypath: nuke
+    name: ""
+    alias: nuke
+    aliasonly: false
+    description: ""
+    commands:
+      docker:
+        keypath: nuke.docker
+        name: dock stop && dock clean && dock rmi
+        alias: docker
+        aliasonly: false
+        description: Nuke docker by stopping, cleaning and removing images
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+      ds:
+        keypath: nuke.ds
+        name: find . -type f -name '*.DS_Store' -ls -delete
+        alias: ds
+        aliasonly: false
+        description: Nuke all those pesky .DS_Store files
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  reload:
+    keypath: reload
+    name: . ~/.zshrc
+    alias: reload
+    aliasonly: false
+    description: Reload shell env by sourcing init file
+    commands: {}
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+  update:
+    keypath: update
+    name: ""
+    alias: update
+    aliasonly: false
+    description: ""
+    commands:
+      brew:
+        keypath: update.brew
+        name: brew update && brew upgrade --all && brew cask update && brew cleanup
+          && brew cask cleanup
+        alias: brew
+        aliasonly: false
+        description: Update everything related to brew and clean up
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
