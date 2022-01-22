@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -247,6 +248,11 @@ func (c *Config) Backup() error {
 	basename := strings.TrimSuffix(DefaultManifestFile, filepath.Ext(DefaultManifestFile))
 	destinationFile := filepath.Join(backupDir, basename+"_"+ts+".yaml")
 	sourceFile := pathutil.Abs(GetConfigPath())
+
+	// Check if manifest exists
+	if _, err := os.Stat(sourceFile); errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
 
 	input, err := ioutil.ReadFile(sourceFile)
 	if err != nil {
