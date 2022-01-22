@@ -211,10 +211,15 @@ func (c *Config) Set(key, value string) error {
 	return fmt.Errorf("key not found")
 }
 
-// Backup a manifest based on timestamp
+// Backup manifest at config path based on timestamp
 func (c *Config) Backup() error {
 	// Before saving backup, prune old files
 	c.pruneBackups()
+
+	// Prevent backups if max count is 0
+	if c.manifest.Config.BackupCount == 0 {
+		return nil
+	}
 
 	// Create backups under base dir in a folder
 	backupDir, err := ensureBackupDir()
@@ -223,7 +228,7 @@ func (c *Config) Backup() error {
 	}
 
 	// Copy existing manifest to backup path
-	ts := time.Now().UTC().Format("20060102150405")
+	ts := fmt.Sprintf("%d", time.Now().UnixMilli())
 	basename := strings.TrimSuffix(DefaultManifestFile, filepath.Ext(DefaultManifestFile))
 	destinationFile := filepath.Join(backupDir, basename+"_"+ts+".yaml")
 	sourceFile := pathutil.Abs(GetConfigPath())
@@ -260,7 +265,10 @@ func (c *Config) pruneBackups() {
 
 	// Add one more to backup count since a new backup will be created
 	maxCount := c.manifest.Config.BackupCount - 1
-	if maxCount > 0 && len(files) > maxCount {
+	if maxCount < 0 {
+		maxCount = 0
+	}
+	if len(files) > maxCount {
 		for _, file := range files[maxCount:] {
 			filename := filepath.Join(backupDir, file.Name())
 			if err := os.Remove(filename); err != nil {
@@ -271,7 +279,7 @@ func (c *Config) pruneBackups() {
 }
 
 func ensureBackupDir() (string, error) {
-	backupDir := filepath.Join(DefaultBaseDir, DefaultBackupsDir)
+	backupDir := filepath.Join(GetBaseDir(), DefaultBackupsDir)
 	if err := pathutil.EnsurePath(backupDir); err != nil {
 		return "", err
 	}
