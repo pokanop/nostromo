@@ -270,12 +270,14 @@ func TestBackup(t *testing.T) {
 		name        string
 		baseDir     string
 		backupCount int
+		copy        bool
 		expErr      bool
 	}{
-		{"invalid path", "/does/not/exist", 1, true},
-		{"valid path", "/tmp", 1, false},
-		{"no backups", "/tmp", 0, false},
-		{"some backups", "/tmp", 5, false},
+		{"invalid path", "/does/not/exist", 1, false, true},
+		{"valid path", "/tmp", 1, true, false},
+		{"missing manifest", "/tmp", 1, false, false},
+		{"no backups", "/tmp", 0, true, false},
+		{"some backups", "/tmp", 5, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -286,7 +288,7 @@ func TestBackup(t *testing.T) {
 				t.Errorf("failed to parse manifest: %s", err)
 			}
 
-			if tt.expErr == false {
+			if tt.copy == true {
 				c.path = filepath.Join(tt.baseDir, "manifest.yaml")
 				err = c.save(false)
 				if err != nil {
