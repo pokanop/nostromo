@@ -388,7 +388,7 @@ func EvalString(args []string) int {
 
 	m := cfg.Manifest()
 
-	language, cmd, err := m.ExecutionString(stringutil.SanitizeArgs(args))
+	language, cmd, err := m.ExecutionString(args)
 	if err != nil {
 		log.Error(err)
 		return -1

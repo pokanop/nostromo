@@ -50,7 +50,8 @@
                     "language": "",
                     "snippet": ""
                   },
-                  "mode": 0
+                  "mode": 0,
+                  "disabled": false
                 }
               },
               "subs": {
@@ -63,7 +64,8 @@
                 "language": "",
                 "snippet": ""
               },
-              "mode": 0
+              "mode": 0,
+              "disabled": false
             }
           },
           "subs": {
@@ -76,7 +78,8 @@
             "language": "",
             "snippet": ""
           },
-          "mode": 0
+          "mode": 0,
+          "disabled": false
         }
       },
       "subs": {
@@ -89,7 +92,8 @@
         "language": "",
         "snippet": ""
       },
-      "mode": 0
+      "mode": 0,
+      "disabled": false
     },
     "1-one-alias": {
       "keyPath": "1-one-alias",
@@ -129,7 +133,8 @@
                     "language": "",
                     "snippet": ""
                   },
-                  "mode": 0
+                  "mode": 0,
+                  "disabled": false
                 }
               },
               "subs": {
@@ -142,7 +147,8 @@
                 "language": "",
                 "snippet": ""
               },
-              "mode": 0
+              "mode": 0,
+              "disabled": false
             }
           },
           "subs": {
@@ -155,7 +161,8 @@
             "language": "",
             "snippet": ""
           },
-          "mode": 0
+          "mode": 0,
+          "disabled": false
         }
       },
       "subs": {
@@ -168,7 +175,8 @@
         "language": "",
         "snippet": ""
       },
-      "mode": 0
+      "mode": 0,
+      "disabled": false
     }
   }
 }
