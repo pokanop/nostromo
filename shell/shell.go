@@ -118,7 +118,7 @@ func buildEvalCmd(cmd, language string) string {
 
 func shellWrapperFunc() string {
 	// Sources completion scripts after each command in case something changes
-	return `__nostromo_cmd() { command ./nostromo "$@"; }
+	return `__nostromo_cmd() { command nostromo "$@"; }
 nostromo() { __nostromo_cmd "$@" && eval "$(__nostromo_cmd completion)"; }`
 }
 
