@@ -343,6 +343,23 @@ func (c *Command) commandList() []string {
 	return cmds
 }
 
+// checkDisabled returns true if this command or any parent node is disabled, and otherwise false
+//
+// Returns command if disabled, and otherwise nil
+func (c *Command) checkDisabled() (bool, *Command) {
+	cmd := c
+	for {
+		if cmd == nil {
+			break
+		}
+		if cmd.Disabled == true {
+			return true, cmd
+		}
+		cmd = cmd.parent
+	}
+	return false, nil
+}
+
 func joinedSubs(subMap map[string]*Substitution) string {
 	subs := []string{}
 	for sub := range subMap {

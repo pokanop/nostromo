@@ -358,7 +358,7 @@ func TestFields(t *testing.T) {
 	}
 }
 
-func TestCommand_Children(t *testing.T) {
+func TestCommandChildren(t *testing.T) {
 	commands := map[string]*Command{
 		"foo": {},
 		"bar": {},
@@ -408,8 +408,89 @@ func TestCommandData(t *testing.T) {
 	}
 }
 
+func TestCommandEffectiveCommand(t *testing.T) {
+	type fields struct {
+		Name string
+		Code *Code
+		Mode Mode
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{"use code", fields{"", &Code{"js", "code"}, ConcatenateMode}, "code"},
+		{"concatenate", fields{"command", nil, ConcatenateMode}, "command"},
+		{"independent", fields{"command", nil, IndependentMode}, "command;"},
+		{"exclusive", fields{"command", nil, ExclusiveMode}, "command;"},
+		{"empty command", fields{"", nil, ExclusiveMode}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Command{
+				Name: tt.fields.Name,
+				Code: tt.fields.Code,
+				Mode: tt.fields.Mode,
+			}
+			if got := c.effectiveCommand(); got != tt.want {
+				t.Errorf("effectiveCommand() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCheckDisabled(t *testing.T) {
+	tests := []struct {
+		name     string
+		depth    int
+		keypath  string
+		disabled bool
+		want     bool
+	}{
+		{"one node not disabled", 1, "one-alias", false, false},
+		{"one node disabled", 1, "one-alias", true, true},
+		{"multi-node not disabled", 3, "one-alias", false, false},
+		{"multi-node disabled leaf", 3, "one-alias.two-alias.three-alias", true, true},
+		{"multi-node disabled parent", 4, "one-alias.two-alias", true, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := fakeCommandWithModifier(tt.depth, tt.keypath, func(cmd *Command) {
+				cmd.Disabled = tt.disabled
+			})
+
+			a := []*Command{c}
+			for {
+				if len(a) == 0 {
+					break
+				}
+				c, a = a[len(a)-1], a[:len(a)-1]
+
+				if got, _ := c.checkDisabled(); got != tt.want {
+					t.Errorf("checkDisabled() = %v, want %v", got, tt.want)
+				}
+
+				cmds := make([]*Command, 0, len(c.Commands))
+				for _, v := range c.Commands {
+					cmds = append(cmds, v)
+				}
+				a = append(a, cmds...)
+			}
+		})
+	}
+}
+
 func fakeCommand(depth int) *Command {
 	return fakeCommandWithPrefix(depth, "")
+}
+
+func fakeCommandWithModifier(depth int, keyPath string, modifier func(*Command)) *Command {
+	c := fakeCommand(depth)
+	if cmd := c.find(keyPath); cmd != nil {
+		modifier(cmd)
+		return cmd
+	}
+	return nil
 }
 
 func fakeCommandWithPrefix(depth int, prefix string) *Command {
@@ -445,35 +526,4 @@ func fakeBuiltCommand(startDepth, endDepth int, keyPath, command string) *Comman
 		cmd.Name = command
 	}
 	return first
-}
-
-func TestCommandEffectiveCommand(t *testing.T) {
-	type fields struct {
-		Name string
-		Code *Code
-		Mode Mode
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		{"use code", fields{"", &Code{"js", "code"}, ConcatenateMode}, "code"},
-		{"concatenate", fields{"command", nil, ConcatenateMode}, "command"},
-		{"independent", fields{"command", nil, IndependentMode}, "command;"},
-		{"exclusive", fields{"command", nil, ExclusiveMode}, "command;"},
-		{"empty command", fields{"", nil, ExclusiveMode}, ""},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Command{
-				Name: tt.fields.Name,
-				Code: tt.fields.Code,
-				Mode: tt.fields.Mode,
-			}
-			if got := c.effectiveCommand(); got != tt.want {
-				t.Errorf("effectiveCommand() = %v, want %v", got, tt.want)
-			}
-		})
-	}
 }

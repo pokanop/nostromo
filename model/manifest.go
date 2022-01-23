@@ -167,6 +167,9 @@ func (m *Manifest) ExecutionString(args []string) (string, string, error) {
 			}
 
 			c := cmd.find(keyPath)
+			if disabled, n := c.checkDisabled(); disabled == true {
+				return "", "", fmt.Errorf("command is disabled at %s", n.KeyPath)
+			}
 			return c.Code.Language, c.executionString(args[count:]), nil
 		}
 	}
