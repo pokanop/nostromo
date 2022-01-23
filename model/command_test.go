@@ -1,10 +1,11 @@
 package model
 
 import (
-	"github.com/shivamMg/ppds/tree"
 	"math"
 	"reflect"
 	"testing"
+
+	"github.com/shivamMg/ppds/tree"
 
 	"github.com/pokanop/nostromo/keypath"
 )
@@ -21,9 +22,9 @@ func TestNewCommand(t *testing.T) {
 		code        *Code
 		expected    *Command
 	}{
-		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode}},
-		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode}},
-		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode}},
+		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false}},
+		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false}},
+		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false}},
 	}
 
 	for _, test := range tests {
@@ -312,7 +313,7 @@ func TestKeys(t *testing.T) {
 		command  *Command
 		expected []string
 	}{
-		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly"}},
+		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled"}},
 	}
 
 	for _, test := range tests {
@@ -343,6 +344,7 @@ func TestFields(t *testing.T) {
 				"keypath":       "one-alias",
 				"mode":          "concatenate",
 				"aliasOnly":     false,
+				"disabled":      false,
 			},
 		},
 	}

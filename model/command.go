@@ -2,10 +2,11 @@ package model
 
 import (
 	"fmt"
-	"github.com/pokanop/nostromo/stringutil"
-	"github.com/spf13/cobra"
 	"sort"
 	"strings"
+
+	"github.com/pokanop/nostromo/stringutil"
+	"github.com/spf13/cobra"
 
 	"github.com/pokanop/nostromo/keypath"
 	"github.com/shivamMg/ppds/tree"
@@ -23,6 +24,7 @@ type Command struct {
 	Subs        map[string]*Substitution `json:"subs"`
 	Code        *Code                    `json:"code"`
 	Mode        Mode                     `json:"mode"`
+	Disabled    bool                     `json:"disabled"`
 }
 
 func (c *Command) String() string {
@@ -31,7 +33,7 @@ func (c *Command) String() string {
 
 // Keys as ordered list of fields for logging
 func (c *Command) Keys() []string {
-	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly"}
+	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled"}
 }
 
 // Fields interface for logging
@@ -46,6 +48,7 @@ func (c *Command) Fields() map[string]interface{} {
 		"code":          c.Code.valid(),
 		"mode":          c.Mode.String(),
 		"aliasOnly":     c.AliasOnly,
+		"disabled":      c.Disabled,
 	}
 }
 
@@ -103,6 +106,7 @@ func newCommand(name, alias, description string, code *Code, aliasOnly bool, mod
 		Subs:        map[string]*Substitution{},
 		Code:        code,
 		Mode:        ModeFromString(mode),
+		Disabled:    false,
 	}
 }
 

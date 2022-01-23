@@ -45,6 +45,7 @@ commands:
                   language: ""
                   snippet: ""
                 mode: 0
+                disabled: false
             subs:
               0-three-sub:
                 name: 0-three
@@ -53,6 +54,7 @@ commands:
               language: ""
               snippet: ""
             mode: 0
+            disabled: false
         subs:
           0-two-sub:
             name: 0-two
@@ -61,6 +63,7 @@ commands:
           language: ""
           snippet: ""
         mode: 0
+        disabled: false
     subs:
       0-one-sub:
         name: 0-one
@@ -69,6 +72,7 @@ commands:
       language: ""
       snippet: ""
     mode: 0
+    disabled: false
   1-one-alias:
     keypath: 1-one-alias
     name: 1-one
@@ -105,6 +109,7 @@ commands:
                   language: ""
                   snippet: ""
                 mode: 0
+                disabled: false
             subs:
               1-three-sub:
                 name: 1-three
@@ -113,6 +118,7 @@ commands:
               language: ""
               snippet: ""
             mode: 0
+            disabled: false
         subs:
           1-two-sub:
             name: 1-two
@@ -121,6 +127,7 @@ commands:
           language: ""
           snippet: ""
         mode: 0
+        disabled: false
     subs:
       1-one-sub:
         name: 1-one
@@ -129,3 +136,4 @@ commands:
       language: ""
       snippet: ""
     mode: 0
+    disabled: false

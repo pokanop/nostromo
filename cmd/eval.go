@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // evalCmd represents the eval command
