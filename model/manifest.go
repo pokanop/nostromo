@@ -20,14 +20,20 @@ type ManifestV0 struct {
 
 // Manifest is the main container for nostromo based commands
 type Manifest struct {
+	// Name of the manifest or "core" if the core manifest
+	Name string `json:"name"`
+	// Source URL of the manifest which can be file URL for local
+	Source   string              `json:"source"`
 	Version  *version.Info       `json:"version"`
 	Config   *Config             `json:"config"`
 	Commands map[string]*Command `json:"commands"`
 }
 
 // NewManifest returns a newly initialized manifest
-func NewManifest(version *version.Info) *Manifest {
+func NewManifest(name, source string, version *version.Info) *Manifest {
 	return &Manifest{
+		Name:     name,
+		Source:   source,
 		Version:  version,
 		Config:   NewConfig(),
 		Commands: map[string]*Command{},

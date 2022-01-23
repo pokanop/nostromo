@@ -366,7 +366,7 @@ func TestManifestChildren(t *testing.T) {
 }
 
 func fakeManifest(n, depth int) *Manifest {
-	m := NewManifest(&version.Info{})
+	m := NewManifest("manifest", "file://path/to/manifest.yaml", &version.Info{})
 	m.Config.Verbose = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
@@ -376,7 +376,7 @@ func fakeManifest(n, depth int) *Manifest {
 }
 
 func fakeManifestAliasesOnly(n, depth int) *Manifest {
-	m := NewManifest(&version.Info{})
+	m := NewManifest("manifest", "file://path/to/manifest.yaml", &version.Info{})
 	m.Config.AliasesOnly = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
@@ -386,7 +386,7 @@ func fakeManifestAliasesOnly(n, depth int) *Manifest {
 }
 
 func fakeSimilarManifest(n, depth int) *Manifest {
-	m := NewManifest(&version.Info{})
+	m := NewManifest("manifest", "file://path/to/manifest.yaml", &version.Info{})
 	for i := 0; i < n; i++ {
 		c := fakeCommand(depth)
 		c.Alias = strconv.Itoa(i) + "-" + c.Alias

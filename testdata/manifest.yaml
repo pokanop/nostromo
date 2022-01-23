@@ -1,3 +1,5 @@
+name: manifest
+source: file://path/to/manifest.yaml
 version:
   uuid: ""
   semver: ""

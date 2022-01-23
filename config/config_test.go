@@ -322,8 +322,53 @@ func TestBackup(t *testing.T) {
 	}
 }
 
+func TestNewCoreManifest(t *testing.T) {
+	m, err := NewCoreManifest()
+	if err != nil {
+		panic(err)
+	}
+	if m == nil {
+		t.Errorf("want not nil, got nil")
+	}
+}
+
+func TestGetCoreManifestURL(t *testing.T) {
+	tests := []struct {
+		name    string
+		home    string
+		want    string
+		wantErr bool
+	}{
+		{"invalid home", "http://test.com/Segment%%2815197306101420000%29.ts", "", true},
+		{"valid home", "/tmp", "file:///tmp/manifests/manifest.yaml", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			os.Setenv("NOSTROMO_HOME", tt.home)
+
+			u, err := GetCoreManifestURL()
+			if tt.wantErr == true && err == nil {
+				t.Errorf("want error, got none")
+			} else if tt.wantErr {
+				return
+			}
+			if u == nil {
+				t.Errorf("want not nil, got nil")
+			}
+			got := u.String()
+			if got != tt.want {
+				t.Errorf("want %s, got %s", tt.want, got)
+			}
+		})
+	}
+}
+
 func fakeManifest() *model.Manifest {
-	m := model.NewManifest(&version.Info{})
+	m, err := NewCoreManifest()
+	if err != nil {
+		panic(err)
+	}
 	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
 	m.AddSubstitution("one.two", "name", "alias")
 	return m

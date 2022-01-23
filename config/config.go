@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -20,9 +22,18 @@ import (
 
 // Path for standard nostromo config
 const (
-	DefaultManifestFile = "manifest.yaml"
 	DefaultBaseDir      = "~/.nostromo"
+	DefaultManifestFile = "manifest.yaml"
+	DefaultManifestsDir = "manifests"
 	DefaultBackupsDir   = "backups"
+)
+
+// URL scheme constants
+const (
+	FileURLScheme  = "file://"
+	GitURLScheme   = "git://"
+	HTTPURLScheme  = "http://"
+	HTTPSURLScheme = "https://"
 )
 
 var ver *version.Info
@@ -45,6 +56,15 @@ func NewConfig(path string, manifest *model.Manifest) *Config {
 	return &Config{path, manifest}
 }
 
+// NewCoreManifest creates a new core manifest
+func NewCoreManifest() (*model.Manifest, error) {
+	m, err := GetCoreManifestURL()
+	if err != nil {
+		return nil, err
+	}
+	return model.NewManifest(DefaultManifestFile, m.String(), ver), nil
+}
+
 // GetBaseDir returns the base directory for nostromo files
 func GetBaseDir() string {
 	customDir := os.Getenv("NOSTROMO_HOME")
@@ -60,6 +80,57 @@ func GetBaseDir() string {
 func GetConfigPath() string {
 	baseDir := GetBaseDir()
 	return filepath.Join(baseDir, DefaultManifestFile)
+}
+
+// GetCoreManifestURL returns the core manifest URL
+func GetCoreManifestURL() (*url.URL, error) {
+	rawURL := filepath.Join(FileURLScheme, pathutil.Abs(GetBaseDir()), DefaultManifestsDir, DefaultManifestFile)
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+// GetManifestURL verifies target and returns a valid URL or error
+//
+// For remote URLs, this method makes a HEAD request to confirm the file exists.
+func GetManifestURL(target string) (*url.URL, error) {
+	// Check for file path
+	if _, err := os.Stat(target); !os.IsNotExist(err) {
+		// Test if file scheme already provided
+		u, err := url.Parse(target)
+		if err == nil && u.Scheme == "file" {
+			p := filepath.Join(u.Host, u.Path)
+			if _, err = os.Stat(p); !os.IsNotExist(err) {
+				// Local file exists
+				return u, nil
+			}
+			// file:// scheme was given but local file does not exist
+			return nil, fmt.Errorf("file not found for target")
+		}
+
+		// Return url with file scheme
+		u, err = url.Parse(filepath.Join(FileURLScheme, target))
+		if err != nil {
+			return nil, err
+		}
+		return u, nil
+	}
+
+	// Check for remote path
+	u, err := url.Parse(target)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.Head(u.String())
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("remote file not found")
+	}
+	return u, nil
 }
 
 // Parse nostromo config at path into a `Manifest` object
@@ -314,7 +385,10 @@ func parseV0(data []byte) *model.Manifest {
 	}
 
 	// Create new manifest with current version and migrate data
-	m := model.NewManifest(ver)
+	m, err := NewCoreManifest()
+	if err != nil {
+		panic("could not set up core manifest, NOSTROMO_HOME must be unset or point to a valid path")
+	}
 	m.Config = prev.Config
 	m.Commands = prev.Commands
 	return m
