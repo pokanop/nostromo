@@ -2,10 +2,11 @@ package shell
 
 import (
 	"bytes"
-	"github.com/pokanop/nostromo/model"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"strings"
+
+	"github.com/pokanop/nostromo/model"
+	"github.com/spf13/cobra"
 )
 
 // CobraCompleter interface for types that can generate a cobra.Command
@@ -41,10 +42,23 @@ func Completion(cmd *cobra.Command) (string, error) {
 	return s, nil
 }
 
+// SpaceportCompletion scripts for all manifests
+func SpaceportCompletion(s *model.Spaceport) ([]string, error) {
+	var completions []string
+	completions = append(completions, shellWrapperFunc())
+	for _, m := range s.Manifests {
+		mc, err := ManifestCompletion(m)
+		if err != nil {
+			return nil, err
+		}
+		completions = append(completions, mc...)
+	}
+	return completions, nil
+}
+
 // ManifestCompletion scripts for a manifest
 func ManifestCompletion(m *model.Manifest) ([]string, error) {
 	var completions []string
-	completions = append(completions, shellWrapperFunc())
 	completions = append(completions, shellAliasFuncs(m))
 	for _, cmd := range m.Commands {
 		// Skip completion scripts for leaf nodes or pure aliases.

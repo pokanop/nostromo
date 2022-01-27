@@ -1,6 +1,6 @@
 package log
 
-import "github.com/logrusorgru/aurora"
+import "github.com/logrusorgru/aurora/v3"
 
 type theme interface {
 	formatLevel(logLevel, string) aurora.Value

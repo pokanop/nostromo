@@ -300,7 +300,7 @@ Even your commands added by `nostromo` get the full red carpet treatment with sh
 nostromo add cmd foo --code 'console.log("hello js")' --language js
 ```
 
-For more complex snippets you can edit `~/.nostromo/manifest.yaml` directly but multiline YAML must be escaped correctly to work.
+For more complex snippets you can edit `~/.nostromo/ships/manifest.yaml` directly but multiline YAML must be escaped correctly to work.
 
 ## Credits
 
