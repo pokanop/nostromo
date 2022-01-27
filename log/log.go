@@ -2,8 +2,9 @@ package log
 
 import (
 	"fmt"
-	"github.com/logrusorgru/aurora"
 	"strings"
+
+	"github.com/logrusorgru/aurora/v3"
 )
 
 type options struct {

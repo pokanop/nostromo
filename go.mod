@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/google/uuid v1.3.0
-	github.com/logrusorgru/aurora v2.0.3+incompatible
+	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/shivamMg/ppds v0.0.1
