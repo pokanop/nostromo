@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
@@ -181,7 +180,7 @@ func manifestURL(target string) (*url.URL, error) {
 	if err == nil && u.Scheme == "file" {
 		// Check for file path
 		p := filepath.Join(u.Host, u.Path)
-		if _, err = os.Stat(p); !errors.Is(err, fs.ErrNotExist) {
+		if _, err = os.Stat(p); !os.IsNotExist(err) {
 			// Local file exists
 			return u, nil
 		}
@@ -200,7 +199,7 @@ func manifestURL(target string) (*url.URL, error) {
 	}
 
 	// Check for local path
-	if _, err = os.Stat(target); !errors.Is(err, fs.ErrNotExist) {
+	if _, err = os.Stat(target); !os.IsNotExist(err) {
 		// Return url with file scheme
 		u, err = url.Parse(filepath.Join(FileURLScheme, target))
 		if err != nil {
@@ -424,7 +423,7 @@ func (c *Config) Backup(m *model.Manifest) error {
 	sourceFile := pathutil.Abs(m.Path)
 
 	// Check if manifest exists
-	if _, err := os.Stat(sourceFile); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(sourceFile); os.IsNotExist(err) {
 		return nil
 	}
 
@@ -498,7 +497,7 @@ func sanitizeFiles() error {
 	// The core manifest was previously in the root folder of NOSTROMO_HOME.
 	// Check there first and move to new location if needed.
 	oldPath := filepath.Join(pathutil.Abs(BaseDir()), model.CoreManifestName+".yaml")
-	if _, err := os.Stat(oldPath); !errors.Is(err, fs.ErrNotExist) {
+	if _, err := os.Stat(oldPath); !os.IsNotExist(err) {
 		// File exists, migrate
 		log.Warning("migrating core manifest")
 		err := os.Rename(oldPath, coreManifestPath())
@@ -509,7 +508,7 @@ func sanitizeFiles() error {
 
 	// Backups dir name change
 	oldPath = filepath.Join(pathutil.Abs(BaseDir()), "backups")
-	if _, err := os.Stat(oldPath); !errors.Is(err, fs.ErrNotExist) {
+	if _, err := os.Stat(oldPath); !os.IsNotExist(err) {
 		// Folder exists, migrate
 		log.Warning("migrating backups folder")
 		err := os.Rename(oldPath, backupsPath())
