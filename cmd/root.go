@@ -5,7 +5,6 @@ import (
 
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/log"
-	"github.com/pokanop/nostromo/task"
 	"github.com/pokanop/nostromo/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -43,7 +42,6 @@ func SetVersion(v, c, d string) {
 	ver = version.NewInfo(v, c, d)
 
 	// Update dependent packages
-	task.SetVersion(ver)
 	config.SetVersion(ver)
 }
 
@@ -53,11 +51,11 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	nostromoPath := config.GetBaseDir() // get base path. (by default ~/.nostromo)
-	viper.SetConfigName("env")          // name of config file (without extension)
-	viper.AddConfigPath("$HOME")        // adding home directory as first search path
-	viper.AddConfigPath(nostromoPath)   // adding nostromo directory to search path
-	viper.AutomaticEnv()                // read in environment variables that match
+	nostromoPath := config.BaseDir()  // get base path. (by default ~/.nostromo)
+	viper.SetConfigName("env")        // name of config file (without extension)
+	viper.AddConfigPath("$HOME")      // adding home directory as first search path
+	viper.AddConfigPath(nostromoPath) // adding nostromo directory to search path
+	viper.AutomaticEnv()              // read in environment variables that match
 }
 
 func printUsage(cmd *cobra.Command) {

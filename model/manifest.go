@@ -12,6 +12,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// CoreManifestName for storing root nostromo config
+const CoreManifestName = "manifest"
+
 type ManifestV0 struct {
 	Version  string              `json:"version"`
 	Config   *Config             `json:"config"`
@@ -20,24 +23,32 @@ type ManifestV0 struct {
 
 // Manifest is the main container for nostromo based commands
 type Manifest struct {
-	// Name of the manifest or "core" if the core manifest
+	// Name of the manifest or "manifest" if the core manifest
 	Name string `json:"name"`
-	// Source URL of the manifest which can be file URL for local
-	Source   string              `json:"source"`
+	// Source URL of the manifest which can be local or remote
+	Source string `json:"source"`
+	// Path of the manifest in local storage
+	Path     string              `json:"path"`
 	Version  *version.Info       `json:"version"`
 	Config   *Config             `json:"config"`
 	Commands map[string]*Command `json:"commands"`
 }
 
 // NewManifest returns a newly initialized manifest
-func NewManifest(name, source string, version *version.Info) *Manifest {
+func NewManifest(name, source, path string, version *version.Info) *Manifest {
 	return &Manifest{
 		Name:     name,
 		Source:   source,
+		Path:     path,
 		Version:  version,
 		Config:   NewConfig(),
 		Commands: map[string]*Command{},
 	}
+}
+
+// IsCore determines if this is the core manifest
+func (m *Manifest) IsCore() bool {
+	return m.Name == CoreManifestName
 }
 
 // Link a newly loaded manifest
@@ -56,13 +67,8 @@ func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, 
 		return false, fmt.Errorf("invalid key path")
 	}
 
-	// Use config mode if not supplied on CLI
-	if len(mode) == 0 {
-		mode = m.Config.Mode.String()
-	}
-
 	// Only need to create one command for alias only mode
-	if m.Config.AliasesOnly || aliasOnly {
+	if aliasOnly {
 		cmd := newCommand(command, keyPath, description, code, true, mode)
 		m.Commands[cmd.Alias] = cmd
 		return true, nil
@@ -173,7 +179,7 @@ func (m *Manifest) ExecutionString(args []string) (string, string, error) {
 			}
 
 			c := cmd.find(keyPath)
-			if disabled, n := c.checkDisabled(); disabled == true {
+			if disabled, n := c.checkDisabled(); disabled {
 				return "", "", fmt.Errorf("command is disabled at %s", n.KeyPath)
 			}
 			return c.Code.Language, c.executionString(args[count:]), nil
@@ -187,13 +193,15 @@ func (m *Manifest) ExecutionString(args []string) (string, string, error) {
 
 // Keys as ordered list of fields for logging
 func (m *Manifest) Keys() []string {
-	return []string{"version", "commands"}
+	return []string{"name", "source", "version", "commands"}
 }
 
 // Fields interface for logging
 func (m *Manifest) Fields() map[string]interface{} {
 	return map[string]interface{}{
-		"version":  m.Version,
+		"name":     m.Name,
+		"source":   m.Source,
+		"version":  m.Version.SemVer,
 		"commands": joinedCommands(m.Commands),
 	}
 }

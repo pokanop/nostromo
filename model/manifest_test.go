@@ -270,7 +270,7 @@ func TestManifestKeys(t *testing.T) {
 		manifest *Manifest
 		expected []string
 	}{
-		{"keys", fakeManifest(1, 1), []string{"version", "commands"}},
+		{"keys", fakeManifest(1, 1), []string{"name", "source", "version", "commands"}},
 	}
 
 	for _, test := range tests {
@@ -292,7 +292,9 @@ func TestManifestFields(t *testing.T) {
 			"keys",
 			fakeManifest(1, 1),
 			map[string]interface{}{
-				"version":  &version.Info{},
+				"name":     "manifest",
+				"source":   "file://path/to/manifest.yaml",
+				"version":  "",
 				"commands": "0-one-alias",
 			},
 		},
@@ -365,8 +367,26 @@ func TestManifestChildren(t *testing.T) {
 	}
 }
 
+func TestIsCore(t *testing.T) {
+	tests := []struct {
+		name     string
+		manifest *Manifest
+		want     bool
+	}{
+		{"not core", &Manifest{Name: "foo"}, false},
+		{"core", &Manifest{Name: CoreManifestName}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.manifest.IsCore(); got != tt.want {
+				t.Errorf("got: %t, want: %t", got, tt.want)
+			}
+		})
+	}
+}
+
 func fakeManifest(n, depth int) *Manifest {
-	m := NewManifest("manifest", "file://path/to/manifest.yaml", &version.Info{})
+	m := NewManifest("manifest", "file://path/to/manifest.yaml", "/path/to/manifest.yaml", &version.Info{})
 	m.Config.Verbose = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
@@ -376,7 +396,7 @@ func fakeManifest(n, depth int) *Manifest {
 }
 
 func fakeManifestAliasesOnly(n, depth int) *Manifest {
-	m := NewManifest("manifest", "file://path/to/manifest.yaml", &version.Info{})
+	m := NewManifest("manifest", "file://path/to/manifest.yaml", "/path/to/manifest.yaml", &version.Info{})
 	m.Config.AliasesOnly = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
@@ -386,7 +406,7 @@ func fakeManifestAliasesOnly(n, depth int) *Manifest {
 }
 
 func fakeSimilarManifest(n, depth int) *Manifest {
-	m := NewManifest("manifest", "file://path/to/manifest.yaml", &version.Info{})
+	m := NewManifest("manifest", "file://path/to/manifest.yaml", "/path/to/manifest.yaml", &version.Info{})
 	for i := 0; i < n; i++ {
 		c := fakeCommand(depth)
 		c.Alias = strconv.Itoa(i) + "-" + c.Alias

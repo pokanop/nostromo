@@ -1,6 +1,7 @@
 package task
 
 import (
+	"os"
 	"strings"
 
 	"github.com/pokanop/nostromo/config"
@@ -10,43 +11,27 @@ import (
 	"github.com/pokanop/nostromo/prompt"
 	"github.com/pokanop/nostromo/shell"
 	"github.com/pokanop/nostromo/stringutil"
-	"github.com/pokanop/nostromo/version"
 	"github.com/shivamMg/ppds/tree"
 	"github.com/spf13/cobra"
 )
 
-var ver *version.Info
-
-// SetVersion should be called before any task to ensure manifest is updated
-func SetVersion(v *version.Info) {
-	ver = v
-}
-
 // InitConfig of nostromo config file if not already initialized
 func InitConfig() int {
-	cfg := checkConfigQuiet()
-
-	if cfg == nil {
-		baseDir := config.GetBaseDir()
-		configPath := config.GetConfigPath()
-		m, err := config.NewCoreManifest()
+	// Attempt to load existing config
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		// Create a new config
+		cfg, err = config.NewConfig()
 		if err != nil {
 			log.Error(err)
 			return -1
 		}
-		cfg = config.NewConfig(configPath, m)
-		err = pathutil.EnsurePath(baseDir)
-		if err != nil {
-			log.Error(err)
-			return -1
-		}
-
 		log.Highlight("nostromo config created")
 	} else {
 		log.Highlight("nostromo config exists, updating")
 	}
 
-	err := saveConfig(cfg, true)
+	err = saveConfig(cfg, true)
 	if err != nil {
 		log.Error(err)
 		return -1
@@ -56,7 +41,15 @@ func InitConfig() int {
 }
 
 // DestroyConfig deletes nostromo config file
-func DestroyConfig() int {
+func DestroyConfig(all bool) int {
+	if all {
+		err := os.RemoveAll(pathutil.Abs(config.BaseDir()))
+		if err != nil {
+			return -1
+		}
+		return 0
+	}
+
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
@@ -68,7 +61,7 @@ func DestroyConfig() int {
 		return -1
 	}
 
-	log.Highlight("nostromo config deleted")
+	log.Highlight("nostromo config destroyed")
 
 	m, err := config.NewCoreManifest()
 	if err != nil {
@@ -92,52 +85,60 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 		return -1
 	}
 
-	m := cfg.Manifest()
-
-	if asJSON || asYAML {
-		log.Bold("[manifest]")
-		if asJSON {
-			log.Regular(m.AsJSON())
-		} else if asYAML {
-			log.Regular(m.AsYAML())
+	verbose := cfg.Spaceport().CoreManifest().Config.Verbose
+	for i, m := range cfg.Spaceport().Manifests {
+		if i > 0 {
+			log.Regular()
 		}
-	} else if asTree {
-		tree.PrintHr(m)
-	} else {
-		log.Bold("[manifest]")
-		logFields(m, m.Config.Verbose)
-
-		log.Bold("\n[config]")
-		logFields(m.Config, m.Config.Verbose)
-
-		if len(m.Commands) > 0 {
-			log.Bold("\n[commands]")
-			for _, cmd := range m.Commands {
-				cmd.Walk(func(c *model.Command, s *bool) {
-					logFields(c, m.Config.Verbose)
-					if m.Config.Verbose {
-						log.Regular()
-					}
-				})
+		if asJSON || asYAML {
+			log.Bold("[manifest]")
+			if asJSON {
+				log.Regular(m.AsJSON())
+			} else if asYAML {
+				log.Regular(m.AsYAML())
 			}
-		} else if m.Config.Verbose {
-			log.Regular()
-		}
-
-		if !m.Config.Verbose {
-			log.Regular()
-		}
-
-		lines, err := shell.InitFileLines()
-		if err != nil {
-			return -1
-		}
-
-		log.Bold("[profile]")
-		if len(lines) > 0 {
-			log.Regular(strings.TrimSpace(lines))
+		} else if asTree {
+			tree.PrintHr(m)
 		} else {
-			log.Regular("empty")
+			log.Bold("[manifest]")
+			logFields(m, verbose)
+
+			if m.IsCore() {
+				log.Bold("\n[config]")
+				logFields(m.Config, verbose)
+			}
+
+			if len(m.Commands) > 0 {
+				log.Bold("\n[commands]")
+				for _, cmd := range m.Commands {
+					cmd.Walk(func(c *model.Command, s *bool) {
+						logFields(c, verbose)
+						if verbose {
+							log.Regular()
+						}
+					})
+				}
+			} else if verbose {
+				log.Regular()
+			}
+
+			if !verbose {
+				log.Regular()
+			}
+
+			lines, err := shell.InitFileLines()
+			if err != nil {
+				return -1
+			}
+
+			if m.IsCore() {
+				log.Bold("[profile]")
+				if len(lines) > 0 {
+					log.Regular(strings.TrimSpace(lines))
+				} else {
+					log.Regular("empty")
+				}
+			}
 		}
 	}
 
@@ -192,7 +193,7 @@ func GenerateCompletions(cmd *cobra.Command) int {
 	}
 
 	// Generate completions for manifest commands
-	completions, err := shell.ManifestCompletion(cfg.Manifest())
+	completions, err := shell.SpaceportCompletion(cfg.Spaceport())
 	if err != nil {
 		return 0
 	}
@@ -285,7 +286,7 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 		return -1
 	}
 
-	m := cfg.Manifest()
+	m := cfg.Spaceport().CoreManifest()
 
 	if update && m.Find(keyPath) == nil {
 		log.Error("no matching command found to update")
@@ -295,6 +296,11 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 	snippet := &model.Code{
 		Language: language,
 		Snippet:  code,
+	}
+
+	aliasOnly = m.Config.AliasesOnly || aliasOnly
+	if len(mode) == 0 {
+		mode = m.Config.Mode.String()
 	}
 
 	_, err := m.AddCommand(keyPath, command, description, snippet, aliasOnly, mode)
@@ -326,7 +332,7 @@ func RemoveCommand(keyPath string) int {
 		return -1
 	}
 
-	_, err := cfg.Manifest().RemoveCommand(keyPath)
+	_, err := cfg.Spaceport().CoreManifest().RemoveCommand(keyPath)
 	if err != nil {
 		log.Error(err)
 		return -1
@@ -348,7 +354,7 @@ func AddSubstitution(keyPath, name, alias string) int {
 		return -1
 	}
 
-	m := cfg.Manifest()
+	m := cfg.Spaceport().CoreManifest()
 
 	err := m.AddSubstitution(keyPath, name, alias)
 	if err != nil {
@@ -373,7 +379,7 @@ func RemoveSubstitution(keyPath, alias string) int {
 		return -1
 	}
 
-	err := cfg.Manifest().RemoveSubstitution(keyPath, alias)
+	err := cfg.Spaceport().CoreManifest().RemoveSubstitution(keyPath, alias)
 	if err != nil {
 		log.Error(err)
 		return -1
@@ -397,16 +403,23 @@ func EvalString(args []string) int {
 		return -1
 	}
 
-	m := cfg.Manifest()
+	var cmdStr string
+	var err error
+	for _, m := range cfg.Spaceport().Manifests {
+		var language, cmd string
+		language, cmd, err = m.ExecutionString(args)
+		if err != nil {
+			continue
+		}
 
-	language, cmd, err := m.ExecutionString(args)
-	if err != nil {
-		log.Error(err)
-		return -1
+		cmdStr, err = shell.EvalString(cmd, language, m.Config.Verbose)
+		if err != nil {
+			continue
+		}
+		break
 	}
 
-	cmdStr, err := shell.EvalString(cmd, language, m.Config.Verbose)
-	if err != nil {
+	if len(cmdStr) == 0 && err != nil {
 		log.Error(err)
 		return -1
 	}
@@ -422,28 +435,30 @@ func Find(name string) int {
 		return -1
 	}
 
-	m := cfg.Manifest()
-
 	var matchingCmds []*model.Command
 	var matchingSubs []*model.Command
 
-	for _, cmd := range m.Commands {
-		cmd.Walk(func(c *model.Command, s *bool) {
-			if stringutil.ContainsCaseInsensitive(c.Name, name) || stringutil.ContainsCaseInsensitive(c.Alias, name) {
-				matchingCmds = append(matchingCmds, c)
-			}
-			for _, sub := range c.Subs {
-				if stringutil.ContainsCaseInsensitive(sub.Name, name) || stringutil.ContainsCaseInsensitive(sub.Alias, name) {
-					matchingSubs = append(matchingSubs, c)
+	for _, m := range cfg.Spaceport().Manifests {
+		for _, cmd := range m.Commands {
+			cmd.Walk(func(c *model.Command, s *bool) {
+				if stringutil.ContainsCaseInsensitive(c.Name, name) || stringutil.ContainsCaseInsensitive(c.Alias, name) {
+					matchingCmds = append(matchingCmds, c)
 				}
-			}
-		})
+				for _, sub := range c.Subs {
+					if stringutil.ContainsCaseInsensitive(sub.Name, name) || stringutil.ContainsCaseInsensitive(sub.Alias, name) {
+						matchingSubs = append(matchingSubs, c)
+					}
+				}
+			})
+		}
 	}
 
 	if len(matchingCmds) == 0 && len(matchingSubs) == 0 {
 		log.Highlight("no matching commands or substitutions found")
 		return -1
 	}
+
+	m := cfg.Spaceport().CoreManifest()
 
 	log.Regular("[commands]")
 	for _, cmd := range matchingCmds {
@@ -476,8 +491,7 @@ func checkConfig() *config.Config {
 }
 
 func checkConfigCommon(quiet bool) *config.Config {
-	configPath := config.GetConfigPath()
-	cfg, err := config.Parse(configPath)
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		if !quiet {
 			log.Error(err)
@@ -486,13 +500,13 @@ func checkConfigCommon(quiet bool) *config.Config {
 		return nil
 	}
 
-	log.SetVerbose(cfg.Manifest().Config.Verbose)
+	log.SetVerbose(cfg.Spaceport().CoreManifest().Config.Verbose)
 
 	return cfg
 }
 
 func saveConfig(cfg *config.Config, commit bool) error {
-	m := cfg.Manifest()
+	m := cfg.Spaceport().CoreManifest()
 
 	err := cfg.Save()
 	if err != nil {

@@ -2,7 +2,7 @@ version:
   uuid: ed18610b-3b89-4408-bbed-e9a07753f775
   semver: 0.8.0
   gitcommit: 8185870fd83f5f165ce76fb0a70e5cd7aff1a8cd
-  builddate: "2022-01-22T08:33:26Z"
+  builddate: '2022-01-22T08:33:26Z'
 config:
   verbose: false
   aliasesonly: false
@@ -18,15 +18,15 @@ commands:
     commands: {}
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   copy:
     keypath: copy
-    name: ""
+    name: ''
     alias: copy
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       ssh:
         keypath: copy.ssh
@@ -37,20 +37,20 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   dock:
     keypath: dock
-    name: ""
+    name: ''
     alias: dock
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       clean:
         keypath: dock.clean
@@ -61,8 +61,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       rmi:
         keypath: dock.rmi
@@ -73,8 +73,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       stop:
         keypath: dock.stop
@@ -85,8 +85,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       vol:
         keypath: dock.vol
@@ -97,20 +97,20 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   edit:
     keypath: edit
-    name: ""
+    name: ''
     alias: edit
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       bash:
         keypath: edit.bash
@@ -121,8 +121,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       bash_profile:
         keypath: edit.bash_profile
@@ -133,20 +133,20 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       nostromo:
         keypath: edit.nostromo
-        name: vim ~/.nostromo/manifest.yaml
+        name: vim ~/.nostromo/ships/manifest.yaml
         alias: nostromo
         aliasonly: false
         description: Edit nostromo manifest file using vim
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       p10k:
         keypath: edit.p10k
@@ -157,8 +157,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       profile:
         keypath: edit.profile
@@ -169,8 +169,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       ssh:
         keypath: edit.ssh
@@ -188,13 +188,13 @@ commands:
             commands: {}
             subs: {}
             code:
-              language: ""
-              snippet: ""
+              language: ''
+              snippet: ''
             mode: 2
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       zsh:
         keypath: edit.zsh
@@ -205,32 +205,32 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   gcdf:
     keypath: gcdf
     name: git clean -df
     alias: gcdf
     aliasonly: true
-    description: ""
+    description: ''
     commands: {}
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   ios:
     keypath: ios
-    name: ""
+    name: ''
     alias: ios
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       record:
         keypath: ios.record
@@ -241,8 +241,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       snap:
         keypath: ios.snap
@@ -253,20 +253,20 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   ip:
     keypath: ip
-    name: ""
+    name: ''
     alias: ip
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       local:
         keypath: ip.local
@@ -277,8 +277,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       public:
         keypath: ip.public
@@ -289,20 +289,20 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   nuke:
     keypath: nuke
-    name: ""
+    name: ''
     alias: nuke
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       docker:
         keypath: nuke.docker
@@ -313,8 +313,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
       ds:
         keypath: nuke.ds
@@ -325,13 +325,13 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   reload:
     keypath: reload
@@ -342,31 +342,30 @@ commands:
     commands: {}
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
   update:
     keypath: update
-    name: ""
+    name: ''
     alias: update
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       brew:
         keypath: update.brew
-        name: brew update && brew upgrade --all && brew cask update && brew cleanup
-          && brew cask cleanup
+        name: brew update && brew upgrade --all && brew cask update && brew cleanup && brew cask cleanup
         alias: brew
         aliasonly: false
         description: Update everything related to brew and clean up
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0

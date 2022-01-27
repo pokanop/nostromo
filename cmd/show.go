@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var (
@@ -19,7 +20,7 @@ var showCmd = &cobra.Command{
 	Long: `Prints nostromo config with command tree
 and profile changes.
 
-By default the config file is located at ~/.nostromo/manifest.yaml.
+By default the config file is located at ~/.nostromo/ships/manifest.yaml.
 
 Customize this with the $NOSTROMO_HOME environment variable`,
 	Run: func(cmd *cobra.Command, args []string) {
