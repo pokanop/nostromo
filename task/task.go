@@ -86,7 +86,7 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 	}
 
 	verbose := cfg.Spaceport().CoreManifest().Config.Verbose
-	for i, m := range cfg.Spaceport().Manifests {
+	for i, m := range cfg.Spaceport().Manifests() {
 		if i > 0 {
 			log.Regular()
 		}
@@ -405,7 +405,7 @@ func EvalString(args []string) int {
 
 	var cmdStr string
 	var err error
-	for _, m := range cfg.Spaceport().Manifests {
+	for _, m := range cfg.Spaceport().Manifests() {
 		var language, cmd string
 		language, cmd, err = m.ExecutionString(args)
 		if err != nil {
@@ -438,7 +438,7 @@ func Find(name string) int {
 	var matchingCmds []*model.Command
 	var matchingSubs []*model.Command
 
-	for _, m := range cfg.Spaceport().Manifests {
+	for _, m := range cfg.Spaceport().Manifests() {
 		for _, cmd := range m.Commands {
 			cmd.Walk(func(c *model.Command, s *bool) {
 				if stringutil.ContainsCaseInsensitive(c.Name, name) || stringutil.ContainsCaseInsensitive(c.Alias, name) {
@@ -477,6 +477,20 @@ func Find(name string) int {
 		if m.Config.Verbose {
 			log.Regular()
 		}
+	}
+
+	return 0
+}
+
+func Sync(force bool, sources []string) int {
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+
+	if err := cfg.Sync(force, sources); err != nil {
+		log.Error(err)
+		return -1
 	}
 
 	return 0

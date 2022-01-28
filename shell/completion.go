@@ -46,7 +46,7 @@ func Completion(cmd *cobra.Command) (string, error) {
 func SpaceportCompletion(s *model.Spaceport) ([]string, error) {
 	var completions []string
 	completions = append(completions, shellWrapperFunc())
-	for _, m := range s.Manifests {
+	for _, m := range s.Manifests() {
 		mc, err := ManifestCompletion(m)
 		if err != nil {
 			return nil, err

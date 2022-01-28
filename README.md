@@ -69,7 +69,15 @@ nostromo init
 
 To customize the directory (and change it from `~/.nostromo`), set the `NOSTROMO_HOME` environment variable to a location of your choosing.
 
-> With every update, it's a good idea to run `nostromo init` to ensure any manifest changes are migrated and commands continue to work.
+> With every update, it's a good idea to run `nostromo init` to ensure any manifest changes are migrated and commands continue to work. `nostromo` will attempt to perform any migrations as well at this time to files and folders so 🤞
+
+The quickest way to populate your commands database is using the `sync` feature:
+
+```sh
+nostromo sync <source>
+```
+
+where `source` can be any local or remote file sources. See the [Distributed Manifests](#distributed-manifests) section for more details.
 
 To destroy the manifest and start over you can always run:
 
@@ -85,12 +93,12 @@ nostromo manifest set backupCount 10
 
 ## Key Features
 
-- Simplified alias management
-- Scoped commands and substitutions
-- Build complex command trees
-- Shell completion support
-- Preserves flags and arguments
-- Execute code snippets
+- [Simplified alias management](#managing-aliases)
+- [Scoped commands and substitutions](#scoped-commands-and-substitutions)
+- [Build complex command trees](#complex-command-tree)
+- [Shell completion support](#shell-completion)
+- [Execute code snippets](#execute-code-snippets)
+- [Distributed manifests](#distributed-manifests)
 
 ## Usage
 
@@ -185,7 +193,7 @@ foo() { eval $(nostromo eval foo "$*") }
 
 > Notice how the keypath has no affect in building a command tree when using the **alias only** feature. Standard shell aliases can only be root level commands.
 
-### Scoped Commands & Substitutions
+### Scoped Commands And Substitutions
 
 Scope affects a tree of commands such that a parent scope is prepended first and then each command in the keypath to the root. If a command is run as follows:
 
@@ -302,12 +310,54 @@ nostromo add cmd foo --code 'console.log("hello js")' --language js
 
 For more complex snippets you can edit `~/.nostromo/ships/manifest.yaml` directly but multiline YAML must be escaped correctly to work.
 
+### Distributed Manifests
+
+`nostromo` now supports keeping multiple manifest sources 💪 allowing you to organize and distribute your commands as you please. This feature enables synchronization functionality to get remote manifests from multiple data sources including:
+
+- Local Files
+- Git
+- Mercurial
+- HTTP
+- Amazon S3
+- Google GCS
+
+Configs can be found in the `~/.nostromo/ships` folder. The **core manifest** is named `manifest.yaml`.
+
+You can add as many additional manifests in the same folder and `nostromo` will parse and aggregate all the commands, useful for organizations wanting to build their own command suite.
+
+To add or sync manifests, use the following:
+
+```sh
+nostromo sync <source>...
+```
+
+And that's it! Your commands will now incorporate the new manifest.
+
+To update all synchronized manifests to the latest versions, just run:
+
+```sh
+nostromo sync
+```
+
+`nostromo` syncs manifests using version information in the manifest. It will only update if the version identifier is different. To force update a manifest, run:
+
+```sh
+# Force sync one or more manifests
+nostromo sync -f <source>...
+
+# Force sync all manifests
+nostromo sync -f
+```
+
+> Details on supported file formats and requirements can be found in the [go-getter](https://github.com/hashicorp/go-getter) documentation since we are using that for downloading files
+
 ## Credits
 
 - This tool was bootstrapped using [cobra](https://github.com/spf13/cobra).
-- Colored logging provided by [aurora](https://github.com/logrusorgru/aurora).
-- `nostromo` fan art supplied by [Ian Stewart](https://www.artstation.com/artwork/EBBVN).
+- Colored logging provided by [aurora](https://github.com/logrusorgru/aurora/v3).
+- Fan art supplied by [Ian Stewart](https://www.artstation.com/artwork/EBBVN).
 - Gopher artwork by [@egonelbre](https://github.com/egonelbre/gophers) and original by [Renee French](http://reneefrench.blogspot.com/).
+- File downloader using [go-getter](https://github.com/hashicorp/go-getter)
 
 ## Contibuting
 
