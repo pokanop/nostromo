@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -118,16 +119,21 @@ func (c *Config) syncMerge(force bool) error {
 			m.Name = name
 		}
 
+		// Update path
+		m.Path = filepath.Join(manifestsPath(), fmt.Sprintf(DefaultConfigFile, m.Name))
+
 		var shouldSave bool
 		if c.spaceport.IsUnique(m.Name) {
 			// New manifest
 			c.spaceport.AddManifest(m)
 			shouldSave = true
+			log.Infof("adding %s manifest", m.Name)
 		} else if u := c.spaceport.FindManifest(m.Name); u != nil {
 			// Update manifest
 			if force || m.Version.UUID != u.Version.UUID {
 				c.spaceport.AddManifest(m)
 				shouldSave = true
+				log.Infof("updating %s manifest", m.Name)
 			}
 		} else {
 			// Should not be possible
