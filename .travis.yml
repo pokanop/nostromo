@@ -9,6 +9,7 @@ sudo: false
 install:
   - go get golang.org/x/tools/cmd/cover
   - go install github.com/mattn/goveralls@latest
+  - go get
 
 script:
   - echo "TRAVIS_GO_VERSION=${TRAVIS_GO_VERSION}"

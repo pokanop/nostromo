@@ -12,8 +12,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// CoreManifestName for storing root nostromo config
-const CoreManifestName = "manifest"
+const (
+	// DefaultSpaceportName for storing spaceport
+	DefaultSpaceportName = "spaceport"
+
+	// CoreManifestName for storing root nostromo config
+	CoreManifestName = "manifest"
+)
 
 type ManifestV0 struct {
 	Version  string              `json:"version"`

@@ -27,10 +27,14 @@ func TestLoadConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Setenv("NOSTROMO_HOME", "/tmp/nostromo")
 			defer os.Unsetenv("NOSTROMO_HOME")
-
-			// Copy manifest to target locations
 			os.MkdirAll("/tmp/nostromo/ships", 0777)
 			defer os.RemoveAll("/tmp/nostromo")
+
+			// Create temporary spaceport file
+			s := model.NewSpaceport(tt.manifests)
+			saveSpaceport(s)
+
+			// Copy manifest to target locations
 			src, _ := os.Open("../testdata/manifest.yaml")
 			defer src.Close()
 			for _, manifest := range tt.manifests {
@@ -46,8 +50,8 @@ func TestLoadConfig(t *testing.T) {
 			}
 
 			if len(tt.manifests) > 0 {
-				if len(c.spaceport.Manifests) != len(tt.manifests) {
-					t.Errorf("want %d manifests, got %d", len(tt.manifests), len(c.spaceport.Manifests))
+				if len(c.spaceport.Manifests()) != len(tt.manifests) {
+					t.Errorf("want %d manifests, got %d", len(tt.manifests), len(c.spaceport.Manifests()))
 				}
 
 				if len(c.spaceport.CoreManifest().Commands) == 0 {
@@ -91,8 +95,8 @@ func TestNewConfig(t *testing.T) {
 				t.Errorf("want error but got none")
 			}
 
-			if len(tt.manifests) > 0 && len(c.spaceport.Manifests) != len(tt.manifests) {
-				t.Errorf("want %d manifests, got %d", len(tt.manifests), len(c.spaceport.Manifests))
+			if len(tt.manifests) > 0 && len(c.spaceport.Manifests()) != len(tt.manifests) {
+				t.Errorf("want %d manifests, got %d", len(tt.manifests), len(c.spaceport.Manifests()))
 			}
 
 			if len(c.spaceport.CoreManifest().Commands) != 0 {
@@ -153,7 +157,7 @@ func TestSave(t *testing.T) {
 			if test.config != nil {
 				m = test.config.spaceport.CoreManifest()
 			}
-			err := test.config.save(m, false)
+			err := saveManifest(m, false)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -180,7 +184,7 @@ func TestDelete(t *testing.T) {
 				if test.config != nil {
 					m = test.config.spaceport.CoreManifest()
 				}
-				err := test.config.save(m, false)
+				err := saveManifest(m, false)
 				if err != nil {
 					t.Errorf("unable to save temporary manifest: %s", err)
 				}
@@ -375,10 +379,10 @@ func TestBackup(t *testing.T) {
 			}
 
 			manifests := []*model.Manifest{m}
-			c := &Config{&model.Spaceport{Manifests: manifests}}
+			c := &Config{model.NewSpaceport(manifests)}
 
 			c.spaceport.CoreManifest().Config.BackupCount = tt.backupCount
-			err = c.Backup(m)
+			err = backupManifest(m)
 			if err != nil {
 				if tt.expErr == true {
 					return
@@ -388,7 +392,7 @@ func TestBackup(t *testing.T) {
 
 			for i := 0; i < 9; i++ {
 				time.Sleep(10 * time.Millisecond)
-				c.Backup(m)
+				backupManifest(m)
 			}
 
 			backupDir, _ := ensureBackupDir()
@@ -479,7 +483,7 @@ func TestManifestURL(t *testing.T) {
 
 func fakeConfig(path string) *Config {
 	manifests := []*model.Manifest{fakeManifest(path)}
-	c := &Config{&model.Spaceport{Manifests: manifests}}
+	c := &Config{model.NewSpaceport(manifests)}
 	return c
 }
 
