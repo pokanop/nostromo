@@ -27,6 +27,9 @@ func (c *Config) Sync(force bool, sources []string) error {
 	// Fallback to all existing manifests if no sources provided
 	if len(sources) == 0 {
 		for _, m := range c.spaceport.Manifests() {
+			if m.IsCore() {
+				continue
+			}
 			sources = append(sources, m.Source)
 		}
 	}
