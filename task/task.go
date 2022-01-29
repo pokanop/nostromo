@@ -132,11 +132,7 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 				log.Regular()
 			}
 
-			lines, err := shell.InitFileLines()
-			if err != nil {
-				return -1
-			}
-
+			lines := shell.InitFileLines()
 			if m.IsCore() {
 				log.Bold("[profile]")
 				if len(lines) > 0 {

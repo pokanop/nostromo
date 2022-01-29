@@ -34,10 +34,10 @@ func TestStartupFile(t *testing.T) {
 		{"malformed block 2", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar\n\n# nostromo [section begin]\neval \"$(nostromo completion)\"\nalias foo='nostromo eval foo \"$*\"'\nalias bar='nostromo eval bar \"$*\"'# nostromo [section begin]", makeManifest("foo", "baz"), true, false, true, true, ""},
 		{"empty profile", ".profile", "", man(), false, true, false, false, ""},
 		{"empty bash_profile", ".bash_profile", "", man(), false, true, false, false, ""},
-		{"empty bashrc", ".bashrc", "", man(), true, true, false, false, "\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
-		{"empty zshrc", ".zshrc", "", man(), true, true, false, false, "\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
+		{"empty bashrc", ".bashrc", "", man(), true, true, false, false, "\n# nostromo [section begin]\nsource <(nostromo completion bash)\n# nostromo [section end]\n"},
+		{"empty zshrc", ".zshrc", "", man(), true, true, false, false, "\n# nostromo [section begin]\nautoload -U compinit; compinit\nsource <(nostromo completion zsh)\n# nostromo [section end]\n"},
 		{"existing non-preferred no commands", ".profile", "export PATH=/usr/local/bin\nexport FOO=bar", man(), false, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar"},
-		{"existing preferred no commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar", man(), true, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n# nostromo [section begin]\neval \"$(nostromo completion)\"\n# nostromo [section end]\n"},
+		{"existing preferred no commands", ".zshrc", "export PATH=/usr/local/bin\nexport FOO=bar", man(), true, true, false, false, "export PATH=/usr/local/bin\nexport FOO=bar\n# nostromo [section begin]\nautoload -U compinit; compinit\nsource <(nostromo completion zsh)\n# nostromo [section end]\n"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -110,31 +110,6 @@ func TestPreferredStartupFiles(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if got := preferredStartupFiles(test.files); !reflect.DeepEqual(got, test.want) {
 				t.Errorf("preferredStartupFiles() = %v, want %v", got, test.want)
-			}
-		})
-	}
-}
-
-func TestCurrentStartupFile(t *testing.T) {
-	type args struct {
-		env   string
-		files []*startupFile
-	}
-	tests := []struct {
-		name string
-		args args
-		want *startupFile
-	}{
-		{"nil files", args{"", nil}, nil},
-		{"not startup file", args{"zsh", []*startupFile{makeStartupFileCommon(".foo", "", true)}}, nil},
-		{"zsh", args{"zsh", []*startupFile{makeStartupFileCommon(".zshrc", "", true)}}, makeStartupFileCommon(".zshrc", "", true)},
-		{"bash", args{"bash", []*startupFile{makeStartupFileCommon(".bashrc", "", true)}}, makeStartupFileCommon(".bashrc", "", true)},
-	}
-	for _, tt := range tests {
-		os.Setenv("SHELL", tt.args.env)
-		t.Run(tt.name, func(t *testing.T) {
-			if got := currentStartupFile(tt.args.files); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("currentStartupFile() = %v, want %v", got, tt.want)
 			}
 		})
 	}
