@@ -2,20 +2,18 @@ package shell
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 )
 
-// Shell type
-type Shell int
-
 // Supported shells
 const (
-	Bash Shell = iota
-	Zsh
+	Bash       = "bash"
+	Zsh        = "zsh"
+	Fish       = "fish"
+	Powershell = "powershell"
 )
 
 var validLanguages = []string{"sh", "ruby", "python", "perl", "js"}
@@ -23,7 +21,6 @@ var validLanguages = []string{"sh", "ruby", "python", "perl", "js"}
 var (
 	initFiles = loadStartupFiles()
 	prefFiles = preferredStartupFiles(initFiles)
-	prefFile  = currentStartupFile(initFiles)
 )
 
 // EvalString returns the command as a string to evaluate or an error.
@@ -68,20 +65,16 @@ func Commit(manifest *model.Manifest) error {
 }
 
 // InitFileLines returns the shell initialization file lines
-func InitFileLines() (string, error) {
-	if prefFile == nil {
-		return "", fmt.Errorf("could not find current init file")
+func InitFileLines() string {
+	var s string
+	for _, prefFile := range prefFiles {
+		s += fmt.Sprintf("|%s|", prefFile.name())
+		c, err := prefFile.contentBlock()
+		if err == nil {
+			s += c
+		}
 	}
-	return prefFile.contentBlock()
-}
-
-// Which shell is currently running
-func Which() Shell {
-	sh := os.Getenv("SHELL")
-	if strings.Contains(sh, "zsh") {
-		return Zsh
-	}
-	return Bash
+	return s
 }
 
 // SupportedLanguages that can be executed
@@ -116,10 +109,9 @@ func buildEvalCmd(cmd, language string) string {
 	}
 }
 
-func shellWrapperFunc() string {
+func shellWrapperFunc(sh string) string {
 	// Sources completion scripts after each command in case something changes
-	return `__nostromo_cmd() { command nostromo "$@"; }
-nostromo() { __nostromo_cmd "$@" && eval "$(__nostromo_cmd completion)"; }`
+	return fmt.Sprintf("__nostromo_cmd() { command nostromo \"$@\"; }\nnostromo() { __nostromo_cmd \"$@\" && eval \"$(__nostromo_cmd completion %s)\"; }", sh)
 }
 
 func shellAliasFuncs(m *model.Manifest) string {
@@ -130,7 +122,7 @@ func shellAliasFuncs(m *model.Manifest) string {
 			alias = fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
 		} else {
 			// This will generate a shell command provided to the completion script
-			// generation. When users run a command, it actually runs evaluates
+			// generation. When users run a command, it actually runs `eval` on
 			// the result of `nostromo eval` with arguments resolved.
 			cmd := fmt.Sprintf("__nostromo_cmd eval %s \"$@\"", c.Alias)
 			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s); }", c.Alias, cmd))

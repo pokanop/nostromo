@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	beginBlockComment = "# nostromo [section begin]"
-	endBlockComment   = "# nostromo [section end]"
-	sourceCompletion  = "eval \"$(nostromo completion)\""
+	beginBlockComment    = "# nostromo [section begin]"
+	endBlockComment      = "# nostromo [section end]"
+	bashSourceCompletion = "source <(nostromo completion bash)"
+	zshSourceCompletion  = "autoload -U compinit; compinit\nsource <(nostromo completion zsh)"
 )
 
 var (
@@ -73,18 +74,6 @@ func preferredStartupFiles(files []*startupFile) []*startupFile {
 	return p
 }
 
-func currentStartupFile(files []*startupFile) *startupFile {
-	sh := Which()
-	for _, s := range files {
-		if sh == Zsh && strings.Contains(s.path, "zshrc") {
-			return s
-		} else if sh == Bash && strings.Contains(s.path, "bashrc") {
-			return s
-		}
-	}
-	return nil
-}
-
 func findStartupFile(name string) (string, os.FileMode, error) {
 	home, err := pathutil.HomeDir()
 	if err != nil {
@@ -139,6 +128,17 @@ func newStartupFile(path, content string, mode os.FileMode) *startupFile {
 		commands:  map[string]*model.Command{},
 		preferred: isPreferredFilename(path),
 	}
+}
+
+func (s *startupFile) name() string {
+	return filepath.Base(s.path)
+}
+
+func (s *startupFile) shell() string {
+	if strings.Contains(s.path, ".zshrc") {
+		return Zsh
+	}
+	return Bash
 }
 
 func (s *startupFile) parse() error {
@@ -263,5 +263,9 @@ func (s *startupFile) contentIndexes() (int, int) {
 }
 
 func (s *startupFile) makeNostromoBlock() string {
+	sourceCompletion := bashSourceCompletion
+	if s.shell() == Zsh {
+		sourceCompletion = zshSourceCompletion
+	}
 	return fmt.Sprintf("\n%s\n%s\n%s\n", beginBlockComment, sourceCompletion, endBlockComment)
 }

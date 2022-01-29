@@ -15,13 +15,13 @@ var ver *version.Info
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "nostromo",
-	Short: "Nostromo is a tool to manage aliases",
-	Long: `Nostromo is a CLI to manage aliases through simple commands to add and remove
+	Short: "nostromo is a tool to manage aliases",
+	Long: `nostromo is a CLI to manage aliases through simple commands to add and remove
 scoped aliases and substitutions.
 
-Managing aliases can be tedious and difficult to set up. Nostromo makes this process easy
+Managing aliases can be tedious and difficult to set up. nostromo makes this process easy
 and reliable. The tool adds shortcuts to your .bashrc that call into the nostromo binary.
-Nostromo reads and manages all aliases within its own config file.
+nostromo reads and manages all aliases within its own config file.
 This is used to find and execute the actual command intended as well as any
 substitutions to simplify calls.`,
 	SilenceErrors: true,
@@ -47,6 +47,9 @@ func SetVersion(v, c, d string) {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	// Disable default completion command
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -65,5 +68,5 @@ func printUsage(cmd *cobra.Command) {
 }
 
 func printVersion() {
-	log.Regularf("Nostromo: %s\n", ver.Formatted())
+	log.Regularf("nostromo: %s\n", ver.Formatted())
 }

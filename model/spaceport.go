@@ -31,6 +31,16 @@ func (s *Spaceport) Manifests() []*Manifest {
 	return manifests
 }
 
+func (s *Spaceport) Commands() []*Command {
+	cmds := []*Command{}
+	for _, m := range s.Manifests() {
+		for _, c := range m.Commands {
+			cmds = append(cmds, c)
+		}
+	}
+	return cmds
+}
+
 func (s *Spaceport) Import(manifests []*Manifest) {
 	s.Sequence = []string{}
 	for _, m := range manifests {

@@ -77,7 +77,9 @@ func (c *Command) CobraCommand() *cobra.Command {
 		Use:       c.Alias,
 		Short:     c.Description,
 		Long:      c.Description,
+		Hidden:    true,
 		ValidArgs: c.commandList(),
+		Run:       func(cmd *cobra.Command, args []string) {},
 	}
 	for _, childCmd := range c.Commands {
 		cmd.AddCommand(childCmd.CobraCommand())
@@ -337,7 +339,7 @@ func (c *Command) build(keyPath, command, description string, code *Code, aliasO
 func (c *Command) commandList() []string {
 	var cmds []string
 	for _, cmd := range c.Commands {
-		cmds = append(cmds, cmd.Alias)
+		cmds = append(cmds, fmt.Sprintf("%s\t%s", cmd.Alias, cmd.Description))
 	}
 	sort.Strings(cmds)
 	return cmds
@@ -352,7 +354,7 @@ func (c *Command) checkDisabled() (bool, *Command) {
 		if cmd == nil {
 			break
 		}
-		if cmd.Disabled == true {
+		if cmd.Disabled {
 			return true, cmd
 		}
 		cmd = cmd.parent

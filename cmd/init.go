@@ -17,7 +17,7 @@ By default the config file is located at ~/.nostromo/ships/manifest.yaml.
 
 Customize this with the $NOSTROMO_HOME environment variable`,
 	Run: func(cmd *cobra.Command, args []string) {
-		os.Exit(task.InitConfig())
+		os.Exit(task.InitConfig(cmd.Root()))
 	},
 }
 

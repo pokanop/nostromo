@@ -19,11 +19,12 @@ import (
 
 // Path for standard nostromo config
 const (
-	DefaultBaseDir      = "~/.nostromo"
-	DefaultConfigFile   = "%s.yaml"
-	DefaultManifestsDir = "ships"
-	DefaultBackupsDir   = "cargo"
-	DefaultDownloadsDir = "downloads"
+	DefaultBaseDir        = "~/.nostromo"
+	DefaultConfigFile     = "%s.yaml"
+	DefaultManifestsDir   = "ships"
+	DefaultBackupsDir     = "cargo"
+	DefaultDownloadsDir   = "downloads"
+	DefaultCompletionsDir = "completions"
 )
 
 // URL scheme constants
@@ -121,6 +122,16 @@ func BaseDir() string {
 	}
 
 	return DefaultBaseDir
+}
+
+// WriteCompletion writes a file to the completions folder
+func WriteCompletion(sh, s string) error {
+	if len(sh) == 0 || len(s) == 0 {
+		return fmt.Errorf("attempt to write 0 length file")
+	}
+
+	path := filepath.Join(completionsPath(), fmt.Sprintf("nostromo.%s", sh))
+	return os.WriteFile(path, []byte(s), 0644)
 }
 
 // Spaceport associated with this config
@@ -255,6 +266,11 @@ func manifestsPath() string {
 // backupsPath joins the base directory and the backups directory
 func backupsPath() string {
 	return filepath.Join(pathutil.Abs(BaseDir()), DefaultBackupsDir)
+}
+
+// completionsPath joins the base directory and the manifest directory
+func completionsPath() string {
+	return filepath.Join(pathutil.Abs(BaseDir()), DefaultCompletionsDir)
 }
 
 func coreManifestFile() string {
@@ -468,6 +484,10 @@ func saveManifest(manifest *model.Manifest, backup bool) error {
 // sanitizeFiles is used for moving config files and fixing up any files during upgrades.
 func sanitizeFiles() error {
 	if err := pathutil.EnsurePath(manifestsPath()); err != nil {
+		return err
+	}
+
+	if err := pathutil.EnsurePath(completionsPath()); err != nil {
 		return err
 	}
 

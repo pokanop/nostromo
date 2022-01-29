@@ -16,7 +16,7 @@ import (
 )
 
 // InitConfig of nostromo config file if not already initialized
-func InitConfig() int {
+func InitConfig(cmd *cobra.Command) int {
 	// Attempt to load existing config
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -36,6 +36,12 @@ func InitConfig() int {
 		log.Error(err)
 		return -1
 	}
+
+	// Generate completion files
+	GenerateCompletions("bash", cmd, true)
+	GenerateCompletions("zsh", cmd, true)
+	GenerateCompletions("fish", cmd, true)
+	GenerateCompletions("powershell", cmd, true)
 
 	return 0
 }
@@ -126,11 +132,7 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 				log.Regular()
 			}
 
-			lines, err := shell.InitFileLines()
-			if err != nil {
-				return -1
-			}
-
+			lines := shell.InitFileLines()
 			if m.IsCore() {
 				log.Bold("[profile]")
 				if len(lines) > 0 {
@@ -178,14 +180,33 @@ func GetConfig(key string) int {
 	return 0
 }
 
+// FetchCommands builds the nostromo command tree and returns the top level
+// commands for execution
+func FetchCommands() []*cobra.Command {
+	cmds := []*cobra.Command{}
+
+	cfg := checkConfigQuiet()
+	if cfg == nil {
+		return cmds
+	}
+
+	for _, cmd := range cfg.Spaceport().Commands() {
+		cmds = append(cmds, cmd.CobraCommand())
+	}
+
+	return cmds
+}
+
 // GenerateCompletions for all manifest commands and nostromo itself.
-func GenerateCompletions(cmd *cobra.Command) int {
+func GenerateCompletions(sh string, cmd *cobra.Command, writeFile bool) int {
 	// Generate completions for nostromo
-	s, err := shell.Completion(cmd)
+	s, err := shell.Completion(sh, cmd)
 	if err != nil {
 		return -1
 	}
-	log.Print(s)
+	if !writeFile {
+		log.Print(s)
+	}
 
 	cfg := checkConfigQuiet()
 	if cfg == nil {
@@ -193,13 +214,23 @@ func GenerateCompletions(cmd *cobra.Command) int {
 	}
 
 	// Generate completions for manifest commands
-	completions, err := shell.SpaceportCompletion(cfg.Spaceport())
+	completions, err := shell.SpaceportCompletion(sh, cfg.Spaceport())
 	if err != nil {
 		return 0
 	}
 
 	for _, completion := range completions {
-		log.Print(completion)
+		if !writeFile {
+			log.Print(completion)
+		}
+		s += "\n" + completion
+	}
+
+	if writeFile {
+		err = config.WriteCompletion(sh, s)
+		if err != nil {
+			log.Warningf("unable to write completion file for %s", sh)
+		}
 	}
 
 	return 0

@@ -2,7 +2,7 @@ package shell
 
 import (
 	"bytes"
-	"io/ioutil"
+	"fmt"
 	"strings"
 
 	"github.com/pokanop/nostromo/model"
@@ -15,39 +15,39 @@ type CobraCompleter interface {
 }
 
 // Completion generates shell completion scripts
-func Completion(cmd *cobra.Command) (string, error) {
+func Completion(sh string, cmd *cobra.Command) (string, error) {
 	var buf bytes.Buffer
 	var err error
-	if Which() == Zsh {
+	switch sh {
+	case "bash":
+		err = cmd.GenBashCompletionV2(&buf, true)
+	case "zsh":
+		zshHead := fmt.Sprintf("#compdef %[1]s\ncompdef _%[1]s %[1]s\n", cmd.Name())
+		buf.Write([]byte(zshHead))
 		err = cmd.GenZshCompletion(&buf)
-	} else {
-		err = cmd.GenBashCompletion(&buf)
+	case "fish":
+		err = cmd.GenFishCompletion(&buf, true)
+	case "powershell":
+		err = cmd.GenPowerShellCompletionWithDesc(&buf)
 	}
 	if err != nil {
 		return "", err
 	}
 
-	b, err := ioutil.ReadAll(&buf)
-	if err != nil {
-		return "", err
-	}
-	s := string(b)
-
-	// This is required due to a bug in cobra and zsh support:
-	// https://github.com/spf13/cobra/pull/887
-	if Which() == Zsh {
-		s = strings.Replace(s, "#", "", 1)
+	s := buf.String()
+	if cmd.Name() != "nostromo" {
+		s = strings.ReplaceAll(s, "${words[1]} __complete ${words[2,-1]}", "nostromo __complete run ${words[1]} ${words[2,-1]}")
 	}
 
 	return s, nil
 }
 
 // SpaceportCompletion scripts for all manifests
-func SpaceportCompletion(s *model.Spaceport) ([]string, error) {
+func SpaceportCompletion(sh string, s *model.Spaceport) ([]string, error) {
 	var completions []string
-	completions = append(completions, shellWrapperFunc())
+	completions = append(completions, shellWrapperFunc(sh))
 	for _, m := range s.Manifests() {
-		mc, err := ManifestCompletion(m)
+		mc, err := ManifestCompletion(sh, m)
 		if err != nil {
 			return nil, err
 		}
@@ -57,7 +57,7 @@ func SpaceportCompletion(s *model.Spaceport) ([]string, error) {
 }
 
 // ManifestCompletion scripts for a manifest
-func ManifestCompletion(m *model.Manifest) ([]string, error) {
+func ManifestCompletion(sh string, m *model.Manifest) ([]string, error) {
 	var completions []string
 	completions = append(completions, shellAliasFuncs(m))
 	for _, cmd := range m.Commands {
@@ -66,7 +66,7 @@ func ManifestCompletion(m *model.Manifest) ([]string, error) {
 		if cmd.AliasOnly || len(cmd.Commands) == 0 {
 			continue
 		}
-		s, err := CommandCompletion(cmd)
+		s, err := CommandCompletion(sh, cmd)
 		if err != nil {
 			return nil, err
 		}
@@ -76,6 +76,6 @@ func ManifestCompletion(m *model.Manifest) ([]string, error) {
 }
 
 // CommandCompletion script for a command
-func CommandCompletion(cmd *model.Command) (string, error) {
-	return Completion(cmd.CobraCommand())
+func CommandCompletion(sh string, cmd *model.Command) (string, error) {
+	return Completion(sh, cmd.CobraCommand())
 }

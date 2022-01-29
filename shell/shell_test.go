@@ -80,8 +80,8 @@ func TestEvalString(t *testing.T) {
 }
 
 func TestShellWrapperFunc(t *testing.T) {
-	if shellWrapperFunc() != `__nostromo_cmd() { command nostromo "$@"; }
-nostromo() { __nostromo_cmd "$@" && eval "$(__nostromo_cmd completion)"; }` {
+	if shellWrapperFunc("zsh") != `__nostromo_cmd() { command nostromo "$@"; }
+nostromo() { __nostromo_cmd "$@" && eval "$(__nostromo_cmd completion zsh)"; }` {
 		t.Errorf("shell wrapper func not as expected")
 	}
 }
