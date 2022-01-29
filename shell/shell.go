@@ -118,8 +118,11 @@ func buildEvalCmd(cmd, language string) string {
 
 func shellWrapperFunc() string {
 	// Sources completion scripts after each command in case something changes
-	return `__nostromo_cmd() { command nostromo "$@"; }
-nostromo() { __nostromo_cmd "$@" && eval "$(__nostromo_cmd completion)"; }`
+	sh := "bash"
+	if Which() == Zsh {
+		sh = "zsh"
+	}
+	return fmt.Sprintf("__nostromo_cmd() { command ./nostromo \"$@\"; }\nnostromo() { __nostromo_cmd \"$@\" && eval \"$(__nostromo_cmd completion %s)\"; }", sh)
 }
 
 func shellAliasFuncs(m *model.Manifest) string {
@@ -130,7 +133,7 @@ func shellAliasFuncs(m *model.Manifest) string {
 			alias = fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
 		} else {
 			// This will generate a shell command provided to the completion script
-			// generation. When users run a command, it actually runs evaluates
+			// generation. When users run a command, it actually runs `eval` on
 			// the result of `nostromo eval` with arguments resolved.
 			cmd := fmt.Sprintf("__nostromo_cmd eval %s \"$@\"", c.Alias)
 			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s); }", c.Alias, cmd))

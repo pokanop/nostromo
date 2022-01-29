@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	beginBlockComment = "# nostromo [section begin]"
-	endBlockComment   = "# nostromo [section end]"
-	sourceCompletion  = "eval \"$(nostromo completion)\""
+	beginBlockComment    = "# nostromo [section begin]"
+	endBlockComment      = "# nostromo [section end]"
+	bashSourceCompletion = "source <(./nostromo completion bash)"
+	zshSourceCompletion  = "autoload -U compinit; compinit\nsource <(./nostromo completion zsh)"
 )
 
 var (
@@ -263,5 +264,9 @@ func (s *startupFile) contentIndexes() (int, int) {
 }
 
 func (s *startupFile) makeNostromoBlock() string {
+	sourceCompletion := bashSourceCompletion
+	if Which() == Zsh {
+		sourceCompletion = zshSourceCompletion
+	}
 	return fmt.Sprintf("\n%s\n%s\n%s\n", beginBlockComment, sourceCompletion, endBlockComment)
 }
