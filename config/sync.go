@@ -24,6 +24,13 @@ func (c *Config) Sync(force bool, sources []string) error {
 
 	defer syncCleanup()
 
+	// Fallback to all existing manifests if no sources provided
+	if len(sources) == 0 {
+		for _, m := range c.spaceport.Manifests() {
+			sources = append(sources, m.Source)
+		}
+	}
+
 	for _, source := range sources {
 		err := syncDownload(source)
 		if err != nil {

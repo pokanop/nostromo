@@ -22,7 +22,6 @@ manifests from respective data sources.
 
 Providing a [source] file will sync only that file. Omitting it
 directs nostromo to sync all manifests.`,
-	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.Sync(force, args))
 	},
