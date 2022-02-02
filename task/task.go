@@ -12,6 +12,7 @@ import (
 	"github.com/pokanop/nostromo/prompt"
 	"github.com/pokanop/nostromo/shell"
 	"github.com/pokanop/nostromo/stringutil"
+	"github.com/pokanop/nostromo/version"
 	"github.com/shivamMg/ppds/tree"
 	"github.com/spf13/cobra"
 )
@@ -584,6 +585,31 @@ func Detach(name string, keyPaths []string, targetKeyPath, description string, k
 		return -1
 	}
 	err = config.SaveSpaceport(s)
+	if err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	return 0
+}
+
+func RegenerateID(name string) int {
+	cfg := checkConfig()
+	var m *model.Manifest
+	if len(name) > 0 {
+		m = cfg.Spaceport().FindManifest(name)
+		if m == nil {
+			log.Errorf("no manifest named %s exists\n", name)
+			return -1
+		}
+	} else {
+		m = cfg.Spaceport().CoreManifest()
+	}
+
+	v := version.NewInfo(m.Version.SemVer, m.Version.GitCommit, m.Version.BuildDate)
+	m.Version.Update(v)
+
+	err := config.SaveManifest(m, m.IsCore())
 	if err != nil {
 		log.Error(err)
 		return -1
