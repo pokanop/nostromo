@@ -2,6 +2,7 @@ package task
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pokanop/nostromo/config"
@@ -520,6 +521,70 @@ func Sync(force bool, sources []string) int {
 	}
 
 	if err := cfg.Sync(force, sources); err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	return 0
+}
+
+func Detach(name string, keyPaths []string, targetKeyPath, description string, keepOriginal bool) int {
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+	s := cfg.Spaceport()
+
+	// First try to find the relevant keypaths
+	cmds := []*model.Command{}
+	for _, keyPath := range keyPaths {
+		cmd := s.FindCommand(keyPath)
+		if cmd == nil {
+			log.Errorf("keypath not found: %s", keyPath)
+			return -1
+		}
+		cmds = append(cmds, cmd)
+	}
+
+	// Name is the output file name, check if manifest already exists
+	var m *model.Manifest
+	var err error
+	path := filepath.Join(pathutil.Abs(config.BaseDir()), config.DefaultManifestsDir, name+".yaml")
+	if m, err = config.Parse(path); err != nil {
+		// Manifest does not exist, create a new one
+		m = config.NewManifest(name)
+	}
+
+	// Merge or add commands to manifest
+	m.ImportCommands(cmds, targetKeyPath, description)
+
+	// Remove original node if needed, only applies to core manifest
+	if !keepOriginal {
+		cm := s.CoreManifest()
+		for _, keyPath := range keyPaths {
+			_, err = cm.RemoveCommand(keyPath)
+			if err != nil {
+				log.Warningf("cannot remove %s: %s\n", keyPath, err)
+			}
+		}
+
+		// Save core manifest updates
+		err = config.SaveManifest(cm, true)
+		if err != nil {
+			log.Error(err)
+			return -1
+		}
+	}
+
+	// Update spaceport and save manifest
+	s.AddManifest(m)
+	err = config.SaveManifest(m, false)
+	if err != nil {
+		log.Error(err)
+		return -1
+	}
+	err = config.SaveSpaceport(s)
+	if err != nil {
 		log.Error(err)
 		return -1
 	}

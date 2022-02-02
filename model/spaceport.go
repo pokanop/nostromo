@@ -15,9 +15,12 @@ func NewSpaceport(manifests []*Manifest) *Spaceport {
 }
 
 func (s *Spaceport) Init() {
-	// Ensure map is created
+	// Ensure fields are created
 	if s.manifests == nil {
 		s.manifests = map[string]*Manifest{}
+	}
+	if s.Sequence == nil {
+		s.Sequence = []string{}
 	}
 }
 
@@ -76,4 +79,13 @@ func (s *Spaceport) UpdateVersion(ver *version.Info) {
 	for _, m := range s.manifests {
 		m.Version.Update(ver)
 	}
+}
+
+func (s *Spaceport) FindCommand(name string) *Command {
+	for _, m := range s.manifests {
+		if cmd := m.Find(name); cmd != nil {
+			return cmd
+		}
+	}
+	return nil
 }

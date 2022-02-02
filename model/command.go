@@ -134,7 +134,7 @@ func (c *Command) addCommand(cmd *Command) {
 
 	c.Commands[cmd.Alias] = cmd
 	cmd.parent = c
-	cmd.KeyPath = fmt.Sprintf("%s.%s", c.KeyPath, cmd.Alias)
+	cmd.KeyPath = keypath.KeyPath([]string{c.KeyPath, cmd.Alias})
 }
 
 // removeCommand at this scope
@@ -360,6 +360,18 @@ func (c *Command) checkDisabled() (bool, *Command) {
 		cmd = cmd.parent
 	}
 	return false, nil
+}
+
+// updateRootKeyPath to change this command and all children with new root
+func (c *Command) updateRootKeyPath(newRoot string) {
+	if len(newRoot) == 0 {
+		c.KeyPath = c.Alias
+	} else {
+		c.KeyPath = keypath.KeyPath([]string{newRoot, c.Alias})
+	}
+	for _, cmd := range c.Commands {
+		cmd.updateRootKeyPath(c.KeyPath)
+	}
 }
 
 func joinedSubs(subMap map[string]*Substitution) string {

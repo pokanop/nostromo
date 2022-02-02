@@ -225,6 +225,26 @@ func (m *Manifest) Children() []tree.Node {
 	return nodes
 }
 
+func (m *Manifest) ImportCommands(cmds []*Command, kp, description string) {
+	// Check if keypath exists
+	root := m.Find(kp)
+	if root != nil {
+		// Add individual commands
+		for _, c := range cmds {
+			root.addCommand(c)
+		}
+		return
+	}
+
+	// Keypath found, add commands to root
+	for _, c := range cmds {
+		c.updateRootKeyPath("")
+		m.Commands[c.Name] = c
+	}
+
+	return
+}
+
 // count of the total number of commands in this manifest
 func (m *Manifest) count() int {
 	count := 0

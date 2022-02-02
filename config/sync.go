@@ -41,11 +41,11 @@ func (c *Config) Sync(force bool, sources []string) error {
 		}
 	}
 
-	if err := c.syncMerge(force); err != nil {
+	if err := c.syncMerge(sources, force); err != nil {
 		return err
 	}
 
-	if err := saveSpaceport(c.spaceport); err != nil {
+	if err := SaveSpaceport(c.spaceport); err != nil {
 		return err
 	}
 
@@ -105,7 +105,7 @@ func syncDownload(source string) error {
 	return nil
 }
 
-func (c *Config) syncMerge(force bool) error {
+func (c *Config) syncMerge(sources []string, force bool) error {
 	// Read all files from download folder
 	downloadsPath := downloadsPath()
 	files, err := ioutil.ReadDir(downloadsPath)
@@ -117,7 +117,7 @@ func (c *Config) syncMerge(force bool) error {
 	for _, file := range files {
 		fname := file.Name()
 		path := filepath.Join(downloadsPath, fname)
-		m, err := parse(path)
+		m, err := Parse(path)
 		if err != nil {
 			return err
 		}
@@ -131,6 +131,14 @@ func (c *Config) syncMerge(force bool) error {
 
 		// Update path
 		m.Path = filepath.Join(manifestsPath(), fmt.Sprintf(DefaultConfigFile, m.Name))
+
+		// Update source
+		for _, source := range sources {
+			base := strings.TrimSuffix(filepath.Base(source), filepath.Ext(m.Path))
+			if base == m.Name {
+				m.Source = source
+			}
+		}
 
 		var shouldSave bool
 		if c.spaceport.IsUnique(m.Name) {
@@ -151,7 +159,7 @@ func (c *Config) syncMerge(force bool) error {
 		}
 
 		if shouldSave {
-			err = saveManifest(m, false)
+			err = SaveManifest(m, false)
 			if err != nil {
 				log.Warningf("failed to save manifest %s", m.Name)
 			}

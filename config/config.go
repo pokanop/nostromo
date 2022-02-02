@@ -58,7 +58,7 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 	path := coreManifestPath()
-	m, err := parse(coreManifestPath())
+	m, err := Parse(coreManifestPath())
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func LoadConfig() (*Config, error) {
 
 	s.Import(manifests)
 	s.Link()
-	if err := saveSpaceport(s); err != nil {
+	if err := SaveSpaceport(s); err != nil {
 		return nil, err
 	}
 
@@ -104,6 +104,12 @@ func NewConfig() (*Config, error) {
 	return &Config{s}, nil
 }
 
+// NewManifest creates a new manifest with provided name
+func NewManifest(name string) *model.Manifest {
+	path := manifestFile(name)
+	return model.NewManifest(name, "file://"+path, path, ver)
+}
+
 // NewCoreManifest creates a new core manifest
 func NewCoreManifest() (*model.Manifest, error) {
 	m, err := coreManifestURL()
@@ -124,6 +130,103 @@ func BaseDir() string {
 	return DefaultBaseDir
 }
 
+// Parse nostromo config at path into a `Manifest` object
+func Parse(path string) (*model.Manifest, error) {
+	log.Debugf("parsing manifest at %s\n", path)
+	f, err := os.Open(pathutil.Abs(path))
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize manifest with some defaults
+	m := &model.Manifest{
+		Config: &model.Config{
+			BackupCount: 10,
+		},
+	}
+	ext := filepath.Ext(path)
+	if ext == ".yaml" {
+		err = yaml.Unmarshal(b, &m)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("invalid file format: %s", ext)
+	}
+
+	// Manifest path should match
+	m.Path = path
+
+	return m, nil
+}
+
+// SaveSpaceport to nostromo config folder
+func SaveSpaceport(s *model.Spaceport) error {
+	log.Debug("saving spaceport")
+
+	if s == nil {
+		return fmt.Errorf("spaceport is nil")
+	}
+
+	b, err := yaml.Marshal(s)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(spaceportFile(), b, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SaveManifest to nostromo config folder and backup optionally
+func SaveManifest(manifest *model.Manifest, backup bool) error {
+	log.Debugf("saving manifest %s\n", manifest.Name)
+
+	if manifest == nil {
+		return fmt.Errorf("manifest is nil")
+	}
+
+	if len(manifest.Path) == 0 {
+		return fmt.Errorf("invalid path to save")
+	}
+
+	var b []byte
+	var err error
+	ext := filepath.Ext(manifest.Path)
+	if ext == ".yaml" {
+		b, err = yaml.Marshal(manifest)
+	} else {
+		return fmt.Errorf("invalid file format: %s", ext)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	// Save backup if requested
+	if backup {
+		if err = backupManifest(manifest); err != nil {
+			return err
+		}
+	}
+
+	err = ioutil.WriteFile(pathutil.Abs(manifest.Path), b, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // WriteCompletion writes a file to the completions folder
 func WriteCompletion(sh, s string) error {
 	if len(sh) == 0 || len(s) == 0 {
@@ -139,39 +242,18 @@ func (c *Config) Spaceport() *model.Spaceport {
 	return c.spaceport
 }
 
-func (c *Config) Load(path string) error {
-	// Convert path to url
-	u, err := manifestURL(path)
-	if err != nil {
-		return err
-	}
-
-	// Handle local manifest
-	if u.Scheme == "file" {
-		m, err := parse(u.Path)
-		if err != nil {
-			return err
-		}
-		c.spaceport.AddManifest(m)
-		return nil
-	}
-
-	// TODO: Handle remote manifest
-	return nil
-}
-
 // Save nostromo config to file
 func (c *Config) Save() error {
 	// Update version
 	c.spaceport.UpdateVersion(ver)
 
 	// Save spaceport
-	if err := saveSpaceport(c.spaceport); err != nil {
+	if err := SaveSpaceport(c.spaceport); err != nil {
 		return err
 	}
 
 	// Save core manifest
-	return saveManifest(c.spaceport.CoreManifest(), true)
+	return SaveManifest(c.spaceport.CoreManifest(), true)
 }
 
 // Delete nostromo config file
@@ -256,6 +338,11 @@ func (c *Config) Set(key, value string) error {
 // spaceportFile provides the path for spaceports
 func spaceportFile() string {
 	return filepath.Join(pathutil.Abs(BaseDir()), fmt.Sprintf(DefaultConfigFile, model.DefaultSpaceportName))
+}
+
+// manifestFile joins the manifests path with provided name
+func manifestFile(name string) string {
+	return filepath.Join(manifestsPath(), fmt.Sprintf(DefaultConfigFile, name))
 }
 
 // manifestsPath joins the base directory and the manifest directory
@@ -374,8 +461,13 @@ func loadManifests() []*model.Manifest {
 	}
 
 	for _, file := range files {
+		// Skip core manifest
+		if file.Name() == coreManifestFile() {
+			continue
+		}
+
 		path := filepath.Join(path, file.Name())
-		m, err := parse(path)
+		m, err := Parse(path)
 		if err != nil {
 			log.Warningf("cannot read manifest %s", path)
 			continue
@@ -388,97 +480,6 @@ func loadManifests() []*model.Manifest {
 	}
 
 	return manifests
-}
-
-// parse nostromo config at path into a `Manifest` object
-func parse(path string) (*model.Manifest, error) {
-	log.Debugf("parsing manifest at %s\n", path)
-	f, err := os.Open(pathutil.Abs(path))
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-
-	// Initialize manifest with some defaults
-	m := &model.Manifest{
-		Config: &model.Config{
-			BackupCount: 10,
-		},
-	}
-	ext := filepath.Ext(path)
-	if ext == ".yaml" {
-		err = yaml.Unmarshal(b, &m)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		return nil, fmt.Errorf("invalid file format: %s", ext)
-	}
-
-	// Manifest path should match
-	m.Path = path
-
-	return m, nil
-}
-
-func saveSpaceport(s *model.Spaceport) error {
-	if s == nil {
-		return fmt.Errorf("spaceport is nil")
-	}
-
-	b, err := yaml.Marshal(s)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(spaceportFile(), b, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func saveManifest(manifest *model.Manifest, backup bool) error {
-	if manifest == nil {
-		return fmt.Errorf("manifest is nil")
-	}
-
-	if len(manifest.Path) == 0 {
-		return fmt.Errorf("invalid path to save")
-	}
-
-	var b []byte
-	var err error
-	ext := filepath.Ext(manifest.Path)
-	if ext == ".yaml" {
-		b, err = yaml.Marshal(manifest)
-	} else {
-		return fmt.Errorf("invalid file format: %s", ext)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	// Save backup if requested
-	if backup {
-		if err = backupManifest(manifest); err != nil {
-			return err
-		}
-	}
-
-	err = ioutil.WriteFile(pathutil.Abs(manifest.Path), b, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // sanitizeFiles is used for moving config files and fixing up any files during upgrades.
