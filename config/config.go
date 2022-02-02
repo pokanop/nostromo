@@ -168,11 +168,11 @@ func Parse(path string) (*model.Manifest, error) {
 
 // SaveSpaceport to nostromo config folder
 func SaveSpaceport(s *model.Spaceport) error {
-	log.Debug("saving spaceport")
-
 	if s == nil {
 		return fmt.Errorf("spaceport is nil")
 	}
+
+	log.Debug("saving spaceport")
 
 	b, err := yaml.Marshal(s)
 	if err != nil {
@@ -189,11 +189,11 @@ func SaveSpaceport(s *model.Spaceport) error {
 
 // SaveManifest to nostromo config folder and backup optionally
 func SaveManifest(manifest *model.Manifest, backup bool) error {
-	log.Debugf("saving manifest %s\n", manifest.Name)
-
 	if manifest == nil {
 		return fmt.Errorf("manifest is nil")
 	}
+
+	log.Debugf("saving manifest %s\n", manifest.Name)
 
 	if len(manifest.Path) == 0 {
 		return fmt.Errorf("invalid path to save")
