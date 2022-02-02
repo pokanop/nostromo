@@ -233,10 +233,15 @@ func (m *Manifest) ImportCommands(cmds []*Command, kp, description string) {
 		for _, c := range cmds {
 			root.addCommand(c)
 		}
+
+		if len(description) > 0 {
+			root.Description = description
+		}
+
 		return
 	}
 
-	// Keypath found, add commands to root
+	// Keypath not found, add commands to root
 	for _, c := range cmds {
 		c.updateRootKeyPath("")
 		m.Commands[c.Name] = c

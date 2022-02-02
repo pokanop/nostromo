@@ -380,6 +380,35 @@ func RemoveCommand(keyPath string) int {
 	return 0
 }
 
+// MoveCommand from one node to another
+func MoveCommand(source, dest, description string) int {
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+
+	m := cfg.Spaceport().CoreManifest()
+	cmd := m.Find(source)
+	if cmd == nil {
+		log.Errorf("%s command not found", source)
+		return -1
+	}
+
+	if _, err := m.RemoveCommand(source); err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	m.ImportCommands([]*model.Command{cmd}, dest, description)
+
+	if err := saveConfig(cfg, false); err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	return 0
+}
+
 // AddSubstitution to the manifest
 func AddSubstitution(keyPath, name, alias string) int {
 	cfg := checkConfig()
