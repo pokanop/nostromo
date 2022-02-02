@@ -11,13 +11,14 @@ var force bool
 
 // syncCmd represents the sync command
 var syncCmd = &cobra.Command{
-	Use:   "sync",
+	Use:   "sync [name]...",
 	Short: "Sync docked manifests from source locations",
 	Long: `Sync docked manifests from source locations and
 makes commands available for execution.
 
 Sync can be used to update previously docked manifests from
-respective data sources.
+respective data sources. Provide one or more of the names of 
+the manifests as arguments to sync.
 
 Sync will only update manifests with changed identifiers, to
 force update use the -f flag.`,

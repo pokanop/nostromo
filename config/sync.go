@@ -35,6 +35,11 @@ func (c *Config) Sync(force bool, sources []string) error {
 	}
 
 	for _, source := range sources {
+		// Check if manifest name was provided
+		if m := c.spaceport.FindManifest(source); m != nil {
+			source = m.Source
+		}
+
 		err := syncDownload(source)
 		if err != nil {
 			return err
