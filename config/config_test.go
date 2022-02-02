@@ -32,7 +32,7 @@ func TestLoadConfig(t *testing.T) {
 
 			// Create temporary spaceport file
 			s := model.NewSpaceport(tt.manifests)
-			saveSpaceport(s)
+			SaveSpaceport(s)
 
 			// Copy manifest to target locations
 			src, _ := os.Open("../testdata/manifest.yaml")
@@ -121,7 +121,7 @@ func TestParse(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			m, err := parse(test.path)
+			m, err := Parse(test.path)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr {
@@ -157,7 +157,7 @@ func TestSave(t *testing.T) {
 			if test.config != nil {
 				m = test.config.spaceport.CoreManifest()
 			}
-			err := saveManifest(m, false)
+			err := SaveManifest(m, false)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -184,7 +184,7 @@ func TestDelete(t *testing.T) {
 				if test.config != nil {
 					m = test.config.spaceport.CoreManifest()
 				}
-				err := saveManifest(m, false)
+				err := SaveManifest(m, false)
 				if err != nil {
 					t.Errorf("unable to save temporary manifest: %s", err)
 				}
@@ -373,9 +373,9 @@ func TestBackup(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Setenv("NOSTROMO_HOME", tt.baseDir)
 
-			m, err := parse("../testdata/manifest.yaml")
+			m, err := Parse("../testdata/manifest.yaml")
 			if err != nil {
-				t.Errorf("failed to parse manifest: %s", err)
+				t.Errorf("failed to Parse manifest: %s", err)
 			}
 
 			manifests := []*model.Manifest{m}
