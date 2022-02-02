@@ -48,9 +48,9 @@ func InitConfig(cmd *cobra.Command) int {
 	return 0
 }
 
-// DestroyConfig deletes nostromo config file
-func DestroyConfig(all bool) int {
-	if all {
+// DestroyConfig for core manifest file
+func DestroyConfig(nuke bool) int {
+	if nuke {
 		err := os.RemoveAll(pathutil.Abs(config.BaseDir()))
 		if err != nil {
 			return -1
@@ -63,7 +63,7 @@ func DestroyConfig(all bool) int {
 		return -1
 	}
 
-	err := cfg.Delete()
+	err := cfg.DeleteManifest(model.CoreManifestName)
 	if err != nil {
 		log.Error(err)
 		return -1
@@ -231,7 +231,7 @@ func GenerateCompletions(sh string, cmd *cobra.Command, writeFile bool) int {
 	if writeFile {
 		err = config.WriteCompletion(sh, s)
 		if err != nil {
-			log.Warningf("unable to write completion file for %s", sh)
+			log.Warningf("unable to write completion file for %s\n", sh)
 		}
 	}
 
@@ -526,6 +526,12 @@ func Sync(force bool, sources []string) int {
 		return -1
 	}
 
+	if len(sources) == 0 {
+		log.Highlight("synchronized nostromo manifests")
+	} else {
+		log.Highlight("docked nostromo manifests")
+	}
+
 	return 0
 }
 
@@ -541,7 +547,7 @@ func Detach(name string, keyPaths []string, targetKeyPath, description string, k
 	for _, keyPath := range keyPaths {
 		cmd := s.FindCommand(keyPath)
 		if cmd == nil {
-			log.Errorf("keypath not found: %s", keyPath)
+			log.Errorf("keypath not found: %s\n", keyPath)
 			return -1
 		}
 		cmds = append(cmds, cmd)
@@ -614,6 +620,39 @@ func RegenerateID(name string) int {
 		log.Error(err)
 		return -1
 	}
+
+	return 0
+}
+
+// Undock a manifest from nostromo installation
+func Undock(name string) int {
+	if len(name) == 0 {
+		log.Errorf("no manifest named %s found\n", name)
+		return -1
+	}
+
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+
+	err := cfg.DeleteManifest(name)
+	if err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	if !cfg.Spaceport().RemoveManifest(name) {
+		log.Warningf("spaceport missing manifest %s\n", name)
+	}
+
+	err = config.SaveSpaceport(cfg.Spaceport())
+	if err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	log.Highlight("undocked nostromo manifest")
 
 	return 0
 }

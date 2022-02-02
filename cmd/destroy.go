@@ -7,25 +7,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var destroyAll bool
+var nuke bool
 
 // destroyCmd represents the destroy command
 var destroyCmd = &cobra.Command{
 	Use:   "destroy",
 	Short: "Destroy nostromo configuration",
-	Long: `Destroy nostromo configuration.
+	Long: `Destroy nostromo configuration and start fresh.
 
-By default the core manifest is located at ~/.nostromo/ships/manifest.yaml.
-Optionally delete all config files using --all flag.
+By default the core manifest is only destroyed and recreated.
 
-Customize this with the $NOSTROMO_HOME environment variable`,
+Optionally delete the entire installation using -n flag. Note that
+this does not remove shell init file entries added by nostromo. 
+You'll have to delete those manually.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		os.Exit(task.DestroyConfig(destroyAll))
+		os.Exit(task.DestroyConfig(nuke))
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(destroyCmd)
 
-	destroyCmd.Flags().BoolVarP(&destroyAll, "all", "a", false, "Delete all configuration files")
+	destroyCmd.Flags().BoolVarP(&nuke, "nuke", "n", false, "Nuke the entire installation")
 }

@@ -11,24 +11,25 @@ var force bool
 
 // syncCmd represents the sync command
 var syncCmd = &cobra.Command{
-	Use:   "sync [source] [options]",
-	Short: "Sync nostromo manifests from source locations",
-	Long: `Sync nostromo manifests from source locations and
+	Use:   "sync [name]...",
+	Short: "Sync docked manifests from source locations",
+	Long: `Sync docked manifests from source locations and
 makes commands available for execution.
 
-Sync can be used to copy a single manifest to nostromo's config
-folder. Or it can be used to update previously synchronized 
-manifests from respective data sources.
+Sync can be used to update previously docked manifests from
+respective data sources. Provide one or more of the names of 
+the manifests as arguments to sync.
 
-Providing a [source] file will sync only that file. Omitting it
-directs nostromo to sync all manifests.`,
+Sync will only update manifests with changed identifiers, to
+force update use the -f flag.`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		os.Exit(task.Sync(force, args))
+		os.Exit(task.Sync(force, []string{}))
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(syncCmd)
 
-	syncCmd.Flags().BoolVarP(&force, "force", "f", false, "Force sync manifest(s)")
+	syncCmd.Flags().BoolVarP(&force, "force", "f", false, "Force sync manifests")
 }

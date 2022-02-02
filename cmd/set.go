@@ -27,5 +27,5 @@ Use this command to set values for these settings:
 }
 
 func init() {
-	manifestCmd.AddCommand(setCmd)
+	rootCmd.AddCommand(setCmd)
 }

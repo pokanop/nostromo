@@ -189,7 +189,7 @@ func TestDelete(t *testing.T) {
 					t.Errorf("unable to save temporary manifest: %s", err)
 				}
 			}
-			err := test.config.Delete()
+			err := test.config.DeleteManifest(model.CoreManifestName)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {

@@ -29,7 +29,7 @@ Customize this with the $NOSTROMO_HOME environment variable`,
 }
 
 func init() {
-	manifestCmd.AddCommand(showCmd)
+	rootCmd.AddCommand(showCmd)
 
 	showCmd.Flags().BoolVarP(&asJSON, "json", "j", false, "Show manifest as json")
 	showCmd.Flags().BoolVarP(&asYAML, "yaml", "y", false, "Show manifest as yaml")
