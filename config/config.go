@@ -474,7 +474,7 @@ func loadManifests() []*model.Manifest {
 		path := filepath.Join(path, file.Name())
 		m, err := Parse(path)
 		if err != nil {
-			log.Warningf("cannot read manifest %s", path)
+			log.Warningf("cannot read manifest %s\n", path)
 			continue
 		}
 

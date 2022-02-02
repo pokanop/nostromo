@@ -231,7 +231,7 @@ func GenerateCompletions(sh string, cmd *cobra.Command, writeFile bool) int {
 	if writeFile {
 		err = config.WriteCompletion(sh, s)
 		if err != nil {
-			log.Warningf("unable to write completion file for %s", sh)
+			log.Warningf("unable to write completion file for %s\n", sh)
 		}
 	}
 

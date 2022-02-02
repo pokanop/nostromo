@@ -150,13 +150,13 @@ func (c *Config) syncMerge(sources []string, force bool) error {
 			// New manifest
 			c.spaceport.AddManifest(m)
 			shouldSave = true
-			log.Infof("adding %s manifest", m.Name)
+			log.Infof("adding %s manifest\n", m.Name)
 		} else if u := c.spaceport.FindManifest(m.Name); u != nil {
 			// Update manifest
 			if force || m.Version.UUID != u.Version.UUID {
 				c.spaceport.AddManifest(m)
 				shouldSave = true
-				log.Infof("updating %s manifest", m.Name)
+				log.Infof("updating %s manifest\n", m.Name)
 			}
 		} else {
 			// Should not be possible
@@ -166,7 +166,7 @@ func (c *Config) syncMerge(sources []string, force bool) error {
 		if shouldSave {
 			err = SaveManifest(m, false)
 			if err != nil {
-				log.Warningf("failed to save manifest %s", m.Name)
+				log.Warningf("failed to save manifest %s\n", m.Name)
 			}
 		}
 	}
