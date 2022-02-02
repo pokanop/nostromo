@@ -7,8 +7,8 @@ import (
 // removeCmd represents the remove command
 var removeCmd = &cobra.Command{
 	Use:   "remove",
-	Short: "Remove commands or substitutions from nostromo",
-	Long:  "Remove commands or substitutions from nostromo",
+	Short: "Remove command or substitution",
+	Long:  "Remove command or substitution",
 	Run: func(cmd *cobra.Command, args []string) {
 		printUsage(cmd)
 	},

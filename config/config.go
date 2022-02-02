@@ -256,13 +256,18 @@ func (c *Config) Save() error {
 	return SaveManifest(c.spaceport.CoreManifest(), true)
 }
 
-// Delete nostromo config file
-func (c *Config) Delete() error {
+// DeleteManifest from nostromo manfiests folder
+func (c *Config) DeleteManifest(name string) error {
 	if !c.Exists() {
 		return fmt.Errorf("invalid path to remove")
 	}
 
-	if err := os.Remove(pathutil.Abs(c.spaceport.CoreManifest().Path)); err != nil {
+	m := c.spaceport.FindManifest(name)
+	if m == nil {
+		return fmt.Errorf("no manifest named %s found", name)
+	}
+
+	if err := os.Remove(pathutil.Abs(m.Path)); err != nil {
 		return err
 	}
 

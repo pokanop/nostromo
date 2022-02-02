@@ -71,15 +71,15 @@ To customize the directory (and change it from `~/.nostromo`), set the `NOSTROMO
 
 > With every update, it's a good idea to run `nostromo init` to ensure any manifest changes are migrated and commands continue to work. `nostromo` will attempt to perform any migrations as well at this time to files and folders so 🤞
 
-The quickest way to populate your commands database is using the `sync` feature:
+The quickest way to populate your commands database is using the `dock` feature:
 
 ```sh
-nostromo sync <source>
+nostromo dock <source>
 ```
 
 where `source` can be any local or remote file sources. See the [Distributed Manifests](#distributed-manifests) section for more details.
 
-To destroy the manifest and start over you can always run:
+To destroy the core manifest and start over you can always run:
 
 ```sh
 nostromo destroy
@@ -88,7 +88,7 @@ nostromo destroy
 Backups of manifests are automatically taken to prevent data loss in case of shenanigans gone wrong. These are located under `${NOSTROMO_HOME}/backups`. The maximum number of backups can be configured with the `backupCount` manifest setting.
 
 ```sh
-nostromo manifest set backupCount 10
+nostromo set backupCount 10
 ```
 
 ## Key Features
@@ -175,7 +175,7 @@ For example, you can see both methods here:
 ```sh
 nostromo add cmd foo.bar.baz "cd /tmp" --alias-only
 
-nostromo manifest set aliasesOnly true
+nostromo set aliasesOnly true
 nostromo add cmd foo.bar.baz "cd /tmp"
 ```
 
@@ -246,7 +246,7 @@ Given features like **keypaths** and **scope** you can build a complex set of co
 You can get a quick snapshot of the command tree using:
 
 ```sh
-nostromo manifest show
+nostromo show
 ```
 
 With nostromo, you can also visualize the command tree (or manifest) in several other ways including as `json`, `yaml` and a tree itself.
@@ -280,7 +280,7 @@ nostromo add cmd foo.bar.baz -m exclusive "echo baz"
 A global setting can also be set to change the mode from the default `concatenate` with:
 
 ```sh
-nostromo manifest set mode independent
+nostromo set mode independent
 ```
 
 > All subsequent commands would inherit the above mode if set.
@@ -321,35 +321,50 @@ For more complex snippets you can edit `~/.nostromo/ships/manifest.yaml` directl
 - Amazon S3
 - Google GCS
 
+> Details on supported file formats and requirements can be found in the [go-getter](https://github.com/hashicorp/go-getter) documentation as `nostromo` uses that for downloading files
+
 Configs can be found in the `~/.nostromo/ships` folder. The **core manifest** is named `manifest.yaml`.
 
 You can add as many additional manifests in the same folder and `nostromo` will parse and aggregate all the commands, useful for organizations wanting to build their own command suite.
 
-To add or sync manifests, use the following:
+To add or dock manifests, use the following:
 
 ```sh
-nostromo sync <source>...
+nostromo dock <source>...
 ```
 
 And that's it! Your commands will now incorporate the new manifest.
 
-To update all synchronized manifests to the latest versions, just run:
+To update docked manifests to the latest versions (omit sources to update all manifests), just run:
 
 ```sh
-nostromo sync
+nostromo sync <name>...
 ```
 
 `nostromo` syncs manifests using version information in the manifest. It will only update if the version identifier is different. To force update a manifest, run:
 
 ```sh
-# Force sync one or more manifests
-nostromo sync -f <source>...
-
-# Force sync all manifests
-nostromo sync -f
+nostromo sync -f <name>...
 ```
 
-> Details on supported file formats and requirements can be found in the [go-getter](https://github.com/hashicorp/go-getter) documentation since we are using that for downloading files
+If you're tired of someone else's manifest or it just isn't making you happy ☹️ then just undock it with:
+```sh
+nostromo undock <name>
+```
+
+So you've created an awesome suite of commands and you like to share, am I right? Well `nostromo` makes it super easy to create manifests with any set of your commands from the tree using the `detach` command. It lets you slice and dice your manifests by extracting out a command node into a new manifest.
+
+```sh
+nostromo detach <name> <key.path>...
+```
+
+By default, this removes the command nodes from the original (core) manifest but can be kept intact as well with the `-k` option.
+
+Since `nostromo` updates manifests if the identifier is unique, there might be times you want to update the `yaml` files manually for whatever reason. In this case you can run the handy `uuidgen` command to update the identifier so you can push the manifest to others:
+
+```sh
+nostromo uuidgen <name>
+```
 
 ## Credits
 

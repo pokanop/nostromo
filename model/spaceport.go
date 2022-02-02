@@ -5,7 +5,7 @@ import "github.com/pokanop/nostromo/version"
 // Spaceport type that manages and docks multiple ships' manifests
 type Spaceport struct {
 	manifests map[string]*Manifest
-	Sequence  []string `json:"order"`
+	Sequence  []string `json:"sequence"`
 }
 
 func NewSpaceport(manifests []*Manifest) *Spaceport {
@@ -64,6 +64,21 @@ func (s *Spaceport) CoreManifest() *Manifest {
 
 func (s *Spaceport) AddManifest(m *Manifest) {
 	s.manifests[m.Name] = m
+}
+
+func (s *Spaceport) RemoveManifest(name string) bool {
+	s.manifests[name] = nil
+	index := -1
+	for i, n := range s.Sequence {
+		if n == name {
+			index = i
+		}
+	}
+	if index != -1 {
+		s.Sequence = append(s.Sequence[:index], s.Sequence[index+1:]...)
+		return true
+	}
+	return false
 }
 
 func (s *Spaceport) FindManifest(name string) *Manifest {

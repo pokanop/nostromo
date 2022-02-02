@@ -25,5 +25,5 @@ backupCount: number`,
 }
 
 func init() {
-	manifestCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(getCmd)
 }

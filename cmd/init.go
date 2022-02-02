@@ -10,7 +10,7 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize nostromo config file",
+	Short: "Initialize nostromo configuration",
 	Long: `Create a nostromo config file with defaults.
 
 By default the config file is located at ~/.nostromo/ships/manifest.yaml.
