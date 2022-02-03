@@ -210,10 +210,15 @@ func GenerateCompletions(sh string, cmd *cobra.Command, writeFile bool) int {
 		log.Print(s)
 	}
 
+	// Force verbose logging off since completion output must be sourced
+	log.SetVerbose(false)
+
 	cfg := checkConfigQuiet()
 	if cfg == nil {
 		return 0
 	}
+
+	log.SetVerbose(false)
 
 	// Generate completions for manifest commands
 	completions, err := shell.SpaceportCompletion(sh, cfg.Spaceport())
