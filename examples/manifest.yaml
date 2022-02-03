@@ -1,6 +1,6 @@
 name: manifest
-source: file:///Users/saheljalal/.nostromo/ships/manifest.yaml
-path: /Users/saheljalal/.nostromo/ships/manifest.yaml
+source: https://github.com/pokanop/nostromo/blob/main/examples/manifest.yaml
+path: /Users/gopher/.nostromo/ships/manifest.yaml
 version:
   uuid: 615ce229-14f6-41b6-bf2b-daf792a7ed71
   semver: 0.9.2

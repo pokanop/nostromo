@@ -1,6 +1,6 @@
 name: docker
-source: file:///Users/saheljalal/.nostromo/ships/docker.yaml
-path: /Users/saheljalal/.nostromo/ships/docker.yaml
+source: https://github.com/pokanop/nostromo/blob/main/examples/docker.yaml
+path: /Users/gopher/.nostromo/ships/docker.yaml
 version:
   uuid: e1eea91e-6a6f-4838-b12b-7063732e4a56
   semver: 0.9.2
