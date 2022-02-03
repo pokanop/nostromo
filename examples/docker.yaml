@@ -1,0 +1,79 @@
+name: docker
+source: file:///Users/saheljalal/.nostromo/ships/docker.yaml
+path: /Users/saheljalal/.nostromo/ships/docker.yaml
+version:
+  uuid: e1eea91e-6a6f-4838-b12b-7063732e4a56
+  semver: 0.9.2
+  gitcommit: 8a2350c0d5700cf2066977089f133af7daf7df60
+  builddate: "2022-02-02T23:29:30Z"
+config:
+  verbose: false
+  aliasesonly: false
+  mode: 0
+  backupcount: 10
+commands:
+  docker:
+    keypath: dock
+    name: docker
+    alias: dock
+    aliasonly: false
+    description: Alias for docker
+    commands:
+      clean:
+        keypath: dock.clean
+        name: ps -a -q |xargs docker rm
+        alias: clean
+        aliasonly: false
+        description: Remove Docker containers using docker rm
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      rmi:
+        keypath: dock.rmi
+        name: rmi $(docker images -q)
+        alias: rmi
+        aliasonly: false
+        description: Remove Docker images using docker rmi
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      stop:
+        keypath: dock.stop
+        name: ps -q |xargs docker stop
+        alias: stop
+        aliasonly: false
+        description: Stop running Docker containers
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      vol:
+        keypath: dock.vol
+        name: volume rm $(docker volume ls -qf dangling=true)
+        alias: vol
+        aliasonly: false
+        description: Remove dangling Docker volumes
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+    disabled: false

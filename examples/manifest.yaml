@@ -1,8 +1,11 @@
+name: manifest
+source: file:///Users/saheljalal/.nostromo/ships/manifest.yaml
+path: /Users/saheljalal/.nostromo/ships/manifest.yaml
 version:
-  uuid: ed18610b-3b89-4408-bbed-e9a07753f775
-  semver: 0.8.0
-  gitcommit: 8185870fd83f5f165ce76fb0a70e5cd7aff1a8cd
-  builddate: '2022-01-22T08:33:26Z'
+  uuid: 615ce229-14f6-41b6-bf2b-daf792a7ed71
+  semver: 0.9.2
+  gitcommit: 8a2350c0d5700cf2066977089f133af7daf7df60
+  builddate: "2022-02-02T23:29:30Z"
 config:
   verbose: false
   aliasesonly: false
@@ -18,15 +21,62 @@ commands:
     commands: {}
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
+    disabled: false
+  cat:
+    keypath: cat
+    name: bat
+    alias: cat
+    aliasonly: false
+    description: Use bat as a better cat tool
+    commands: {}
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+    disabled: false
+  check:
+    keypath: check
+    name: which $1 > /dev/null 2>&1 && echo $1 exists || (echo $1 not found && exit
+      1)
+    alias: check
+    aliasonly: false
+    description: Check if a command or tool is installed
+    commands: {}
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+    disabled: false
+  code:
+    keypath: code
+    name: command code
+    alias: code
+    aliasonly: false
+    description: Shortcut with substitutions for VSCode
+    commands: {}
+    subs:
+      nostromo:
+        name: ~/.nostromo/manifest.yaml
+        alias: nostromo
+      zsh:
+        name: ~/.zshrc
+        alias: zsh
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+    disabled: false
   copy:
     keypath: copy
-    name: ''
+    name: ""
     alias: copy
     aliasonly: false
-    description: ''
+    description: ""
     commands:
       ssh:
         keypath: copy.ssh
@@ -37,80 +87,87 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
+    disabled: false
   dock:
     keypath: dock
-    name: ''
+    name: docker
     alias: dock
     aliasonly: false
-    description: ''
+    description: Alias for docker
     commands:
       clean:
         keypath: dock.clean
-        name: docker ps -a -q |xargs docker rm
+        name: ps -a -q |xargs docker rm
         alias: clean
         aliasonly: false
         description: Remove Docker containers using docker rm
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       rmi:
         keypath: dock.rmi
-        name: docker rmi $(docker images -q)
+        name: rmi $(docker images -q)
         alias: rmi
         aliasonly: false
         description: Remove Docker images using docker rmi
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       stop:
         keypath: dock.stop
-        name: docker ps -q |xargs docker stop
+        name: ps -q |xargs docker stop
         alias: stop
         aliasonly: false
         description: Stop running Docker containers
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       vol:
         keypath: dock.vol
-        name: docker volume rm $(docker volume ls -qf dangling=true)
+        name: volume rm $(docker volume ls -qf dangling=true)
         alias: vol
         aliasonly: false
         description: Remove dangling Docker volumes
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
+    disabled: false
   edit:
     keypath: edit
-    name: ''
+    name: ""
     alias: edit
     aliasonly: false
-    description: ''
+    description: ""
     commands:
       bash:
         keypath: edit.bash
@@ -121,9 +178,10 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       bash_profile:
         keypath: edit.bash_profile
         name: vim ~/.bash_profile
@@ -133,21 +191,23 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       nostromo:
         keypath: edit.nostromo
-        name: vim ~/.nostromo/ships/manifest.yaml
+        name: vim ~/.nostromo/manifest.yaml
         alias: nostromo
         aliasonly: false
         description: Edit nostromo manifest file using vim
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       p10k:
         keypath: edit.p10k
         name: vim ~/.p10k.zsh
@@ -157,9 +217,10 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       profile:
         keypath: edit.profile
         name: vim ~/.profile
@@ -169,9 +230,10 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       ssh:
         keypath: edit.ssh
         name: vim ~/.ssh/config
@@ -188,14 +250,29 @@ commands:
             commands: {}
             subs: {}
             code:
-              language: ''
-              snippet: ''
+              language: ""
+              snippet: ""
             mode: 2
+            disabled: false
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
+      terminalizer:
+        keypath: edit.terminalizer
+        name: vim ~/.terminalizer/config.yml
+        alias: terminalizer
+        aliasonly: false
+        description: Edit terminalizer config file
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
       zsh:
         keypath: edit.zsh
         name: vim ~/.zshrc
@@ -205,32 +282,35 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
+    disabled: false
   gcdf:
     keypath: gcdf
     name: git clean -df
     alias: gcdf
     aliasonly: true
-    description: ''
+    description: Clean untracked directories and files in Git
     commands: {}
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
+    disabled: false
   ios:
     keypath: ios
-    name: ''
+    name: ""
     alias: ios
     aliasonly: false
-    description: ''
+    description: ""
     commands:
       record:
         keypath: ios.record
@@ -241,9 +321,10 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       snap:
         keypath: ios.snap
         name: xcrun simctl io booted screenshot $1
@@ -253,20 +334,22 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
+    disabled: false
   ip:
     keypath: ip
-    name: ''
+    name: ""
     alias: ip
     aliasonly: false
-    description: ''
+    description: ""
     commands:
       local:
         keypath: ip.local
@@ -277,9 +360,10 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       public:
         keypath: ip.public
         name: curl ifconfig.me
@@ -289,20 +373,22 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
+    disabled: false
   nuke:
     keypath: nuke
-    name: ''
+    name: ""
     alias: nuke
     aliasonly: false
-    description: ''
+    description: ""
     commands:
       docker:
         keypath: nuke.docker
@@ -313,9 +399,10 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
       ds:
         keypath: nuke.ds
         name: find . -type f -name '*.DS_Store' -ls -delete
@@ -325,14 +412,16 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
+        disabled: false
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
+    disabled: false
   reload:
     keypath: reload
     name: . ~/.zshrc
@@ -342,30 +431,7 @@ commands:
     commands: {}
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
-  update:
-    keypath: update
-    name: ''
-    alias: update
-    aliasonly: false
-    description: ''
-    commands:
-      brew:
-        keypath: update.brew
-        name: brew update && brew upgrade --all && brew cask update && brew cleanup && brew cask cleanup
-        alias: brew
-        aliasonly: false
-        description: Update everything related to brew and clean up
-        commands: {}
-        subs: {}
-        code:
-          language: ''
-          snippet: ''
-        mode: 0
-    subs: {}
-    code:
-      language: ''
-      snippet: ''
-    mode: 0
+    disabled: false

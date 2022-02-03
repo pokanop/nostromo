@@ -660,6 +660,8 @@ func Detach(name string, keyPaths []string, targetKeyPath, description string, k
 		return -1
 	}
 
+	log.Highlightf("detached %s into %s manifest\n", strings.Join(keyPaths, ", "), name)
+
 	return 0
 }
 
