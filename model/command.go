@@ -27,6 +27,31 @@ type Command struct {
 	Disabled    bool                     `json:"disabled"`
 }
 
+// newCommand returns a newly initialized command
+func newCommand(name, alias, description string, code *Code, aliasOnly bool, mode string) *Command {
+	// Default alias to same as command name
+	if len(alias) == 0 {
+		alias = name
+	}
+
+	if code == nil {
+		code = &Code{}
+	}
+
+	return &Command{
+		KeyPath:     alias,
+		Name:        name,
+		Alias:       alias,
+		AliasOnly:   aliasOnly,
+		Description: description,
+		Commands:    map[string]*Command{},
+		Subs:        map[string]*Substitution{},
+		Code:        code,
+		Mode:        ModeFromString(mode),
+		Disabled:    false,
+	}
+}
+
 func (c *Command) String() string {
 	return fmt.Sprintf("[%s] %s -> %s", c.KeyPath, c.Name, c.Alias)
 }
@@ -87,31 +112,6 @@ func (c *Command) CobraCommand() *cobra.Command {
 	return cmd
 }
 
-// newCommand returns a newly initialized command
-func newCommand(name, alias, description string, code *Code, aliasOnly bool, mode string) *Command {
-	// Default alias to same as command name
-	if len(alias) == 0 {
-		alias = name
-	}
-
-	if code == nil {
-		code = &Code{}
-	}
-
-	return &Command{
-		KeyPath:     alias,
-		Name:        name,
-		Alias:       alias,
-		AliasOnly:   aliasOnly,
-		Description: description,
-		Commands:    map[string]*Command{},
-		Subs:        map[string]*Substitution{},
-		Code:        code,
-		Mode:        ModeFromString(mode),
-		Disabled:    false,
-	}
-}
-
 func (c *Command) effectiveCommand() string {
 	if c.Code.valid() {
 		return c.Code.Snippet
@@ -134,7 +134,7 @@ func (c *Command) addCommand(cmd *Command) {
 
 	c.Commands[cmd.Alias] = cmd
 	cmd.parent = c
-	cmd.KeyPath = keypath.KeyPath([]string{c.KeyPath, cmd.Alias})
+	cmd.updateRootKeyPath(c.KeyPath)
 }
 
 // removeCommand at this scope

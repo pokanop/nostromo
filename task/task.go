@@ -377,6 +377,8 @@ func RemoveCommand(keyPath string) int {
 		return -1
 	}
 
+	log.Highlightf("removed command %s\n", keyPath)
+
 	return 0
 }
 
@@ -399,12 +401,43 @@ func MoveCommand(source, dest, description string) int {
 		return -1
 	}
 
-	m.ImportCommands([]*model.Command{cmd}, dest, description)
+	if err := m.ImportCommands([]*model.Command{cmd}, dest, description, true); err != nil {
+		log.Error(err)
+		return -1
+	}
 
 	if err := saveConfig(cfg, false); err != nil {
 		log.Error(err)
 		return -1
 	}
+
+	if len(dest) == 0 {
+		dest = "root"
+	}
+	log.Highlightf("moved %s command to %s\n", source, dest)
+
+	return 0
+}
+
+// RenameCommand to a different name
+func RenameCommand(source, dest, description string) int {
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+
+	m := cfg.Spaceport().CoreManifest()
+	if err := m.RenameCommand(source, dest, description); err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	if err := saveConfig(cfg, false); err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	log.Highlightf("renamed %s command to %s\n", source, dest)
 
 	return 0
 }
@@ -452,6 +485,8 @@ func RemoveSubstitution(keyPath, alias string) int {
 		log.Error(err)
 		return -1
 	}
+
+	log.Highlightf("removed substitution %s for command %s\n", alias, keyPath)
 
 	return 0
 }
@@ -592,7 +627,7 @@ func Detach(name string, keyPaths []string, targetKeyPath, description string, k
 	}
 
 	// Merge or add commands to manifest
-	m.ImportCommands(cmds, targetKeyPath, description)
+	m.ImportCommands(cmds, targetKeyPath, description, false)
 
 	// Remove original node if needed, only applies to core manifest
 	if !keepOriginal {
