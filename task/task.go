@@ -595,11 +595,10 @@ func Sync(force bool, sources []string) int {
 		return -1
 	}
 
-	s := strings.Join(sources, ", ")
-	if len(s) == 0 {
-		log.Highlightf("synchronized manifests: %s\n", s)
+	if len(sources) == 0 {
+		log.Highlight("synchronized nostromo manifests")
 	} else {
-		log.Highlightf("docked manifests: %s\n", s)
+		log.Highlight("docked nostromo manifests")
 	}
 
 	return 0
