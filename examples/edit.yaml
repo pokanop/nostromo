@@ -1,0 +1,144 @@
+name: edit
+source: https://github.com/pokanop/nostromo/blob/main/examples/edit.yaml
+path: /Users/gopher/.nostromo/ships/edit.yaml
+version:
+  uuid: 08f24962-402a-4323-a843-71c594b1c816
+  semver: 0.9.2
+  gitcommit: 8a2350c0d5700cf2066977089f133af7daf7df60
+  builddate: "2022-02-02T23:29:30Z"
+config:
+  verbose: false
+  aliasesonly: false
+  mode: 0
+  backupcount: 10
+commands:
+  "":
+    keypath: edit
+    name: ""
+    alias: edit
+    aliasonly: false
+    description: ""
+    commands:
+      bash:
+        keypath: edit.bash
+        name: vim ~/.bashrc
+        alias: bash
+        aliasonly: false
+        description: Edit bashrc config file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      bash_profile:
+        keypath: edit.bash_profile
+        name: vim ~/.bash_profile
+        alias: bash_profile
+        aliasonly: false
+        description: Edit bash_profile config file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      nostromo:
+        keypath: edit.nostromo
+        name: vim ~/.nostromo/manifest.yaml
+        alias: nostromo
+        aliasonly: false
+        description: Edit nostromo manifest file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      p10k:
+        keypath: edit.p10k
+        name: vim ~/.p10k.zsh
+        alias: p10k
+        aliasonly: false
+        description: Edit p10k config file in vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      profile:
+        keypath: edit.profile
+        name: vim ~/.profile
+        alias: profile
+        aliasonly: false
+        description: Edit profile config file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      ssh:
+        keypath: edit.ssh
+        name: vim ~/.ssh/config
+        alias: ssh
+        aliasonly: false
+        description: Edit ssh config file in vim
+        commands:
+          hosts:
+            keypath: edit.ssh.hosts
+            name: vim ~/.ssh/hosts
+            alias: hosts
+            aliasonly: false
+            description: Edit ssh hosts file in vim
+            commands: {}
+            subs: {}
+            code:
+              language: ""
+              snippet: ""
+            mode: 2
+            disabled: false
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      terminalizer:
+        keypath: edit.terminalizer
+        name: vim ~/.terminalizer/config.yml
+        alias: terminalizer
+        aliasonly: false
+        description: Edit terminalizer config file
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+      zsh:
+        keypath: edit.zsh
+        name: vim ~/.zshrc
+        alias: zsh
+        aliasonly: false
+        description: Edit zsh config file using vim
+        commands: {}
+        subs: {}
+        code:
+          language: ""
+          snippet: ""
+        mode: 0
+        disabled: false
+    subs: {}
+    code:
+      language: ""
+      snippet: ""
+    mode: 0
+    disabled: false

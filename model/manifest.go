@@ -117,6 +117,27 @@ func (m *Manifest) RemoveCommand(keyPath string) (bool, error) {
 	return isRoot, nil
 }
 
+// RenameCommand and update subtree
+func (m *Manifest) RenameCommand(keyPath, name, description string) error {
+	cmd := m.Find(keyPath)
+	if cmd == nil {
+		return fmt.Errorf("command not found")
+	}
+
+	cmd.Alias = name
+	if len(description) > 0 {
+		cmd.Description = description
+	}
+
+	var root string
+	if p := cmd.parent; p != nil {
+		root = p.KeyPath
+	}
+	cmd.updateRootKeyPath(root)
+
+	return nil
+}
+
 // AddSubstitution with name and alias at key path
 func (m *Manifest) AddSubstitution(keyPath, name, alias string) error {
 	cmd := m.Find(keyPath)
@@ -225,24 +246,42 @@ func (m *Manifest) Children() []tree.Node {
 	return nodes
 }
 
-func (m *Manifest) ImportCommands(cmds []*Command, kp, description string) {
+func (m *Manifest) ImportCommands(cmds []*Command, kp, description string, create bool) error {
 	// Check if keypath exists
 	root := m.Find(kp)
+	if root == nil && create && len(kp) > 0 {
+		// Create destination key path
+		_, err := m.AddCommand(kp, "", description, nil, false, "")
+		if err != nil {
+			return err
+		}
+
+		root = m.Find(kp)
+		if root == nil {
+			return fmt.Errorf("root command should exist")
+		}
+	}
+
 	if root != nil {
 		// Add individual commands
 		for _, c := range cmds {
 			root.addCommand(c)
 		}
-		return
+
+		if len(description) > 0 {
+			root.Description = description
+		}
+
+		return nil
 	}
 
-	// Keypath found, add commands to root
+	// Keypath not found, add commands to root
 	for _, c := range cmds {
 		c.updateRootKeyPath("")
 		m.Commands[c.Name] = c
 	}
 
-	return
+	return nil
 }
 
 // count of the total number of commands in this manifest
