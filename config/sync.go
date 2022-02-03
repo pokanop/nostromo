@@ -98,13 +98,14 @@ func syncDownload(source string) error {
 		signal.Reset(os.Interrupt)
 		cancel()
 		wg.Wait()
-		log.Regularf("signal %v", sig)
+		log.Regularf("signal %v\n", sig)
 	case <-ctx.Done():
 		wg.Wait()
 		log.Regular("success")
 	case err := <-errChan:
 		wg.Wait()
-		log.Regularf("failed, %s", err)
+		log.Regularf("failed, %s\n", err)
+		return err
 	}
 
 	return nil
