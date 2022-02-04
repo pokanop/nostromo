@@ -690,7 +690,8 @@ func RegenerateID(name string) int {
 		m = cfg.Spaceport().CoreManifest()
 	}
 
-	m.Version.Update(ver)
+	v := version.NewInfo(ver.SemVer, ver.GitCommit, ver.BuildDate)
+	m.Version.Update(v)
 
 	err := config.SaveManifest(m, m.IsCore())
 	if err != nil {

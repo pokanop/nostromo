@@ -1,0 +1,209 @@
+name: tools
+source: file:///Users/saheljalal/.nostromo/ships/tools.yaml
+path: /Users/gopher/.nostromo/ships/tools.yaml
+version:
+  uuid: 03ccc721-4942-48cf-8e58-297539f2220d
+  semver: 0.9.6
+  gitcommit: 9fe0a40921c1954c5a26f691ddb76f307c7be83b
+  builddate: '2022-02-04T00:15:57Z'
+config:
+  verbose: false
+  aliasesonly: false
+  mode: 0
+  backupcount: 10
+commands:
+  check:
+    keypath: check
+    name: which $1 > /dev/null 2>&1 && echo $1 exists || (echo $1 not found && exit 1)
+    alias: check
+    aliasonly: false
+    description: Check if a command or tool is installed
+    commands: {}
+    subs: {}
+    code:
+      language: ''
+      snippet: ''
+    mode: 0
+    disabled: false
+  exists:
+    keypath: exists
+    name: '[ -f $1 ] || [ -d $1 ] && echo $1 exists || (echo $1 not found && exit 1)'
+    alias: exists
+    aliasonly: false
+    description: Check if a file or folder exists
+    commands: {}
+    subs: {}
+    code:
+      language: ''
+      snippet: ''
+    mode: 0
+    disabled: false
+  install:
+    keypath: install
+    name: ''
+    alias: install
+    aliasonly: false
+    description: ''
+    commands:
+      brew:
+        keypath: install.brew
+        name: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        alias: brew
+        aliasonly: false
+        description: Install Homebrew
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      htmlq:
+        keypath: install.htmlq
+        name: brew install htmlq
+        alias: htmlq
+        aliasonly: false
+        description: Install htmlq
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      iterm:
+        keypath: install.iterm
+        name: curl --silent https://iterm2.com/downloads.html | htmlq --attribute href a | grep stable | head -n 1
+        alias: iterm
+        aliasonly: false
+        description: Install iTerm2
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      jq:
+        keypath: install.jq
+        name: brew install jq
+        alias: jq
+        aliasonly: false
+        description: Install jq
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      lynx:
+        keypath: install.lynx
+        name: brew install lynx
+        alias: lynx
+        aliasonly: false
+        description: Install lynx
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      nvm:
+        keypath: install.nvm
+        name: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+        alias: nvm
+        aliasonly: false
+        description: Install nvm
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      ohmyzsh:
+        keypath: install.ohmyzsh
+        name: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        alias: ohmyzsh
+        aliasonly: false
+        description: Install ohmyzsh
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      p10k:
+        keypath: install.p10k
+        name: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+        alias: p10k
+        aliasonly: false
+        description: Install powerlevel10k
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      rbenv:
+        keypath: install.rbenv
+        name: brew install rbenv && eval "$(rbenv init -)"
+        alias: rbenv
+        aliasonly: false
+        description: Install rbenv
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+      rust:
+        keypath: install.rust
+        name: curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
+        alias: rust
+        aliasonly: false
+        description: Install Rust
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+    subs: {}
+    code:
+      language: ''
+      snippet: ''
+    mode: 0
+    disabled: false
+  run:
+    keypath: run
+    name: ''
+    alias: run
+    aliasonly: false
+    description: ''
+    commands:
+      quietly:
+        keypath: run.quietly
+        name: echo running $1;$2 > /dev/null 2>&1;if [$? == 0]; then echo success; else echo failed; fi
+        alias: quietly
+        aliasonly: false
+        description: Execute a command quietly
+        commands: {}
+        subs: {}
+        code:
+          language: ''
+          snippet: ''
+        mode: 0
+        disabled: false
+    subs: {}
+    code:
+      language: ''
+      snippet: ''
+    mode: 0
+    disabled: false
