@@ -234,7 +234,7 @@ func (m *Manifest) Fields() map[string]interface{} {
 
 // Data method for Node interface to print tree
 func (m *Manifest) Data() interface{} {
-	return "manifest"
+	return m.Name
 }
 
 // Children method for Node interface to print tree
@@ -278,7 +278,7 @@ func (m *Manifest) ImportCommands(cmds []*Command, kp, description string, creat
 	// Keypath not found, add commands to root
 	for _, c := range cmds {
 		c.updateRootKeyPath("")
-		m.Commands[c.Name] = c
+		m.Commands[c.Alias] = c
 	}
 
 	return nil

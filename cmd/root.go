@@ -5,6 +5,7 @@ import (
 
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/log"
+	"github.com/pokanop/nostromo/task"
 	"github.com/pokanop/nostromo/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -42,6 +43,7 @@ func SetVersion(v, c, d string) {
 	ver = version.NewInfo(v, c, d)
 
 	// Update dependent packages
+	task.SetVersion(ver)
 	config.SetVersion(ver)
 }
 

@@ -18,7 +18,8 @@ import (
 
 // Sync adds a new manifest from provided sources
 func (c *Config) Sync(force bool, sources []string) error {
-	if err := syncPrep(); err != nil {
+	sources, err := syncPrep(sources)
+	if err != nil {
 		return err
 	}
 
@@ -57,9 +58,22 @@ func (c *Config) Sync(force bool, sources []string) error {
 	return nil
 }
 
-func syncPrep() error {
+func syncPrep(sources []string) ([]string, error) {
 	// Ensure downloads folder exists
-	return pathutil.EnsurePath(downloadsPath())
+	if err := pathutil.EnsurePath(downloadsPath()); err != nil {
+		return nil, err
+	}
+
+	// Sanitize github web urls
+	s := []string{}
+	for _, source := range sources {
+		if strings.Contains(source, "github") && strings.Contains(source, "blob") {
+			source = strings.Replace(source, "blob", "raw", 1)
+			s = append(s, source)
+		}
+	}
+
+	return s, nil
 }
 
 func syncCleanup() error {

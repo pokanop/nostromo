@@ -17,6 +17,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var ver *version.Info
+
+// SetVersion should be called before any task to ensure manifest is updated
+func SetVersion(v *version.Info) {
+	ver = v
+}
+
 // InitConfig of nostromo config file if not already initialized
 func InitConfig(cmd *cobra.Command) int {
 	// Attempt to load existing config
@@ -683,14 +690,15 @@ func RegenerateID(name string) int {
 		m = cfg.Spaceport().CoreManifest()
 	}
 
-	v := version.NewInfo(m.Version.SemVer, m.Version.GitCommit, m.Version.BuildDate)
-	m.Version.Update(v)
+	m.Version.Update(ver)
 
 	err := config.SaveManifest(m, m.IsCore())
 	if err != nil {
 		log.Error(err)
 		return -1
 	}
+
+	log.Highlight("updated version info")
 
 	return 0
 }

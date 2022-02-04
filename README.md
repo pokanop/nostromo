@@ -255,7 +255,7 @@ With nostromo, you can also visualize the command tree (or manifest) in several 
   <img src="images/nostromo-tree.gif" alt="nostromo" style="border-radius: 15px">
 </p>
 
-Setting the `verbose` config item prints more detailed information as well.
+Setting the `verbose` config setting prints more detailed information as well for all commands.
 
 <p align="center">
   <img src="images/nostromo-verbose.gif" alt="nostromo" style="border-radius: 15px">
@@ -348,6 +348,7 @@ nostromo sync -f <name>...
 ```
 
 If you're tired of someone else's manifest or it just isn't making you happy ☹️ then just undock it with:
+
 ```sh
 nostromo undock <name>
 ```
