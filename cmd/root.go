@@ -5,6 +5,7 @@ import (
 
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/log"
+	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/task"
 	"github.com/pokanop/nostromo/version"
 	"github.com/spf13/cobra"
@@ -12,6 +13,7 @@ import (
 )
 
 var ver *version.Info
+var verbose bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -25,6 +27,10 @@ and reliable. The tool adds shortcuts to your .bashrc that call into the nostrom
 nostromo reads and manages all aliases within its own config file.
 This is used to find and execute the actual command intended as well as any
 substitutions to simplify calls.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		log.SetVerbose(verbose)
+		model.SetVerbose(verbose)
+	},
 	SilenceErrors: true,
 	SilenceUsage:  true,
 }
@@ -52,6 +58,8 @@ func init() {
 
 	// Disable default completion command
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "show verbose logging")
 }
 
 // initConfig reads in config file and ENV variables if set.

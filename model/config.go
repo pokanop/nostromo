@@ -1,5 +1,7 @@
 package model
 
+var verbose bool
+
 // Config model for holding nostromo settings
 type Config struct {
 	Verbose     bool `json:"verbose"`
@@ -13,6 +15,16 @@ func NewConfig() *Config {
 	return &Config{
 		BackupCount: 10,
 	}
+}
+
+// SetVerbose global flag
+func SetVerbose(v bool) {
+	verbose = v
+}
+
+// IsVerbose check with override and config
+func (c *Config) IsVerbose() bool {
+	return verbose || c.Verbose
 }
 
 // Keys as ordered list of fields for logging

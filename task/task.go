@@ -100,7 +100,7 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 		return -1
 	}
 
-	verbose := cfg.Spaceport().CoreManifest().Config.Verbose
+	verbose := cfg.Spaceport().CoreManifest().Config.IsVerbose()
 	for i, m := range cfg.Spaceport().Manifests() {
 		if i > 0 {
 			log.Regular()
@@ -475,7 +475,7 @@ func AddSubstitution(keyPath, name, alias string) int {
 		return -1
 	}
 
-	logFields(m.Find(keyPath), m.Config.Verbose)
+	logFields(m.Find(keyPath), m.Config.IsVerbose())
 	return 0
 }
 
@@ -521,7 +521,7 @@ func EvalString(args []string) int {
 			continue
 		}
 
-		cmdStr, err = shell.EvalString(cmd, language, m.Config.Verbose)
+		cmdStr, err = shell.EvalString(cmd, language, m.Config.IsVerbose())
 		if err != nil {
 			continue
 		}
@@ -568,22 +568,23 @@ func Find(name string) int {
 	}
 
 	m := cfg.Spaceport().CoreManifest()
+	verbose := m.Config.IsVerbose()
 
 	log.Regular("[commands]")
 	for _, cmd := range matchingCmds {
-		logFields(cmd, m.Config.Verbose)
-		if m.Config.Verbose {
+		logFields(cmd, verbose)
+		if verbose {
 			log.Regular()
 		}
 	}
 
-	if !m.Config.Verbose {
+	if !verbose {
 		log.Regular()
 	}
 	log.Regular("[substitutions]")
 	for _, cmd := range matchingSubs {
-		logFields(cmd, m.Config.Verbose)
-		if m.Config.Verbose {
+		logFields(cmd, verbose)
+		if verbose {
 			log.Regular()
 		}
 	}
@@ -755,7 +756,7 @@ func checkConfigCommon(quiet bool) *config.Config {
 		return nil
 	}
 
-	log.SetVerbose(cfg.Spaceport().CoreManifest().Config.Verbose)
+	log.SetVerbose(cfg.Spaceport().CoreManifest().Config.IsVerbose())
 
 	return cfg
 }
