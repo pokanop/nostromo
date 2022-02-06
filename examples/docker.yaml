@@ -2,10 +2,10 @@ name: docker
 source: https://github.com/pokanop/nostromo/raw/main/examples/docker.yaml
 path: /Users/gopher/.nostromo/ships/docker.yaml
 version:
-  uuid: 7ef7b873-90be-48a1-af4d-f29cb9430a5c
-  semver: 0.9.6
-  gitcommit: 9fe0a40921c1954c5a26f691ddb76f307c7be83b
-  builddate: '2022-02-04T00:15:57Z'
+  uuid: a9e3de62-63ab-41f1-8019-0979e3d0a7d7
+  semver: 0.9.9
+  gitcommit: 2e19036fcc51c9af254ff0fa5fa849558308a985
+  builddate: '2022-02-06T08:21:54Z'
 config:
   verbose: false
   aliasesonly: false

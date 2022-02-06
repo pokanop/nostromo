@@ -2,10 +2,10 @@ name: manifest
 source: https://github.com/pokanop/nostromo/blob/main/examples/manifest.yaml
 path: /Users/gopher/.nostromo/ships/manifest.yaml
 version:
-  uuid: 615ce229-14f6-41b6-bf2b-daf792a7ed71
-  semver: 0.9.2
-  gitcommit: 8a2350c0d5700cf2066977089f133af7daf7df60
-  builddate: "2022-02-02T23:29:30Z"
+  uuid: 4b897259-290b-4975-a7a9-a37e6813273d
+  semver: 0.9.9
+  gitcommit: 2e19036fcc51c9af254ff0fa5fa849558308a985
+  builddate: '2022-02-06T08:21:54Z'
 config:
   verbose: false
   aliasesonly: false
@@ -21,8 +21,8 @@ commands:
     commands: {}
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   cat:
@@ -34,22 +34,21 @@ commands:
     commands: {}
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   check:
     keypath: check
-    name: which $1 > /dev/null 2>&1 && echo $1 exists || (echo $1 not found && exit
-      1)
+    name: which $1 > /dev/null 2>&1 && echo $1 exists || (echo $1 not found && exit 1)
     alias: check
     aliasonly: false
     description: Check if a command or tool is installed
     commands: {}
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   code:
@@ -67,16 +66,16 @@ commands:
         name: ~/.zshrc
         alias: zsh
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   copy:
     keypath: copy
-    name: ""
+    name: ''
     alias: copy
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       ssh:
         keypath: copy.ssh
@@ -87,14 +86,14 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   dock:
@@ -113,8 +112,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       rmi:
@@ -126,8 +125,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       stop:
@@ -139,8 +138,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       vol:
@@ -152,22 +151,22 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   edit:
     keypath: edit
-    name: ""
+    name: ''
     alias: edit
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       bash:
         keypath: edit.bash
@@ -178,8 +177,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       bash_profile:
@@ -191,8 +190,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       nostromo:
@@ -204,8 +203,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       p10k:
@@ -217,8 +216,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       profile:
@@ -230,8 +229,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       ssh:
@@ -250,14 +249,14 @@ commands:
             commands: {}
             subs: {}
             code:
-              language: ""
-              snippet: ""
+              language: ''
+              snippet: ''
             mode: 2
             disabled: false
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       terminalizer:
@@ -269,8 +268,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       zsh:
@@ -282,14 +281,14 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   gcdf:
@@ -301,16 +300,16 @@ commands:
     commands: {}
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   ios:
     keypath: ios
-    name: ""
+    name: ''
     alias: ios
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       record:
         keypath: ios.record
@@ -321,8 +320,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       snap:
@@ -334,22 +333,22 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   ip:
     keypath: ip
-    name: ""
+    name: ''
     alias: ip
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       local:
         keypath: ip.local
@@ -360,8 +359,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       public:
@@ -373,22 +372,22 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   nuke:
     keypath: nuke
-    name: ""
+    name: ''
     alias: nuke
     aliasonly: false
-    description: ""
+    description: ''
     commands:
       docker:
         keypath: nuke.docker
@@ -399,8 +398,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
       ds:
@@ -412,14 +411,14 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ""
-          snippet: ""
+          language: ''
+          snippet: ''
         mode: 0
         disabled: false
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false
   reload:
@@ -431,7 +430,7 @@ commands:
     commands: {}
     subs: {}
     code:
-      language: ""
-      snippet: ""
+      language: ''
+      snippet: ''
     mode: 0
     disabled: false

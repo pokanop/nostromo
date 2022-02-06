@@ -1,11 +1,11 @@
 name: tools
-source: file:///Users/saheljalal/.nostromo/ships/tools.yaml
+source: https://github.com/pokanop/nostromo/raw/main/examples/tools.yaml
 path: /Users/gopher/.nostromo/ships/tools.yaml
 version:
-  uuid: 03ccc721-4942-48cf-8e58-297539f2220d
-  semver: 0.9.6
-  gitcommit: 9fe0a40921c1954c5a26f691ddb76f307c7be83b
-  builddate: '2022-02-04T00:15:57Z'
+  uuid: 59a4a815-3b0b-440d-91e8-fc395e2016b4
+  semver: 0.9.9
+  gitcommit: 2e19036fcc51c9af254ff0fa5fa849558308a985
+  builddate: '2022-02-06T08:21:54Z'
 config:
   verbose: false
   aliasesonly: false
