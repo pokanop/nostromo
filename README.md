@@ -1,15 +1,18 @@
 [![Travis (.com)](https://img.shields.io/travis/com/pokanop/nostromo)](https://app.travis-ci.com/pokanop/nostromo) [![Go Report Card](https://goreportcard.com/badge/github.com/pokanop/nostromo)](https://goreportcard.com/report/github.com/pokanop/nostromo) [![Coveralls github](https://img.shields.io/coveralls/github/pokanop/nostromo)](https://coveralls.io/github/pokanop/nostromo) [![GitHub](https://img.shields.io/github/license/pokanop/nostromo)](https://github.com/pokanop/nostromo/blob/master/LICENSE) [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
 
 <p align="center">
-  <img src="images/nostromo-mess-hall.png" alt="nostromo-mess-hall">
+  <img src="images/mess-hall.png" alt="mess-hall">
 </p>
 
-# nostromo
+<p align="center" style="margin: 12px 0px">
+  <img src="images/nostromo-drop-ship.png" alt="nostromo">&nbsp;
+  <img src="images/nostromo-logo.png" alt="nostromo" style="height: 32px">
+</p>
 
 `nostromo` is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
 
 <p align="center">
-  <img src="images/nostromo-intro.gif" alt="nostromo" style="border-radius: 15px">
+  <img src="images/intro.gif" alt="intro" style="border-radius: 15px">
 </p>
 
 Managing aliases can be tedious and difficult to set up. `nostromo` makes this process easy and reliable. The tool adds shortcuts to your `.bashrc` / `.zshrc` that call into the `nostromo` binary. It reads and manages all aliases within its manifest. This is used to find and execute the actual command as well as swap any substitutions to simplify calls.
@@ -38,7 +41,7 @@ The possibilities are endless 🚀 and up to your imagination with the ability t
 
 > Check out the [examples](https://github.com/pokanop/nostromo/tree/main/examples) folder for sample manifests with commands.
 
-## Getting Started
+## <img align="left" src="images/sleep-pod.png" alt="sleep pod">&nbsp;Getting Started
 
 ### Prerequisites
 
@@ -91,7 +94,7 @@ Backups of manifests are automatically taken to prevent data loss in case of she
 nostromo set backupCount 10
 ```
 
-## Key Features
+## <img align="left" src="images/derelict-ship.png" alt="derelict ship">&nbsp;Key Features
 
 - [Simplified alias management](#managing-aliases)
 - [Scoped commands and substitutions](#scoped-commands-and-substitutions)
@@ -100,8 +103,6 @@ nostromo set backupCount 10
 - [Execute code snippets](#execute-code-snippets)
 - [Distributed manifests](#distributed-manifests)
 - [Neato themes](#themes)
-
-## Usage
 
 ### Managing Aliases
 
@@ -135,7 +136,7 @@ nostromo add cmd foo "echo bar" -d "My magical foo command that prints bar"
 You can also add commands and substitutions **interactively** by using just `nostromo add` without any arguments. This command will walk through prompts to guide adding new commands easily.
 
 <p align="center">
-  <img src="images/nostromo-interactive.gif" alt="nostromo" style="border-radius: 15px">
+  <img src="images/interactive.gif" alt="interactive" style="border-radius: 15px">
 </p>
 
 #### Keypaths
@@ -253,13 +254,13 @@ nostromo show
 With nostromo, you can also visualize the command tree (or manifest) in several other ways including as `json`, `yaml` and a tree itself.
 
 <p align="center">
-  <img src="images/nostromo-tree.gif" alt="nostromo" style="border-radius: 15px">
+  <img src="images/tree.gif" alt="tree" style="border-radius: 15px">
 </p>
 
 Setting the `verbose` config setting prints more detailed information as well for all commands.
 
 <p align="center">
-  <img src="images/nostromo-verbose.gif" alt="nostromo" style="border-radius: 15px">
+  <img src="images/verbose.gif" alt="verbose" style="border-radius: 15px">
 </p>
 
 #### Execution Modes
@@ -386,7 +387,7 @@ Enjoy!
 
 🐳📑🍥🌞🍓🕖🕐💘🎵🌑🐻🐜📙💥👡🍈👝🎭🐄🌓🎏👔📁🍝🔼🕔💩🌒📥
 
-## Credits
+## <img align="left" src="images/sulaco-drop-ship.png" alt="sulaco">&nbsp;Credits
 
 - This tool was bootstrapped using [cobra](https://github.com/spf13/cobra).
 - Colored logging provided by [aurora](https://github.com/logrusorgru/aurora/v3).
@@ -394,7 +395,7 @@ Enjoy!
 - Gopher artwork by [@egonelbre](https://github.com/egonelbre/gophers) and original by [Renee French](http://reneefrench.blogspot.com/).
 - File downloader using [go-getter](https://github.com/hashicorp/go-getter)
 
-## Contibuting
+## <img align="left" src="images/facehugger.png" alt="facehugger">&nbsp;Contributing
 
 Contributions are what makes the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -404,7 +405,7 @@ Contributions are what makes the open-source community such an amazing place to 
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License
+## <img align="left" src="images/loader.png" alt="loader">&nbsp;License
 
 Distributed under the MIT License.
 
