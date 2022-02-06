@@ -4,7 +4,7 @@
   <img src="images/mess-hall.png" alt="mess-hall">
 </p>
 
-<p align="center" style="margin: 12px 0px">
+<p align="left" style="margin: 12px 0px">
   <img src="images/nostromo-drop-ship.png" alt="nostromo">&nbsp;
   <img src="images/nostromo-logo.png" alt="nostromo" style="height: 32px">
 </p>
