@@ -175,6 +175,8 @@ func SetConfig(key, value string) int {
 		return -1
 	}
 
+	log.SetTheme(cfg.Spaceport().Theme)
+	log.Highlightf("set %s to %s\n", key, value)
 	return 0
 }
 
@@ -756,6 +758,7 @@ func checkConfigCommon(quiet bool) *config.Config {
 		return nil
 	}
 
+	log.SetTheme(cfg.Spaceport().Theme)
 	log.SetVerbose(cfg.Spaceport().CoreManifest().Config.IsVerbose())
 
 	return cfg

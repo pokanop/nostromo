@@ -1,15 +1,19 @@
 package model
 
-import "github.com/pokanop/nostromo/version"
+import (
+	"github.com/pokanop/nostromo/log"
+	"github.com/pokanop/nostromo/version"
+)
 
 // Spaceport type that manages and docks multiple ships' manifests
 type Spaceport struct {
 	manifests map[string]*Manifest
-	Sequence  []string `json:"sequence"`
+	Sequence  []string      `json:"sequence"`
+	Theme     log.ThemeType `json:"themeType"`
 }
 
 func NewSpaceport(manifests []*Manifest) *Spaceport {
-	s := &Spaceport{map[string]*Manifest{}, []string{}}
+	s := &Spaceport{map[string]*Manifest{}, []string{}, log.EmojiTheme}
 	s.Import(manifests)
 	return s
 }

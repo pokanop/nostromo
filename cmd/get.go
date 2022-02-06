@@ -18,7 +18,8 @@ Use this command to get keys to examine these settings:
 verbose: boolean
 aliasesOnly: boolean
 backupCount: number`,
-	Args: cobra.MinimumNArgs(1),
+	Args:      cobra.MinimumNArgs(1),
+	ValidArgs: []string{"verbose", "aliasesOnly", "mode", "backupCount", "theme"},
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.GetConfig(args[0]))
 	},

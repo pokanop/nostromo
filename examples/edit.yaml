@@ -1,11 +1,11 @@
 name: edit
 source: https://github.com/pokanop/nostromo/raw/main/examples/edit.yaml
-path: /Users/gopher/.nostromo/ships/edit.yaml
+path: /Users/saheljalal/.nostromo/ships/edit.yaml
 version:
-  uuid: 78fb1569-bab8-4d2f-849b-d1792e98b23d
-  semver: 0.9.6
-  gitcommit: 9fe0a40921c1954c5a26f691ddb76f307c7be83b
-  builddate: '2022-02-04T00:15:57Z'
+  uuid: a47a8333-80e7-4661-a59c-9c3b5cc5e25e
+  semver: 0.9.8
+  gitcommit: 60e81f1768c03dae43b21df8863670d7a16f3da6
+  builddate: "2022-02-04T05:11:09Z"
 config:
   verbose: false
   aliasesonly: false
@@ -14,10 +14,10 @@ config:
 commands:
   edit:
     keypath: edit
-    name: ''
+    name: ""
     alias: edit
     aliasonly: false
-    description: ''
+    description: ""
     commands:
       bash:
         keypath: edit.bash
@@ -28,8 +28,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
         disabled: false
       bash_profile:
@@ -41,21 +41,21 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
         disabled: false
       nostromo:
         keypath: edit.nostromo
-        name: vim ~/.nostromo/manifest.yaml
+        name: vim ~/.nostromo/ships/manifest.yaml
         alias: nostromo
         aliasonly: false
         description: Edit nostromo manifest file using vim
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
         disabled: false
       p10k:
@@ -67,8 +67,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
         disabled: false
       profile:
@@ -80,8 +80,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
         disabled: false
       ssh:
@@ -100,14 +100,14 @@ commands:
             commands: {}
             subs: {}
             code:
-              language: ''
-              snippet: ''
+              language: ""
+              snippet: ""
             mode: 2
             disabled: false
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
         disabled: false
       terminalizer:
@@ -119,8 +119,8 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
         disabled: false
       zsh:
@@ -132,13 +132,13 @@ commands:
         commands: {}
         subs: {}
         code:
-          language: ''
-          snippet: ''
+          language: ""
+          snippet: ""
         mode: 0
         disabled: false
     subs: {}
     code:
-      language: ''
-      snippet: ''
+      language: ""
+      snippet: ""
     mode: 0
     disabled: false

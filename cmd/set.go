@@ -18,9 +18,10 @@ Use this command to set values for these settings:
   verbose: boolean
   aliasesOnly: boolean
   mode: concatenate | independent | exclusive
-  backupCount: number`,
+  backupCount: number
+	theme: default | grayscale | emoji`,
 	Args:      cobra.MinimumNArgs(2),
-	ValidArgs: []string{"verbose", "aliasesOnly", "mode", "backupCount"},
+	ValidArgs: []string{"verbose", "aliasesOnly", "mode", "backupCount", "theme"},
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.SetConfig(args[0], args[1]))
 	},

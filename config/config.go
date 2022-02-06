@@ -301,6 +301,8 @@ func (c *Config) Get(key string) string {
 		return m.Config.Mode.String()
 	case "backupCount":
 		return strconv.FormatInt(int64(m.Config.BackupCount), 10)
+	case "theme":
+		return log.ThemeToString(c.spaceport.Theme)
 	}
 	return "key not found"
 }
@@ -335,6 +337,9 @@ func (c *Config) Set(key, value string) error {
 			return err
 		}
 		m.Config.BackupCount = int(count)
+		return nil
+	case "theme":
+		c.spaceport.Theme = log.ThemeFromString(value)
 		return nil
 	}
 	return fmt.Errorf("key not found")
@@ -440,7 +445,10 @@ func loadSpaceport() (*model.Spaceport, error) {
 		return nil, err
 	}
 
-	var s *model.Spaceport
+	// Set default values
+	s := &model.Spaceport{
+		Theme: log.EmojiTheme,
+	}
 	ext := filepath.Ext(path)
 	if ext == ".yaml" {
 		err = yaml.Unmarshal(b, &s)

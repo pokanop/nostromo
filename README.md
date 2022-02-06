@@ -99,6 +99,7 @@ nostromo set backupCount 10
 - [Shell completion support](#shell-completion)
 - [Execute code snippets](#execute-code-snippets)
 - [Distributed manifests](#distributed-manifests)
+- [Neato themes](#themes)
 
 ## Usage
 
@@ -366,6 +367,24 @@ Since `nostromo` updates manifests if the identifier is unique, there might be t
 ```sh
 nostromo uuidgen <name>
 ```
+
+### Themes
+
+`nostromo` now supports themes to make it look even more neat. There's 3 themes currently which can be set with:
+
+```sh
+nostromo set theme <name>
+```
+
+where valid themes include:
+
+- `default`: The basic theme and previous default
+- `grayscale`: Gray colored things are sometimes nice
+- `emoji`: The new default obviously
+
+Enjoy!
+
+🐳📑🍥🌞🍓🕖🕐💘🎵🌑🐻🐜📙💥👡🍈👝🎭🐄🌓🎏👔📁🍝🔼🕔💩🌒📥
 
 ## Credits
 

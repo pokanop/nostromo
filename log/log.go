@@ -99,7 +99,7 @@ func Debugf(format string, a ...interface{}) {
 		echof(format, a...)
 		return
 	}
-	fmt.Print(opt.theme.formatLevel(debugLevel, "debug: "), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(debugLevel, "debug:"), " ", fmt.Sprintf(format, a...))
 }
 
 // Info logs an info message
@@ -117,7 +117,7 @@ func Infof(format string, a ...interface{}) {
 		echof(format, a...)
 		return
 	}
-	fmt.Print(opt.theme.formatLevel(infoLevel, "info: "), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(infoLevel, "info:"), " ", fmt.Sprintf(format, a...))
 }
 
 // Warning logs a warning message
@@ -135,7 +135,7 @@ func Warningf(format string, a ...interface{}) {
 		echof(format, a...)
 		return
 	}
-	fmt.Print(opt.theme.formatLevel(warningLevel, "warning: "), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(warningLevel, "warning:"), " ", fmt.Sprintf(format, a...))
 }
 
 // Error logs an error message
@@ -153,7 +153,7 @@ func Errorf(format string, a ...interface{}) {
 		echof(format, a...)
 		return
 	}
-	fmt.Print(opt.theme.formatLevel(errorLevel, "error: "), fmt.Sprintf(format, a...))
+	fmt.Print(opt.theme.formatLevel(errorLevel, "error:"), " ", fmt.Sprintf(format, a...))
 }
 
 // Print is effectively a pass-through to fmt.Print
@@ -179,6 +179,18 @@ func SetEcho(echo bool) {
 	opt.echo = echo
 }
 
+// SetTheme for logger
+func SetTheme(theme ThemeType) {
+	switch theme {
+	case DefaultTheme:
+		opt.theme = &defaultTheme{}
+	case GrayscaleTheme:
+		opt.theme = &grayscaleTheme{}
+	case EmojiTheme:
+		opt.theme = &emojiTheme{}
+	}
+}
+
 func joined(a ...interface{}) string {
 	sargs := []string{}
 	for _, arg := range a {
@@ -189,7 +201,7 @@ func joined(a ...interface{}) string {
 
 func init() {
 	opt = &options{
-		theme:   &defaultTheme{},
+		theme:   &emojiTheme{},
 		verbose: false,
 	}
 }
