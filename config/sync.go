@@ -68,7 +68,11 @@ func syncPrep(sources []string) ([]string, error) {
 	s := []string{}
 	for _, source := range sources {
 		if strings.Contains(source, "github") && strings.Contains(source, "blob") {
+			// Adjust github link to point to raw file
 			source = strings.Replace(source, "blob", "raw", 1)
+			s = append(s, source)
+		} else {
+			// Fallback to same url
 			s = append(s, source)
 		}
 	}
