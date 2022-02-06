@@ -24,6 +24,11 @@ const (
 	errorLevel
 )
 
+// IsVerbose logging turned on
+func IsVerbose() bool {
+	return opt.verbose
+}
+
 // Regular log for body style text
 func Regular(a ...interface{}) {
 	if opt.echo {

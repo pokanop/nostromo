@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/pokanop/nostromo/version"
 	"github.com/shivamMg/ppds/tree"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 )
 
 var ver *version.Info
@@ -52,6 +54,14 @@ func InitConfig(cmd *cobra.Command) int {
 	GenerateCompletions("fish", cmd, true)
 	GenerateCompletions("powershell", cmd, true)
 
+	// Generate man pages
+	for _, err := range config.UnlinkManPages() {
+		log.Debug(err)
+	}
+	for _, err := range generateManPages(cmd) {
+		log.Debug(err)
+	}
+
 	return 0
 }
 
@@ -74,6 +84,10 @@ func DestroyConfig(nuke bool) int {
 	if err != nil {
 		log.Error(err)
 		return -1
+	}
+
+	for _, err := range config.UnlinkManPages() {
+		log.Debug(err)
 	}
 
 	log.Highlight("nostromo config destroyed")
@@ -220,6 +234,8 @@ func GenerateCompletions(sh string, cmd *cobra.Command, writeFile bool) int {
 	}
 
 	// Force verbose logging off since completion output must be sourced
+	verbose := log.IsVerbose()
+	defer log.SetVerbose(verbose)
 	log.SetVerbose(false)
 
 	cfg := checkConfigQuiet()
@@ -250,6 +266,23 @@ func GenerateCompletions(sh string, cmd *cobra.Command, writeFile bool) int {
 	}
 
 	return 0
+}
+
+// generateManPages for nostromo
+func generateManPages(cmd *cobra.Command) []error {
+	header := &doc.GenManHeader{
+		Section: "1",
+		Manual:  "nostromo manual",
+		Source:  fmt.Sprintf("nostromo %s", ver.SemVer),
+	}
+	cmd.Root().DisableAutoGenTag = true
+
+	doc.GenManTree(cmd.Root(), header, config.ManDir())
+	if errs := config.LinkManPages(); len(errs) > 0 {
+		return errs
+	}
+
+	return []error{}
 }
 
 // AddInteractive adds a command or substitution through user prompts

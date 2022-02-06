@@ -1,4 +1,3 @@
-# This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
 before:
   hooks:
@@ -67,6 +66,10 @@ brews:
       Be sure to source your shell profile after initializing nostromo for auto-complete to work.
       
       
+      
+      
+      
+      
 
     # Your app's homepage.
     # Default is empty.
@@ -83,6 +86,10 @@ brews:
     # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
     # Default is false.
     skip_upload: false
+
+    # SPDX identifier of your app's license.
+    # Default is empty
+    license: 'MIT'
 
     # So you can `brew test` your formula.
     # Default is empty.

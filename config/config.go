@@ -19,12 +19,14 @@ import (
 
 // Path for standard nostromo config
 const (
+	SystemPrefixDir       = "/usr/local"
 	DefaultBaseDir        = "~/.nostromo"
 	DefaultConfigFile     = "%s.yaml"
 	DefaultManifestsDir   = "ships"
 	DefaultBackupsDir     = "cargo"
 	DefaultDownloadsDir   = "downloads"
 	DefaultCompletionsDir = "completions"
+	DefaultManDir         = "man"
 )
 
 // URL scheme constants
@@ -128,6 +130,59 @@ func BaseDir() string {
 	}
 
 	return DefaultBaseDir
+}
+
+// ManDir returns the nostromo man dir
+func ManDir() string {
+	return filepath.Join(pathutil.Abs(BaseDir()), DefaultManDir)
+}
+
+// LinkManPages creates a symlink for man pages
+func LinkManPages() []error {
+	mandir := ManDir()
+	manpages, err := ioutil.ReadDir(mandir)
+	if err != nil {
+		return []error{err}
+	}
+
+	errors := []error{}
+	sysmandir := filepath.Join(SystemPrefixDir, "share", "man", "man1")
+	for _, manpage := range manpages {
+		name := manpage.Name()
+		oldname := filepath.Join(mandir, name)
+		newname := filepath.Join(sysmandir, name)
+
+		log.Debugf("adding man page: %s\n", name)
+		if err := os.Symlink(oldname, newname); err != nil {
+			errors = append(errors, err)
+		}
+	}
+
+	return errors
+}
+
+// UnlinkManPages from system man dir
+func UnlinkManPages() []error {
+	sysmandir := filepath.Join(SystemPrefixDir, "share", "man", "man1")
+	manpages, err := ioutil.ReadDir(sysmandir)
+	if err != nil {
+		return []error{err}
+	}
+
+	errors := []error{}
+	for _, manpage := range manpages {
+		name := manpage.Name()
+		if strings.HasPrefix(name, "nostromo") {
+			path := filepath.Join(sysmandir, name)
+
+			log.Debugf("removing man page: %s\n", name)
+			if err := os.Remove(path); err != nil {
+				errors = append(errors, err)
+			}
+		}
+	}
+
+	return errors
 }
 
 // Parse nostromo config at path into a `Manifest` object
@@ -502,6 +557,10 @@ func sanitizeFiles() error {
 	}
 
 	if err := pathutil.EnsurePath(completionsPath()); err != nil {
+		return err
+	}
+
+	if err := pathutil.EnsurePath(ManDir()); err != nil {
 		return err
 	}
 
