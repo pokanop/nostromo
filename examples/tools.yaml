@@ -2,10 +2,10 @@ name: tools
 source: https://github.com/pokanop/nostromo/raw/main/examples/tools.yaml
 path: /Users/gopher/.nostromo/ships/tools.yaml
 version:
-  uuid: 59a4a815-3b0b-440d-91e8-fc395e2016b4
-  semver: 0.9.9
-  gitcommit: 2e19036fcc51c9af254ff0fa5fa849558308a985
-  builddate: '2022-02-06T08:21:54Z'
+  uuid: d6353550-f89d-4bc4-86d6-cd5020cb9d6c
+  semver: 0.9.11
+  gitcommit: e53f5fdb6f17fe4d18166aa2e80febad711a8b47
+  builddate: '2022-02-06T08:40:14Z'
 config:
   verbose: false
   aliasesonly: false

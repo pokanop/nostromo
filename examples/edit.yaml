@@ -2,10 +2,10 @@ name: edit
 source: https://github.com/pokanop/nostromo/raw/main/examples/edit.yaml
 path: /Users/gopher/.nostromo/ships/edit.yaml
 version:
-  uuid: 9ed3501b-6f2d-4393-afb9-c517c4da6e21
-  semver: 0.9.9
-  gitcommit: 2e19036fcc51c9af254ff0fa5fa849558308a985
-  builddate: '2022-02-06T08:21:54Z'
+  uuid: bd28c391-4ba9-43a1-9346-6008883def08
+  semver: 0.9.11
+  gitcommit: e53f5fdb6f17fe4d18166aa2e80febad711a8b47
+  builddate: '2022-02-06T08:40:14Z'
 config:
   verbose: false
   aliasesonly: false
@@ -47,7 +47,7 @@ commands:
         disabled: false
       nostromo:
         keypath: edit.nostromo
-        name: vim ~/.nostromo/manifest.yaml
+        name: vim ~/.nostromo/ships/manifest.yaml
         alias: nostromo
         aliasonly: false
         description: Edit nostromo manifest file using vim
