@@ -19,6 +19,7 @@ folder. If a docked manifest already exists with the same name then
 nostromo will overwrite that file if the identifier is different.
 
 To force docking even if identifiers are the same, use the -f flag.`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.Sync(force, args))
 	},
