@@ -17,10 +17,11 @@ import (
 )
 
 // Sync adds a new manifest from provided sources
-func (c *Config) Sync(force bool, sources []string) error {
+func (c *Config) Sync(force bool, sources []string) ([]*model.Manifest, error) {
+	manifests := []*model.Manifest{}
 	sources, err := syncPrep(sources)
 	if err != nil {
-		return err
+		return manifests, err
 	}
 
 	defer syncCleanup()
@@ -43,19 +44,20 @@ func (c *Config) Sync(force bool, sources []string) error {
 
 		err := syncDownload(source)
 		if err != nil {
-			return err
+			return manifests, err
 		}
 	}
 
-	if err := c.syncMerge(sources, force); err != nil {
-		return err
+	manifests, err = c.syncMerge(sources, force)
+	if err != nil {
+		return manifests, err
 	}
 
 	if err := SaveSpaceport(c.spaceport); err != nil {
-		return err
+		return manifests, err
 	}
 
-	return nil
+	return manifests, nil
 }
 
 func syncPrep(sources []string) ([]string, error) {
@@ -129,12 +131,13 @@ func syncDownload(source string) error {
 	return nil
 }
 
-func (c *Config) syncMerge(sources []string, force bool) error {
+func (c *Config) syncMerge(sources []string, force bool) ([]*model.Manifest, error) {
 	// Read all files from download folder
+	manifests := []*model.Manifest{}
 	downloadsPath := downloadsPath()
 	files, err := ioutil.ReadDir(downloadsPath)
 	if err != nil {
-		return err
+		return manifests, err
 	}
 
 	// Parse each file
@@ -143,7 +146,7 @@ func (c *Config) syncMerge(sources []string, force bool) error {
 		path := filepath.Join(downloadsPath, fname)
 		m, err := Parse(path)
 		if err != nil {
-			return err
+			return manifests, err
 		}
 
 		// Check for conflicts
@@ -188,7 +191,9 @@ func (c *Config) syncMerge(sources []string, force bool) error {
 				log.Warningf("failed to save manifest %s\n", m.Name)
 			}
 		}
+
+		manifests = append(manifests, m)
 	}
 
-	return nil
+	return manifests, nil
 }

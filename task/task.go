@@ -672,7 +672,8 @@ func Sync(force bool, sources []string) int {
 		return -1
 	}
 
-	if err := cfg.Sync(force, sources); err != nil {
+	manifests, err := cfg.Sync(force, sources)
+	if err != nil {
 		log.Error(err)
 		return -1
 	}
@@ -680,7 +681,11 @@ func Sync(force bool, sources []string) int {
 	if len(sources) == 0 {
 		log.Highlight("synchronized nostromo manifests")
 	} else {
-		log.Highlight("docked nostromo manifests")
+		names := []string{}
+		for _, m := range manifests {
+			names = append(names, m.Name)
+		}
+		log.Highlightf("docked manifests: %s\n", names)
 	}
 
 	return 0
@@ -782,34 +787,38 @@ func RegenerateID(name string) int {
 }
 
 // Undock a manifest from nostromo installation
-func Undock(name string) int {
-	if len(name) == 0 {
-		log.Errorf("no manifest named %s found\n", name)
-		return -1
-	}
-
+func Undock(names []string) int {
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
 	}
 
-	err := cfg.DeleteManifest(name)
+	undocked := []string{}
+	for _, name := range names {
+		if len(name) == 0 {
+			log.Warningf("no manifest named %s found\n", name)
+		}
+
+		err := cfg.DeleteManifest(name)
+		if err != nil {
+			log.Warning(err)
+			return -1
+		}
+
+		if !cfg.Spaceport().RemoveManifest(name) {
+			log.Warningf("spaceport missing manifest %s\n", name)
+		}
+
+		undocked = append(undocked, name)
+	}
+
+	err := config.SaveSpaceport(cfg.Spaceport())
 	if err != nil {
 		log.Error(err)
 		return -1
 	}
 
-	if !cfg.Spaceport().RemoveManifest(name) {
-		log.Warningf("spaceport missing manifest %s\n", name)
-	}
-
-	err = config.SaveSpaceport(cfg.Spaceport())
-	if err != nil {
-		log.Error(err)
-		return -1
-	}
-
-	log.Highlight("undocked nostromo manifest")
+	log.Highlightf("undocked manifests: %s\n", undocked)
 
 	return 0
 }
