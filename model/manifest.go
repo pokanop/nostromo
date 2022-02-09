@@ -249,7 +249,7 @@ func (m *Manifest) Children() []tree.Node {
 func (m *Manifest) ImportCommands(cmds []*Command, kp, description string, create bool) error {
 	// Check if keypath exists
 	root := m.Find(kp)
-	if root == nil && create && len(kp) > 0 {
+	if root == nil && create && len(kp) > 0 && kp != "." {
 		// Create destination key path
 		_, err := m.AddCommand(kp, "", description, nil, false, "")
 		if err != nil {

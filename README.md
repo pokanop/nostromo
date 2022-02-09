@@ -9,7 +9,7 @@
   <img src="images/nostromo-logo.png" alt="nostromo" style="height: 32px">
 </p>
 
-`nostromo` is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.
+`nostromo` is a CLI to rapidly build declarative aliases making multi-dimensional tools on the fly.
 
 <p align="center">
   <img src="images/intro.gif" alt="intro" style="border-radius: 15px">
@@ -88,7 +88,7 @@ To destroy the core manifest and start over you can always run:
 nostromo destroy
 ```
 
-Backups of manifests are automatically taken to prevent data loss in case of shenanigans gone wrong. These are located under `${NOSTROMO_HOME}/backups`. The maximum number of backups can be configured with the `backupCount` manifest setting.
+Backups of manifests are automatically taken to prevent data loss in case of shenanigans gone wrong. These are located under `${NOSTROMO_HOME}/cargo`. The maximum number of backups can be configured with the `backupCount` manifest setting.
 
 ```sh
 nostromo set backupCount 10
@@ -102,6 +102,7 @@ nostromo set backupCount 10
 - [Shell completion support](#shell-completion)
 - [Execute code snippets](#execute-code-snippets)
 - [Distributed manifests](#distributed-manifests)
+- [Powerful tree management](#command-tree-management)
 - [Neato themes](#themes)
 
 ### Managing Aliases
@@ -355,13 +356,35 @@ If you're tired of someone else's manifest or it just isn't making you happy ☹
 nostromo undock <name>
 ```
 
+### Command Tree Management
+
+Moving and copying command subtrees can be done easily using `nostromo` as well to avoid manual copy pasta with yaml. If you want to move command nodes around just use:
+
+```sh
+nostromo move cmd <source> <destination>
+```
+
+where the source and destinations are expected to be key paths like `foo.bar`.
+
+You can rename a node with:
+
+```sh
+nostromo rename cmd <source> -r <name>
+```
+
+Next up, you might want to copy entire nodes around, which can also be done between manifests using `copy`. Again use key paths for `source` and `destination` and `nostromo` will attempt to replicate the branch to the new location.
+
+```sh
+nostromo copy cmd <source> <destination>
+```
+
 So you've created an awesome suite of commands and you like to share, am I right? Well `nostromo` makes it super easy to create manifests with any set of your commands from the tree using the `detach` command. It lets you slice and dice your manifests by extracting out a command node into a new manifest.
 
 ```sh
 nostromo detach <name> <key.path>...
 ```
 
-By default, this removes the command nodes from the original (core) manifest but can be kept intact as well with the `-k` option.
+By default, this removes the command nodes from the manifest but can be kept intact as well with the `-k` option. Additionally, detaching any command nodes from a docked manifest may have unwanted side effects when running `nostromo sync` again since the commands will likely be added back from the original source.
 
 Since `nostromo` updates manifests if the identifier is unique, there might be times you want to update the `yaml` files manually for whatever reason. In this case you can run the handy `uuidgen` command to update the identifier so you can push the manifest to others:
 

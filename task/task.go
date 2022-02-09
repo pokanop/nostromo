@@ -430,29 +430,54 @@ func RemoveCommand(keyPath string) int {
 }
 
 // MoveCommand from one node to another
-func MoveCommand(source, dest, description string) int {
+func MoveCommand(source, dest, manifest, description string, copy bool) int {
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
 	}
 
-	m := cfg.Spaceport().CoreManifest()
-	cmd := m.Find(source)
-	if cmd == nil {
+	// Find the source manifest and command
+	cmd, sm := cfg.Spaceport().FindCommand(source)
+	if cmd == nil || sm == nil {
 		log.Errorf("%s command not found", source)
 		return -1
 	}
 
-	if _, err := m.RemoveCommand(source); err != nil {
+	// Remove it from the source manifest if not copying
+	if !copy {
+		if _, err := sm.RemoveCommand(source); err != nil {
+			log.Error(err)
+			return -1
+		}
+	}
+
+	// Find destination manifest if it exists and otherwise use the core manifest
+	dm := cfg.Spaceport().FindManifest(manifest)
+	if dm == nil {
+		dm = cfg.Spaceport().CoreManifest()
+	}
+	if err := dm.ImportCommands([]*model.Command{cmd}, dest, description, true); err != nil {
 		log.Error(err)
 		return -1
 	}
 
-	if err := m.ImportCommands([]*model.Command{cmd}, dest, description, true); err != nil {
-		log.Error(err)
-		return -1
+	// Save source manifest
+	if !copy {
+		if err := config.SaveManifest(sm, false); err != nil {
+			log.Error(err)
+			return -1
+		}
 	}
 
+	// Save destonation manifest if different from source manifest
+	if dm.Name != sm.Name {
+		if err := config.SaveManifest(dm, false); err != nil {
+			log.Error(err)
+			return -1
+		}
+	}
+
+	// Save core manifest and spaceport
 	if err := saveConfig(cfg, false); err != nil {
 		log.Error(err)
 		return -1
@@ -654,19 +679,33 @@ func Detach(name string, keyPaths []string, targetKeyPath, description string, k
 	}
 	s := cfg.Spaceport()
 
+	// Keep track of manifests that need saving
+	saveList := map[string]*model.Manifest{}
+
 	// First try to find the relevant keypaths
+	var m *model.Manifest
 	cmds := []*model.Command{}
 	for _, keyPath := range keyPaths {
-		cmd := s.FindCommand(keyPath)
+		var cmd *model.Command
+		cmd, m = s.FindCommand(keyPath)
 		if cmd == nil {
 			log.Errorf("keypath not found: %s\n", keyPath)
 			return -1
 		}
 		cmds = append(cmds, cmd)
+
+		// Remove original node if needed
+		if !keepOriginal {
+			if _, err := m.RemoveCommand(keyPath); err != nil {
+				log.Warningf("cannot remove %s: %s\n", keyPath, err)
+			}
+
+			// Track save
+			saveList[m.Name] = m
+		}
 	}
 
 	// Name is the output file name, check if manifest already exists
-	var m *model.Manifest
 	var err error
 	path := filepath.Join(pathutil.Abs(config.BaseDir()), config.DefaultManifestsDir, name+".yaml")
 	if m, err = config.Parse(path); err != nil {
@@ -676,32 +715,20 @@ func Detach(name string, keyPaths []string, targetKeyPath, description string, k
 
 	// Merge or add commands to manifest
 	m.ImportCommands(cmds, targetKeyPath, description, false)
+	saveList[m.Name] = m
 
-	// Remove original node if needed, only applies to core manifest
-	if !keepOriginal {
-		cm := s.CoreManifest()
-		for _, keyPath := range keyPaths {
-			_, err = cm.RemoveCommand(keyPath)
-			if err != nil {
-				log.Warningf("cannot remove %s: %s\n", keyPath, err)
-			}
-		}
+	// Update spaceport
+	s.AddManifest(m)
 
-		// Save core manifest updates
-		err = config.SaveManifest(cm, true)
+	// Save manifests
+	for _, m := range saveList {
+		err = config.SaveManifest(m, false)
 		if err != nil {
 			log.Error(err)
 			return -1
 		}
 	}
 
-	// Update spaceport and save manifest
-	s.AddManifest(m)
-	err = config.SaveManifest(m, false)
-	if err != nil {
-		log.Error(err)
-		return -1
-	}
 	err = config.SaveSpaceport(s)
 	if err != nil {
 		log.Error(err)

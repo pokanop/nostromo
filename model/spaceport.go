@@ -100,11 +100,11 @@ func (s *Spaceport) UpdateVersion(ver *version.Info) {
 	}
 }
 
-func (s *Spaceport) FindCommand(name string) *Command {
+func (s *Spaceport) FindCommand(name string) (*Command, *Manifest) {
 	for _, m := range s.manifests {
 		if cmd := m.Find(name); cmd != nil {
-			return cmd
+			return cmd, m
 		}
 	}
-	return nil
+	return nil, nil
 }

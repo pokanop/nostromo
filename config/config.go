@@ -308,7 +308,11 @@ func (c *Config) Save() error {
 	}
 
 	// Save core manifest
-	return SaveManifest(c.spaceport.CoreManifest(), true)
+	if err := SaveManifest(c.spaceport.CoreManifest(), true); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // DeleteManifest from nostromo manfiests folder
