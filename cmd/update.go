@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
+	"github.com/pokanop/nostromo/shell"
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
 )
@@ -29,7 +32,7 @@ exclusive    Execute this and only this command ignoring parent commands
 
 You can set using -m or --mode when adding a command or globally using:
 	nostromo manifest set mode <mode>`,
-	Args: addCmdArgs,
+	Args: updateCmdArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var name string
 		if len(args) > 1 {
@@ -48,4 +51,14 @@ func init() {
 	updateCmd.Flags().StringVarP(&language, "language", "l", "", "Language of code snippet (e.g., ruby, python, perl, js)")
 	updateCmd.Flags().BoolVarP(&aliasOnly, "alias-only", "a", false, "Add shell alias only, not a nostromo command")
 	updateCmd.Flags().StringVarP(&mode, "mode", "m", "", "Set the mode for the command (concatenate, independent, exclusive)")
+}
+
+func updateCmdArgs(cmd *cobra.Command, args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("invalid number of arguments")
+	}
+	if codeValid() && !shell.IsSupportedLanguage(language) {
+		return fmt.Errorf("invalid code snippet and language, must be in [%s]", strings.Join(shell.SupportedLanguages(), ","))
+	}
+	return nil
 }

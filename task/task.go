@@ -368,9 +368,16 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 
 	m := cfg.Spaceport().CoreManifest()
 
-	if update && m.Find(keyPath) == nil {
-		log.Error("no matching command found to update")
-		return -1
+	if update {
+		cmd := m.Find(keyPath)
+		if cmd == nil {
+			log.Error("no matching command found to update")
+			return -1
+		}
+		if len(command) == 0 {
+			// Keep same command if not supplied
+			command = cmd.Name
+		}
 	}
 
 	snippet := &model.Code{
@@ -401,7 +408,11 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 		return -1
 	}
 
-	logFields(cmd, m.Config.Verbose)
+	if update {
+		log.Highlightf("updated command %s\n", keyPath)
+	} else {
+		logFields(cmd, m.Config.Verbose)
+	}
 	return 0
 }
 
