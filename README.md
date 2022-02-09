@@ -369,7 +369,7 @@ where the source and destinations are expected to be key paths like `foo.bar`.
 You can rename a node with:
 
 ```sh
-nostromo rename cmd <source> -r <name>
+nostromo rename cmd <source> <name>
 ```
 
 Next up, you might want to copy entire nodes around, which can also be done between manifests using `copy`. Again use key paths for `source` and `destination` and `nostromo` will attempt to replicate the branch to the new location.
