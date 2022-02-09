@@ -265,7 +265,11 @@ func (m *Manifest) ImportCommands(cmds []*Command, kp, description string, creat
 	if root != nil {
 		// Add individual commands
 		for _, c := range cmds {
-			root.addCommand(c)
+			copy := c.copy()
+			if copy == nil {
+				return fmt.Errorf("failed to create copy of command")
+			}
+			root.addCommand(copy)
 		}
 
 		if len(description) > 0 {
@@ -277,8 +281,12 @@ func (m *Manifest) ImportCommands(cmds []*Command, kp, description string, creat
 
 	// Keypath not found, add commands to root
 	for _, c := range cmds {
-		c.updateRootKeyPath("")
-		m.Commands[c.Alias] = c
+		copy := c.copy()
+		if copy == nil {
+			return fmt.Errorf("failed to create copy of command")
+		}
+		copy.updateRootKeyPath("")
+		m.Commands[c.Alias] = copy
 	}
 
 	return nil

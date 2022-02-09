@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-getter v1.5.11
+	github.com/jinzhu/copier v0.3.5
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/olekukonko/tablewriter v0.0.5

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/jinzhu/copier"
 	"github.com/pokanop/nostromo/stringutil"
 	"github.com/spf13/cobra"
 
@@ -162,6 +163,15 @@ func (c *Command) removeSubstitution(sub *Substitution) {
 	}
 
 	delete(c.Subs, sub.Alias)
+}
+
+// copy this command into a new instance
+func (c *Command) copy() *Command {
+	copy := &Command{}
+	if err := copier.Copy(copy, c); err != nil {
+		return nil
+	}
+	return copy
 }
 
 // count of the total number of commands including this one

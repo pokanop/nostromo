@@ -472,17 +472,15 @@ func MoveCommand(source, dest, manifest, description string, copy bool) int {
 		return -1
 	}
 
-	// Save source manifest
-	if !copy {
-		if err := config.SaveManifest(sm, false); err != nil {
-			log.Error(err)
-			return -1
-		}
+	// Save destination manifest
+	if err := config.SaveManifest(dm, false); err != nil {
+		log.Error(err)
+		return -1
 	}
 
-	// Save destonation manifest if different from source manifest
-	if dm.Name != sm.Name {
-		if err := config.SaveManifest(dm, false); err != nil {
+	// Save source manifest if required
+	if !copy && dm.Name != sm.Name {
+		if err := config.SaveManifest(sm, false); err != nil {
 			log.Error(err)
 			return -1
 		}
@@ -497,7 +495,12 @@ func MoveCommand(source, dest, manifest, description string, copy bool) int {
 	if len(dest) == 0 {
 		dest = "root"
 	}
-	log.Highlightf("moved %s command to %s\n", source, dest)
+
+	if copy {
+		log.Highlightf("copied %s command to %s\n", source, dest)
+	} else {
+		log.Highlightf("moved %s command to %s\n", source, dest)
+	}
 
 	return 0
 }
