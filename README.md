@@ -52,8 +52,7 @@ The possibilities are endless 🚀 and up to your imagination with the ability t
 Using `brew`:
 
 ```sh
-brew tap pokanop/pokanop
-brew install nostromo
+brew install pokanop/pokanop/nostromo
 ```
 
 Using `go get`:
