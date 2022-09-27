@@ -12,7 +12,6 @@ install:
   - go get
 
 script:
-  - echo "TRAVIS_GO_VERSION=${TRAVIS_GO_VERSION}"
   - go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
   - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
 
