@@ -1,8 +1,8 @@
 language: go
 
 go:
-  - 1.16.x
-  - tip
+  - 1.17.x
+  - 1.x
 
 sudo: false
 
@@ -13,8 +13,8 @@ install:
 
 script:
   - echo "TRAVIS_GO_VERSION=${TRAVIS_GO_VERSION}"
-  - go test -v -covermode=count -coverprofile=coverage.out ./...
-  - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
+  - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
 
 env:
   global:
