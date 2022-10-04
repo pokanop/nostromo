@@ -238,7 +238,7 @@ foo bar baz sls
 would finally result in the following since the substitution is in scope:
 
 ```sh
-oof rab zab //some/long/string
+foo bar baz //some/long/string
 ```
 
 ### Complex Command Tree
