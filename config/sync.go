@@ -25,6 +25,10 @@ type syncItem struct {
 	source string
 	// Destination is the destination directory to download to
 	destination string
+	// RelativePath from the destination to the manifest
+	relativePath string
+	// SyncPath is the path to the manifest after sync
+	syncPath string
 }
 
 func newSyncItem(source string) *syncItem {
@@ -35,6 +39,11 @@ func newSyncItem(source string) *syncItem {
 		source:      source,
 		destination: destination,
 	}
+}
+
+func (i *syncItem) setPath(p string) {
+	i.relativePath = strings.TrimPrefix(p, i.destination)
+	i.syncPath = path.Join(i.source, i.relativePath)
 }
 
 // Sync adds a new manifest from provided sources
@@ -49,10 +58,16 @@ func (c *Config) Sync(force, keep bool, sources []string) ([]*model.Manifest, er
 
 	// Fallback to all existing manifests if no sources provided
 	if len(sources) == 0 {
+		// Track unique sources
+		seen := map[string]bool{}
 		for _, m := range c.spaceport.Manifests() {
 			if m.IsCore() {
 				continue
 			}
+			if seen[m.Source] {
+				continue
+			}
+			seen[m.Source] = true
 			sources = append(sources, m.Source)
 		}
 	}
@@ -189,6 +204,9 @@ func (c *Config) syncMerge(items []*syncItem, force bool) ([]*model.Manifest, er
 				return nil
 			}
 
+			// Update item paths
+			item.setPath(path)
+
 			fname := info.Name()
 			m, err := Parse(path)
 			if err != nil {
@@ -207,12 +225,7 @@ func (c *Config) syncMerge(items []*syncItem, force bool) ([]*model.Manifest, er
 			m.Path = filepath.Join(manifestsPath(), fmt.Sprintf(DefaultConfigFile, m.Name))
 
 			// Update source
-			for _, item := range items {
-				base := strings.TrimSuffix(filepath.Base(item.source), filepath.Ext(m.Path))
-				if base == m.Name {
-					m.Source = item.source
-				}
-			}
+			m.Source = item.source
 
 			var shouldSave bool
 			if c.spaceport.IsUnique(m.Name) {
