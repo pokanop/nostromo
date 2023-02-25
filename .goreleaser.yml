@@ -46,7 +46,7 @@ brews:
     # Defaults are shown.
     commit_author:
       name: saheljalal
-      email: sahel.jalal@icloud.com
+      email: sahel@pokanop.com
 
     # Folder inside the repository to put the formula.
     # Default is the root folder.
@@ -56,20 +56,24 @@ brews:
     # Default is empty.
     caveats: >+
       Initialize nostromo which will create a manifest under ~/.nostromo by running:
-      
+
         nostromo init
-      
-      You can get started by running the following interactive command:
-      
+
+      You can get started adding commands by running the following interactive command:
+
         nostromo add
-      
+
+      If you have remote manifests already, you can quickly get them by running:
+
+        nostromo dock <url>
+
       Be sure to source your shell profile after initializing nostromo for auto-complete to work.
-      
-      
-      
-      
-      
-      
+
+
+
+
+
+
 
     # Your app's homepage.
     # Default is empty.
