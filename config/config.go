@@ -188,6 +188,7 @@ func UnlinkManPages() []error {
 // Parse nostromo config at path into a `Manifest` object
 func Parse(path string) (*model.Manifest, error) {
 	log.Debugf("parsing manifest at %s\n", path)
+
 	f, err := os.Open(pathutil.Abs(path))
 	if err != nil {
 		return nil, err
@@ -213,6 +214,11 @@ func Parse(path string) (*model.Manifest, error) {
 		}
 	} else {
 		return nil, fmt.Errorf("invalid file format: %s", ext)
+	}
+
+	// Sanity check parsed manifest
+	if len(m.Name) == 0 {
+		return nil, fmt.Errorf("invalid file content")
 	}
 
 	// Manifest path should match
