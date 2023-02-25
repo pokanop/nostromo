@@ -17,14 +17,14 @@ import (
 )
 
 // Sync adds a new manifest from provided sources
-func (c *Config) Sync(force bool, sources []string) ([]*model.Manifest, error) {
+func (c *Config) Sync(force, keep bool, sources []string) ([]*model.Manifest, error) {
 	manifests := []*model.Manifest{}
 	sources, err := syncPrep(sources)
 	if err != nil {
 		return manifests, err
 	}
 
-	defer syncCleanup()
+	defer syncCleanup(keep)
 
 	// Fallback to all existing manifests if no sources provided
 	if len(sources) == 0 {
@@ -82,7 +82,12 @@ func syncPrep(sources []string) ([]string, error) {
 	return s, nil
 }
 
-func syncCleanup() error {
+func syncCleanup(keep bool) error {
+	// Persist downloads folder if requested
+	if keep {
+		return nil
+	}
+
 	// Remove downloads folder
 	return os.RemoveAll(downloadsPath())
 }

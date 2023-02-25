@@ -666,13 +666,13 @@ func Find(name string) int {
 	return 0
 }
 
-func Sync(force bool, sources []string) int {
+func Sync(force, keep bool, sources []string) int {
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
 	}
 
-	manifests, err := cfg.Sync(force, sources)
+	manifests, err := cfg.Sync(force, keep, sources)
 	if err != nil {
 		log.Error(err)
 		return -1

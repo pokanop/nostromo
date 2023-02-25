@@ -8,6 +8,7 @@ import (
 )
 
 var force bool
+var keep bool
 
 // syncCmd represents the sync command
 var syncCmd = &cobra.Command{
@@ -24,7 +25,7 @@ Sync will only update manifests with changed identifiers, to
 force update use the -f flag.`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		os.Exit(task.Sync(force, []string{}))
+		os.Exit(task.Sync(force, keep, args))
 	},
 }
 
@@ -32,4 +33,5 @@ func init() {
 	rootCmd.AddCommand(syncCmd)
 
 	syncCmd.Flags().BoolVarP(&force, "force", "f", false, "Force sync manifests")
+	syncCmd.Flags().BoolVarP(&keep, "keep", "k", false, "Keep downloaded files")
 }

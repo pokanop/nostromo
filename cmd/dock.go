@@ -26,7 +26,7 @@ Run:
 To force docking even if identifiers are the same, use the -f flag.`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		os.Exit(task.Sync(force, args))
+		os.Exit(task.Sync(force, keep, args))
 	},
 }
 
@@ -34,4 +34,5 @@ func init() {
 	rootCmd.AddCommand(dockCmd)
 
 	dockCmd.Flags().BoolVarP(&force, "force", "f", false, "Force dock manifest")
+	dockCmd.Flags().BoolVarP(&keep, "keep", "k", false, "Keep downloaded files")
 }
