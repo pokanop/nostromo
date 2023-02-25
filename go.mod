@@ -19,7 +19,7 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.12.0
 	github.com/ulikunitz/xz v0.5.10 // indirect
-	golang.org/x/net v0.0.0-20220531201128-c960675eff93 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	google.golang.org/api v0.82.0 // indirect
 	google.golang.org/genproto v0.0.0-20220601144221-27df5f98adab // indirect
 	google.golang.org/grpc v1.47.0 // indirect
