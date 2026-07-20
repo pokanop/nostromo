@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/storage v1.29.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.209 // indirect
 	github.com/google/uuid v1.3.0
-	github.com/hashicorp/go-getter v1.7.0
+	github.com/hashicorp/go-getter v1.7.5
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jinzhu/copier v0.3.5
 	github.com/klauspost/compress v1.15.15 // indirect
