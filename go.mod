@@ -20,7 +20,7 @@ require (
 	github.com/spf13/afero v1.9.4 // indirect
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
-	github.com/ulikunitz/xz v0.5.11 // indirect
+	github.com/ulikunitz/xz v0.5.14 // indirect
 	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
