@@ -116,17 +116,22 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 
 	verbose := cfg.Spaceport().CoreManifest().Config.IsVerbose()
 	for i, m := range cfg.Spaceport().Manifests() {
+		if asJSON || asYAML {
+			// Emit pure JSON/YAML so output is machine parseable
+			if asJSON {
+				log.Print(m.AsJSON(), "\n")
+			} else {
+				if i > 0 {
+					log.Print("---\n")
+				}
+				log.Print(m.AsYAML())
+			}
+			continue
+		}
 		if i > 0 {
 			log.Regular()
 		}
-		if asJSON || asYAML {
-			log.Bold("[manifest]")
-			if asJSON {
-				log.Regular(m.AsJSON())
-			} else if asYAML {
-				log.Regular(m.AsYAML())
-			}
-		} else if asTree {
+		if asTree {
 			tree.PrintHr(m)
 		} else {
 			log.Bold("[manifest]")

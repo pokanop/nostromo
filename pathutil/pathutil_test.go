@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -31,7 +32,7 @@ func TestAbs(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			defer patchEnv("HOME", test.home)()
+			defer patchHomeEnv(test.home)()
 
 			if actual := Abs(test.path); actual != test.expected {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
@@ -57,7 +58,7 @@ func TestExpand(t *testing.T) {
 		{"~foo/foo", "~foo/foo"},
 	}
 
-	defer patchEnv("HOME", u.HomeDir)()
+	defer patchHomeEnv(u.HomeDir)()
 
 	for _, test := range tests {
 		if actual := Expand(test.path); actual != test.expected {
@@ -72,19 +73,12 @@ func TestEnsurePath(t *testing.T) {
 		path   string
 		expErr bool
 	}{
-		{"valid path", "/tmp/pathutil_tests/valid_path", false},
+		{"valid path", "valid_path", false},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			defer func() {
-				err := os.RemoveAll("/tmp/pathutil_tests")
-				if err != nil {
-					t.Fatalf("unable to clean up tmp folder: %s", err)
-				}
-			}()
-
-			err := EnsurePath(test.path)
+			err := EnsurePath(filepath.Join(t.TempDir(), test.path))
 			if err != nil && !test.expErr {
 				t.Errorf("expected no error but got %s", err)
 			} else if err == nil && test.expErr {
@@ -92,6 +86,27 @@ func TestEnsurePath(t *testing.T) {
 			}
 		})
 	}
+}
+
+// patchHomeEnv sets the home directory environment variable(s) for the
+// current platform: HOME on unix, USERPROFILE/HOMEDRIVE/HOMEPATH on Windows.
+func patchHomeEnv(value string) func() {
+	deferFuncs := []func(){}
+	for _, key := range homeEnvVars() {
+		deferFuncs = append(deferFuncs, patchEnv(key, value))
+	}
+	return func() {
+		for _, f := range deferFuncs {
+			f()
+		}
+	}
+}
+
+func homeEnvVars() []string {
+	if runtime.GOOS == "windows" {
+		return []string{"USERPROFILE", "HOMEDRIVE", "HOMEPATH"}
+	}
+	return []string{"HOME"}
 }
 
 func patchEnv(key, value string) func() {

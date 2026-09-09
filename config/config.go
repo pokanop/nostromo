@@ -2,11 +2,12 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -109,7 +110,13 @@ func NewConfig() (*Config, error) {
 // NewManifest creates a new manifest with provided name
 func NewManifest(name string) *model.Manifest {
 	path := manifestFile(name)
-	return model.NewManifest(name, "file://"+path, path, ver)
+	source := ""
+	if u, err := fileURL(path); err != nil {
+		log.Warningf("invalid manifest path %s: %s\n", path, err)
+	} else {
+		source = u.String()
+	}
+	return model.NewManifest(name, source, path, ver)
 }
 
 // NewCoreManifest creates a new core manifest
@@ -139,8 +146,13 @@ func ManDir() string {
 
 // LinkManPages creates a symlink for man pages
 func LinkManPages() []error {
+	if runtime.GOOS == "windows" {
+		log.Debug("skipping man page linking on windows")
+		return nil
+	}
+
 	mandir := ManDir()
-	manpages, err := ioutil.ReadDir(mandir)
+	manpages, err := os.ReadDir(mandir)
 	if err != nil {
 		return []error{err}
 	}
@@ -163,8 +175,13 @@ func LinkManPages() []error {
 
 // UnlinkManPages from system man dir
 func UnlinkManPages() []error {
+	if runtime.GOOS == "windows" {
+		log.Debug("skipping man page unlinking on windows")
+		return nil
+	}
+
 	sysmandir := filepath.Join(SystemPrefixDir, "share", "man", "man1")
-	manpages, err := ioutil.ReadDir(sysmandir)
+	manpages, err := os.ReadDir(sysmandir)
 	if err != nil {
 		return []error{err}
 	}
@@ -195,7 +212,7 @@ func Parse(path string) (*model.Manifest, error) {
 	}
 	defer f.Close()
 
-	b, err := ioutil.ReadAll(f)
+	b, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}
@@ -221,6 +238,9 @@ func Parse(path string) (*model.Manifest, error) {
 		return nil, fmt.Errorf("invalid file content")
 	}
 
+	// Normalize file: sources written by older versions (e.g. "file:/path")
+	m.Source = normalizeFileSource(m.Source)
+
 	// Manifest path should match
 	m.Path = path
 
@@ -240,7 +260,7 @@ func SaveSpaceport(s *model.Spaceport) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(spaceportFile(), b, 0644)
+	err = os.WriteFile(spaceportFile(), b, 0644)
 	if err != nil {
 		return err
 	}
@@ -280,7 +300,7 @@ func SaveManifest(manifest *model.Manifest, backup bool) error {
 		}
 	}
 
-	err = ioutil.WriteFile(pathutil.Abs(manifest.Path), b, 0644)
+	err = os.WriteFile(pathutil.Abs(manifest.Path), b, 0644)
 	if err != nil {
 		return err
 	}
@@ -449,12 +469,59 @@ func downloadsPath() string {
 
 // coreManifestURL returns the core manifest URL
 func coreManifestURL() (*url.URL, error) {
-	rawURL := filepath.Join(FileURLScheme, coreManifestPath())
-	u, err := url.Parse(rawURL)
-	if err != nil {
+	return fileURL(coreManifestPath())
+}
+
+// fileURL returns a canonical file:// URL for the provided local path.
+// On Windows the path gets a leading slash so drive letters produce
+// URLs like file:///C:/... which go-getter expects.
+func fileURL(path string) (*url.URL, error) {
+	p := filepath.ToSlash(pathutil.Abs(path))
+	// Make sure the path can be represented inside a URL
+	if _, err := url.Parse(p); err != nil {
 		return nil, err
 	}
-	return u, nil
+	if runtime.GOOS == "windows" && !strings.HasPrefix(p, "/") {
+		p = "/" + p
+	}
+	return &url.URL{Scheme: "file", Path: p}, nil
+}
+
+// normalizeFileSource converts legacy file: source strings stored in
+// manifests (e.g. "file:/path" or "file:\\C:\\path") into canonical
+// file:// URLs so they continue to resolve correctly.
+func normalizeFileSource(source string) string {
+	if !strings.HasPrefix(source, "file:") {
+		return source
+	}
+
+	u, err := url.Parse(source)
+	if err != nil {
+		return source
+	}
+
+	if u.Host != "" && u.Host != "localhost" {
+		// File URL on another host (e.g. a network share), leave as-is
+		return source
+	}
+
+	p := u.Path
+	if p == "" {
+		p = u.Opaque
+	}
+	p = strings.ReplaceAll(p, "\\", "/")
+	if runtime.GOOS == "windows" && len(p) > 2 && p[0] == '/' && p[2] == ':' {
+		p = p[1:]
+	}
+	if p == "" {
+		return source
+	}
+
+	n, err := fileURL(p)
+	if err != nil {
+		return source
+	}
+	return n.String()
 }
 
 // manifestURL verifies target and returns a valid URL or error
@@ -464,7 +531,12 @@ func manifestURL(target string) (*url.URL, error) {
 	u, err := url.Parse(target)
 	if err == nil && u.Scheme == "file" {
 		// Check for file path
-		p := filepath.Join(u.Host, u.Path)
+		p := u.Path
+		// file:///C:/... URLs carry a leading slash before the drive letter
+		if runtime.GOOS == "windows" && len(p) > 2 && p[0] == '/' && p[2] == ':' {
+			p = p[1:]
+		}
+		p = filepath.Join(u.Host, filepath.FromSlash(p))
 		if _, err = os.Stat(p); !os.IsNotExist(err) {
 			// Local file exists
 			return u, nil
@@ -486,11 +558,7 @@ func manifestURL(target string) (*url.URL, error) {
 	// Check for local path
 	if _, err = os.Stat(target); !os.IsNotExist(err) {
 		// Return url with file scheme
-		u, err = url.Parse(filepath.Join(FileURLScheme, target))
-		if err != nil {
-			return nil, err
-		}
-		return u, nil
+		return fileURL(target)
 	}
 
 	return nil, fmt.Errorf("file not found for target")
@@ -505,7 +573,7 @@ func loadSpaceport() (*model.Spaceport, error) {
 	}
 	defer f.Close()
 
-	b, err := ioutil.ReadAll(f)
+	b, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}
@@ -533,7 +601,7 @@ func loadSpaceport() (*model.Spaceport, error) {
 func loadManifests() []*model.Manifest {
 	manifests := []*model.Manifest{}
 	path := manifestsPath()
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return manifests
 	}

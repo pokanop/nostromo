@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
+	"github.com/pokanop/nostromo/log"
+	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
 )
@@ -33,11 +36,44 @@ your own tool. Imagine composing commands to simplify a workflow:
 The root "build" command can do things like cd to a folder, set env vars, and
 run the main command. Lastly, substitutions can further shorten any sets of
 commands that need to be run across the scope of the command.`,
-	Args:               cobra.MinimumNArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		evalArgs, _ := evalFlags(args)
+		return cobra.MinimumNArgs(1)(cmd, evalArgs)
+	},
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		os.Exit(task.EvalString(args))
+		evalArgs, v := evalFlags(args)
+		if v {
+			log.SetVerbose(true)
+			model.SetVerbose(true)
+		}
+		os.Exit(task.EvalString(evalArgs))
 	},
+}
+
+// evalFlags consumes leading -v/--verbose flags that cobra cannot parse
+// since flag parsing is disabled to pass user arguments through untouched.
+func evalFlags(args []string) ([]string, bool) {
+	verbose := false
+	for len(args) > 0 {
+		v, ok := verboseFlagValue(args[0])
+		if !ok {
+			break
+		}
+		verbose = v
+		args = args[1:]
+	}
+	return args, verbose
+}
+
+func verboseFlagValue(arg string) (bool, bool) {
+	switch {
+	case arg == "-v" || arg == "--verbose":
+		return true, true
+	case strings.HasPrefix(arg, "-v=") || strings.HasPrefix(arg, "--verbose="):
+		return strings.HasSuffix(arg, "=true"), true
+	}
+	return false, false
 }
 
 func init() {

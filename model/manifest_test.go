@@ -1,7 +1,7 @@
 package model
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"reflect"
 	"strconv"
@@ -191,7 +191,7 @@ func TestAsJSON(t *testing.T) {
 			}
 			defer f.Close()
 
-			b, err := ioutil.ReadAll(f)
+			b, err := io.ReadAll(f)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -221,7 +221,7 @@ func TestAsYAML(t *testing.T) {
 			}
 			defer f.Close()
 
-			b, err := ioutil.ReadAll(f)
+			b, err := io.ReadAll(f)
 			if err != nil {
 				t.Fatal(err)
 			}

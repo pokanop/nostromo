@@ -1,10 +1,10 @@
 package config
 
 import (
-	"io"
-	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -15,33 +15,42 @@ import (
 func TestLoadConfig(t *testing.T) {
 	tests := []struct {
 		name      string
-		manifests []*model.Manifest
+		manifests []string
 		wantErr   bool
 	}{
-		{"no core manifest", fakeManifests(), false},
-		{"only core manifest", fakeManifests("/tmp/nostromo/manifest.yaml"), false},
-		{"multiple manifests", fakeManifests("/tmp/nostromo/manifest.yaml", "/tmp/nostromo/ships/manifest2.yaml", "/tmp/nostromo/ships/manifest3.yaml"), false},
+		{"no core manifest", []string{}, false},
+		{"only core manifest", []string{"manifest.yaml"}, false},
+		{"multiple manifests", []string{"manifest.yaml", filepath.Join("ships", "manifest2.yaml"), filepath.Join("ships", "manifest3.yaml")}, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("NOSTROMO_HOME", "/tmp/nostromo")
-			defer os.Unsetenv("NOSTROMO_HOME")
-			os.MkdirAll("/tmp/nostromo/ships", 0777)
-			defer os.RemoveAll("/tmp/nostromo")
+			baseDir := t.TempDir()
+			t.Setenv("NOSTROMO_HOME", baseDir)
+			os.MkdirAll(filepath.Join(baseDir, "ships"), 0777)
+
+			paths := absPaths(baseDir, tt.manifests)
+			manifests := fakeManifests(paths...)
 
 			// Create temporary spaceport file
-			s := model.NewSpaceport(tt.manifests)
+			s := model.NewSpaceport(manifests)
 			SaveSpaceport(s)
 
 			// Copy manifest to target locations
-			src, _ := os.Open("../testdata/manifest.yaml")
-			defer src.Close()
-			for _, manifest := range tt.manifests {
-				dest, _ := os.Create(manifest.Path)
-				defer dest.Close()
-				io.Copy(dest, src)
-				dest.Sync()
+			src, err := os.ReadFile("../testdata/manifest.yaml")
+			if err != nil {
+				t.Fatalf("unable to read test manifest: %s", err)
+			}
+			for i, manifest := range manifests {
+				data := src
+				// Non core manifests need a unique name to load
+				if i > 0 {
+					name := strings.TrimSuffix(filepath.Base(manifest.Path), filepath.Ext(manifest.Path))
+					data = []byte(strings.Replace(string(src), "name: manifest", "name: "+name, 1))
+				}
+				if err := os.WriteFile(manifest.Path, data, 0644); err != nil {
+					t.Fatalf("unable to write manifest %s: %s", manifest.Path, err)
+				}
 			}
 
 			c, err := LoadConfig()
@@ -49,9 +58,9 @@ func TestLoadConfig(t *testing.T) {
 				t.Errorf("want error but got none")
 			}
 
-			if len(tt.manifests) > 0 {
-				if len(c.spaceport.Manifests()) != len(tt.manifests) {
-					t.Errorf("want %d manifests, got %d", len(tt.manifests), len(c.spaceport.Manifests()))
+			if len(manifests) > 0 {
+				if len(c.spaceport.Manifests()) != len(manifests) {
+					t.Errorf("want %d manifests, got %d", len(manifests), len(c.spaceport.Manifests()))
 				}
 
 				if len(c.spaceport.CoreManifest().Commands) == 0 {
@@ -65,29 +74,36 @@ func TestLoadConfig(t *testing.T) {
 func TestNewConfig(t *testing.T) {
 	tests := []struct {
 		name      string
-		manifests []*model.Manifest
+		manifests []string
 		wantErr   bool
 	}{
-		{"no manifest", fakeManifests(), false},
-		{"single manifest", fakeManifests("/tmp/nostromo/manifest.yaml"), false},
-		{"multiple manifests", fakeManifests("/tmp/nostromo/manifest.yaml", "/tmp/nostromo/ships/manifest2.yaml", "/tmp/nostromo/ships/manifest3.yaml"), false},
+		{"no manifest", []string{}, false},
+		{"single manifest", []string{"manifest.yaml"}, false},
+		{"multiple manifests", []string{"manifest.yaml", filepath.Join("ships", "manifest2.yaml"), filepath.Join("ships", "manifest3.yaml")}, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("NOSTROMO_HOME", "/tmp/nostromo")
-			defer os.Unsetenv("NOSTROMO_HOME")
+			baseDir := t.TempDir()
+			t.Setenv("NOSTROMO_HOME", baseDir)
 
 			// Copy manifest to target locations
-			os.MkdirAll("/tmp/nostromo/ships", 0777)
-			defer os.RemoveAll("/tmp/nostromo")
-			src, _ := os.Open("../testdata/manifest.yaml")
-			defer src.Close()
-			for _, manifest := range tt.manifests {
-				dest, _ := os.Create(manifest.Path)
-				defer dest.Close()
-				io.Copy(dest, src)
-				dest.Sync()
+			os.MkdirAll(filepath.Join(baseDir, "ships"), 0777)
+			src, err := os.ReadFile("../testdata/manifest.yaml")
+			if err != nil {
+				t.Fatalf("unable to read test manifest: %s", err)
+			}
+			manifests := fakeManifests(absPaths(baseDir, tt.manifests)...)
+			for i, manifest := range manifests {
+				data := src
+				// Non core manifests need a unique name to load
+				if i > 0 {
+					name := strings.TrimSuffix(filepath.Base(manifest.Path), filepath.Ext(manifest.Path))
+					data = []byte(strings.Replace(string(src), "name: manifest", "name: "+name, 1))
+				}
+				if err := os.WriteFile(manifest.Path, data, 0644); err != nil {
+					t.Fatalf("unable to write manifest %s: %s", manifest.Path, err)
+				}
 			}
 
 			c, err := NewConfig()
@@ -95,8 +111,8 @@ func TestNewConfig(t *testing.T) {
 				t.Errorf("want error but got none")
 			}
 
-			if len(tt.manifests) > 0 && len(c.spaceport.Manifests()) != len(tt.manifests) {
-				t.Errorf("want %d manifests, got %d", len(tt.manifests), len(c.spaceport.Manifests()))
+			if len(manifests) > 0 && len(c.spaceport.Manifests()) != len(manifests) {
+				t.Errorf("want %d manifests, got %d", len(manifests), len(c.spaceport.Manifests()))
 			}
 
 			if len(c.spaceport.CoreManifest().Commands) != 0 {
@@ -146,9 +162,9 @@ func TestSave(t *testing.T) {
 	}{
 		{"invalid path", fakeConfig("/does/not/exist"), true},
 		{"nil manifest", nil, true},
-		{"no perms", fakeConfig("/tmp/no-perms/.nostromo"), true},
-		{"bad extension", fakeConfig("/tmp/bad.ext"), true},
-		{"yaml file format", fakeConfig("/tmp/manifest.yaml"), false},
+		{"no perms", fakeConfig(filepath.Join(t.TempDir(), "no-perms", ".nostromo")), true},
+		{"bad extension", fakeConfig(filepath.Join(t.TempDir(), "bad.ext")), true},
+		{"yaml file format", fakeConfig(filepath.Join(t.TempDir(), "manifest.yaml")), false},
 	}
 
 	for _, test := range tests {
@@ -174,7 +190,7 @@ func TestDelete(t *testing.T) {
 		expErr bool
 	}{
 		{"invalid path", fakeConfig("/does/not/exist/test.yaml"), true},
-		{"valid path", fakeConfig("/tmp/test.yaml"), false},
+		{"valid path", fakeConfig(filepath.Join(t.TempDir(), "test.yaml")), false},
 	}
 
 	for _, test := range tests {
@@ -364,14 +380,18 @@ func TestBackup(t *testing.T) {
 		expErr      bool
 	}{
 		{"invalid path", "/does/not/exist", 1, true},
-		{"valid path", "/tmp", 1, false},
-		{"missing manifest", "/tmp", 1, false},
-		{"no backups", "/tmp", 0, false},
-		{"some backups", "/tmp", 5, false},
+		{"valid path", "", 1, false},
+		{"missing manifest", "", 1, false},
+		{"no backups", "", 0, false},
+		{"some backups", "", 5, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("NOSTROMO_HOME", tt.baseDir)
+			baseDir := tt.baseDir
+			if baseDir == "" {
+				baseDir = t.TempDir()
+			}
+			t.Setenv("NOSTROMO_HOME", baseDir)
 
 			m, err := Parse("../testdata/manifest.yaml")
 			if err != nil {
@@ -396,7 +416,7 @@ func TestBackup(t *testing.T) {
 			}
 
 			backupDir, _ := ensureBackupDir()
-			files, err := ioutil.ReadDir(backupDir)
+			files, err := os.ReadDir(backupDir)
 			if err != nil {
 				t.Errorf("could not read backup dir: %s", err)
 			}
@@ -425,12 +445,11 @@ func TestGetCoreManifestURL(t *testing.T) {
 		wantErr bool
 	}{
 		{"invalid home", "http://test.com/Segment%%2815197306101420000%29.ts", "", true},
-		// {"valid home", "/tmp", "file:///tmp/ships/manifest.yaml", false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("NOSTROMO_HOME", tt.home)
+			t.Setenv("NOSTROMO_HOME", tt.home)
 
 			u, err := coreManifestURL()
 			if tt.wantErr == true && err == nil {
@@ -450,6 +469,12 @@ func TestGetCoreManifestURL(t *testing.T) {
 }
 
 func TestManifestURL(t *testing.T) {
+	tmpDir := t.TempDir()
+	tmpURL, err := fileURL(tmpDir)
+	if err != nil {
+		t.Fatalf("unable to build temp dir url: %s", err)
+	}
+
 	tests := []struct {
 		name    string
 		target  string
@@ -458,9 +483,9 @@ func TestManifestURL(t *testing.T) {
 	}{
 		{"empty target", "", "", true},
 		{"invalid target", "not a url", "", true},
-		// {"valid target", "/tmp", "file:///tmp", false},
+		{"valid local path", tmpDir, tmpURL.String(), false},
 		{"invalid file target", "file:///does/not/exist", "", true},
-		{"valid file target", "file:///tmp", "file:///tmp", false},
+		{"valid file target", tmpURL.String(), tmpURL.String(), false},
 		{"invalid remote target", "https://does/not/exist", "", true},
 		{"valid remote target", "https://jsonplaceholder.typicode.com/users", "https://jsonplaceholder.typicode.com/users", false},
 	}
@@ -476,6 +501,28 @@ func TestManifestURL(t *testing.T) {
 
 			if u.String() != tt.want {
 				t.Errorf("want %s, got %s", tt.want, u.String())
+			}
+		})
+	}
+}
+
+func TestNormalizeFileSource(t *testing.T) {
+	tests := []struct {
+		name   string
+		source string
+		want   string
+	}{
+		{"empty", "", ""},
+		{"non file source", "https://foo.com/x.yaml", "https://foo.com/x.yaml"},
+		{"legacy single slash", "file:/home/u/x.yaml", "file:///home/u/x.yaml"},
+		{"canonical", "file:///home/u/x.yaml", "file:///home/u/x.yaml"},
+		{"file host", "file://host/share/x.yaml", "file://host/share/x.yaml"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := normalizeFileSource(tt.source); got != tt.want {
+				t.Errorf("want %s, got %s", tt.want, got)
 			}
 		})
 	}
@@ -504,6 +551,14 @@ func fakeManifests(path ...string) []*model.Manifest {
 		manifests = append(manifests, fakeManifest(path))
 	}
 	return manifests
+}
+
+func absPaths(baseDir string, paths []string) []string {
+	abs := []string{}
+	for _, path := range paths {
+		abs = append(abs, filepath.Join(baseDir, path))
+	}
+	return abs
 }
 
 func init() {
