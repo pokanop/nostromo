@@ -1,6 +1,7 @@
 package task
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -114,20 +115,28 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 		return -1
 	}
 
+	// Emit pure JSON/YAML so output is machine parseable
+	if asJSON {
+		b, err := json.MarshalIndent(cfg.Spaceport().Manifests(), "", "  ")
+		if err != nil {
+			log.Error(err)
+			return -1
+		}
+		log.Print(string(b), "\n")
+		return 0
+	}
+	if asYAML {
+		for i, m := range cfg.Spaceport().Manifests() {
+			if i > 0 {
+				log.Print("---\n")
+			}
+			log.Print(m.AsYAML())
+		}
+		return 0
+	}
+
 	verbose := cfg.Spaceport().CoreManifest().Config.IsVerbose()
 	for i, m := range cfg.Spaceport().Manifests() {
-		if asJSON || asYAML {
-			// Emit pure JSON/YAML so output is machine parseable
-			if asJSON {
-				log.Print(m.AsJSON(), "\n")
-			} else {
-				if i > 0 {
-					log.Print("---\n")
-				}
-				log.Print(m.AsYAML())
-			}
-			continue
-		}
 		if i > 0 {
 			log.Regular()
 		}
