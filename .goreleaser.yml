@@ -1,4 +1,5 @@
 # Make sure to check the documentation at http://goreleaser.com
+version: 2
 before:
   hooks:
     # you may remove this if you don't use vgo
@@ -18,7 +19,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: '{{ .Tag }}-next'
+  version_template: '{{ .Tag }}-next'
 changelog:
   sort: asc
   filters:
@@ -34,7 +35,7 @@ brews:
     # same kind. We will probably unify this in the next major version like it is done with scoop.
 
     # Github repository to push the tap to.
-    tap:
+    repository:
       owner: pokanop
       name: homebrew-pokanop
 
@@ -50,7 +51,7 @@ brews:
 
     # Folder inside the repository to put the formula.
     # Default is the root folder.
-    folder: Formula
+    directory: Formula
 
     # Caveats for the user of your binary.
     # Default is empty.
@@ -68,12 +69,6 @@ brews:
         nostromo dock <url>
 
       Be sure to source your shell profile after initializing nostromo for auto-complete to work.
-
-
-
-
-
-
 
     # Your app's homepage.
     # Default is empty.
