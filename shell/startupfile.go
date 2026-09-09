@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -18,11 +19,16 @@ const (
 	endBlockComment      = "# nostromo [section end]"
 	bashSourceCompletion = "source <(nostromo completion bash)"
 	zshSourceCompletion  = "autoload -U compinit; compinit\nsource <(nostromo completion zsh)"
+	fishSourceCompletion = "nostromo completion fish | source"
+	pwshSourceCompletion = "nostromo completion powershell | Out-String | Invoke-Expression"
+
+	fishConfigFilename  = "config.fish"
+	pwshProfileFilename = "Microsoft.PowerShell_profile.ps1"
 )
 
 var (
-	startupFilenames   = []string{".profile", ".bash_profile", ".bashrc", ".zshrc"}
-	preferredFilenames = []string{".bashrc", ".zshrc"}
+	startupFilenames   = []string{".profile", ".bash_profile", ".bashrc", ".zshrc", fishConfigFilename, pwshProfileFilename}
+	preferredFilenames = []string{".bashrc", ".zshrc", fishConfigFilename, pwshProfileFilename}
 )
 
 type startupFile struct {
@@ -80,16 +86,7 @@ func findStartupFile(name string) (string, os.FileMode, error) {
 		return "", 0, err
 	}
 
-	// zsh doesn't always have a ~/.zshrc file, and if it doesn't,
-	// it does have a $ZDOTDIR/.zshrc
-	// https://wiki.archlinux.org/index.php/Zsh#Startup.2FShutdown_files
-	zdotDir := os.Getenv("ZDOTDIR")
-	var path string
-	if zdotDir != "" {
-		path = filepath.Join(zdotDir, name)
-	} else {
-		path = filepath.Join(home, name)
-	}
+	path := startupFilePath(home, name)
 
 	info, err := os.Stat(path)
 	if err != nil {
@@ -97,6 +94,33 @@ func findStartupFile(name string) (string, os.FileMode, error) {
 	}
 
 	return path, info.Mode(), nil
+}
+
+// startupFilePath returns where a startup file is expected to live.
+func startupFilePath(home, name string) string {
+	switch name {
+	case fishConfigFilename:
+		// https://fishshell.com/docs/current/language.html#configuration-files
+		configHome := os.Getenv("XDG_CONFIG_HOME")
+		if configHome == "" {
+			configHome = filepath.Join(home, ".config")
+		}
+		return filepath.Join(configHome, "fish", name)
+	case pwshProfileFilename:
+		// https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_profiles
+		if runtime.GOOS == "windows" {
+			return filepath.Join(home, "Documents", "PowerShell", name)
+		}
+		return filepath.Join(home, ".config", "powershell", name)
+	case ".zshrc":
+		// zsh doesn't always have a ~/.zshrc file, and if it doesn't,
+		// it does have a $ZDOTDIR/.zshrc
+		// https://wiki.archlinux.org/index.php/Zsh#Startup.2FShutdown_files
+		if zdotDir := os.Getenv("ZDOTDIR"); zdotDir != "" {
+			return filepath.Join(zdotDir, name)
+		}
+	}
+	return filepath.Join(home, name)
 }
 
 func parseStartupFile(path string, mode os.FileMode) (*startupFile, error) {
@@ -135,8 +159,13 @@ func (s *startupFile) name() string {
 }
 
 func (s *startupFile) shell() string {
-	if strings.Contains(s.path, ".zshrc") {
+	switch {
+	case strings.Contains(s.path, ".zshrc"):
 		return Zsh
+	case strings.HasSuffix(s.path, fishConfigFilename):
+		return Fish
+	case strings.HasSuffix(s.path, pwshProfileFilename):
+		return Powershell
 	}
 	return Bash
 }
@@ -195,7 +224,7 @@ func (s *startupFile) commit() error {
 
 	// Save a timestamped backup
 	ts := time.Now().UTC().Format("20060102150405")
-	backupPath := filepath.Join("/tmp", filepath.Base(s.path)) + "_" + ts
+	backupPath := filepath.Join(os.TempDir(), filepath.Base(s.path)) + "_" + ts
 	err := ioutil.WriteFile(backupPath, []byte(s.content), s.mode)
 	if err != nil {
 		return err
@@ -264,8 +293,13 @@ func (s *startupFile) contentIndexes() (int, int) {
 
 func (s *startupFile) makeNostromoBlock() string {
 	sourceCompletion := bashSourceCompletion
-	if s.shell() == Zsh {
+	switch s.shell() {
+	case Zsh:
 		sourceCompletion = zshSourceCompletion
+	case Fish:
+		sourceCompletion = fishSourceCompletion
+	case Powershell:
+		sourceCompletion = pwshSourceCompletion
 	}
 	return fmt.Sprintf("\n%s\n%s\n%s\n", beginBlockComment, sourceCompletion, endBlockComment)
 }

@@ -45,7 +45,8 @@ The possibilities are endless 🚀 and up to your imagination with the ability t
 
 ### Prerequisites
 
-- Works for MacOS and `bash` / `zsh` shells (other combinations untested _but may work_)
+- Works for MacOS and Linux with `bash`, `zsh`, `fish` and PowerShell (`pwsh`) shells
+- Windows with PowerShell should work _but is untested_
 
 ### Installation
 
@@ -289,11 +290,16 @@ nostromo set mode independent
 
 ### Shell Completion
 
-`nostromo` provides completion scripts to allow tab completion. This is added by default to your shell init file:
+`nostromo` provides completion scripts to allow tab completion for `bash`, `zsh`, `fish` and PowerShell. `nostromo init` adds a `# nostromo [section begin]` … `# nostromo [section end]` block to the init files that already exist for these shells:
 
-```sh
-eval "$(nostromo completion)"
-```
+| Shell      | Init file                                                                                                            | Block                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| bash       | `~/.bashrc`                                                                                                          | `source <(nostromo completion bash)`                              |
+| zsh        | `~/.zshrc` (or `$ZDOTDIR/.zshrc`)                                                                                    | `autoload -U compinit; compinit`<br>`source <(nostromo completion zsh)` |
+| fish       | `~/.config/fish/config.fish` (or `$XDG_CONFIG_HOME/fish/config.fish`)                                               | `nostromo completion fish \| source`                              |
+| PowerShell | `~/.config/powershell/Microsoft.PowerShell_profile.ps1` (Windows: `~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1`) | `nostromo completion powershell \| Out-String \| Invoke-Expression` |
+
+The completion script also defines the shell functions for your top level commands in that shell's syntax, so `nostromo` commands work the same across shells.
 
 Even your commands added by `nostromo` get the full red carpet treatment with shell completion. Be sure to add a description and tab completion will show hints at each junction of your command. Cool right! 😎
 
