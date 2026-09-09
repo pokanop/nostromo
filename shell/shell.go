@@ -2,6 +2,7 @@ package shell
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/pokanop/nostromo/log"
@@ -109,25 +110,56 @@ func buildEvalCmd(cmd, language string) string {
 	}
 }
 
+// shellWrapperFunc returns the `nostromo` wrapper function for a shell.
+//
+// `__nostromo_cmd` always invokes the real binary and is what every other
+// generated function (and the completion scripts) call. The `nostromo`
+// wrapper re-sources the completion scripts after each successful command
+// in case something changed.
 func shellWrapperFunc(sh string) string {
-	// Sources completion scripts after each command in case something changes
-	return fmt.Sprintf("__nostromo_cmd() { command nostromo \"$@\"; }\nnostromo() { __nostromo_cmd \"$@\" && eval \"$(__nostromo_cmd completion %s)\"; }", sh)
+	switch sh {
+	case Fish:
+		return "function __nostromo_cmd; command nostromo $argv; end\n" +
+			"function nostromo; __nostromo_cmd $argv; and __nostromo_cmd completion fish | source; end"
+	case Powershell:
+		return "function __nostromo_cmd { & (Get-Command nostromo -CommandType Application | Select-Object -First 1).Source @args }\n" +
+			"function nostromo { __nostromo_cmd @args; if ($?) { __nostromo_cmd completion powershell | Out-String | Invoke-Expression } }"
+	default:
+		return fmt.Sprintf("__nostromo_cmd() { command nostromo \"$@\"; }\nnostromo() { __nostromo_cmd \"$@\" && eval \"$(__nostromo_cmd completion %s)\"; }", sh)
+	}
 }
 
-func shellAliasFuncs(m *model.Manifest) string {
+// shellAliasFuncs returns the function/alias definitions for a manifest's
+// top level commands in the given shell's syntax.
+//
+// When users run a command, it actually runs `eval` on the result of
+// `nostromo eval` with arguments resolved.
+func shellAliasFuncs(sh string, m *model.Manifest) string {
 	var aliases []string
 	for _, c := range m.Commands {
-		var alias string
-		if c.AliasOnly {
-			alias = fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
-		} else {
-			// This will generate a shell command provided to the completion script
-			// generation. When users run a command, it actually runs `eval` on
-			// the result of `nostromo eval` with arguments resolved.
-			cmd := fmt.Sprintf("__nostromo_cmd eval %s \"$@\"", c.Alias)
-			alias = strings.TrimSpace(fmt.Sprintf("%s() { eval $(%s); }", c.Alias, cmd))
-		}
-		aliases = append(aliases, alias)
+		aliases = append(aliases, shellAliasFunc(sh, c))
 	}
+	sort.Strings(aliases)
 	return fmt.Sprintf("\n%s\n", strings.Join(aliases, "\n"))
+}
+
+func shellAliasFunc(sh string, c *model.Command) string {
+	switch sh {
+	case Fish:
+		if c.AliasOnly {
+			return fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
+		}
+		return fmt.Sprintf("function %s; eval (__nostromo_cmd eval %s $argv | string collect); end", c.Alias, c.Alias)
+	case Powershell:
+		if c.AliasOnly {
+			// Set-Alias cannot carry arguments, so use a function
+			return fmt.Sprintf("function %s { %s @args }", c.Alias, c.Name)
+		}
+		return fmt.Sprintf("function %s { Invoke-Expression (__nostromo_cmd eval %s @args | Out-String) }", c.Alias, c.Alias)
+	default:
+		if c.AliasOnly {
+			return fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
+		}
+		return fmt.Sprintf("%s() { eval $(__nostromo_cmd eval %s \"$@\"); }", c.Alias, c.Alias)
+	}
 }

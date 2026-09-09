@@ -9,7 +9,7 @@ require (
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/shivamMg/ppds v0.0.1
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.15.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -22,7 +22,7 @@ require (
 	cloud.google.com/go/storage v1.29.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.209 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
