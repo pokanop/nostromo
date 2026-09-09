@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -41,12 +40,12 @@ func backupManifest(m *model.Manifest) error {
 		return nil
 	}
 
-	input, err := ioutil.ReadFile(sourceFile)
+	input, err := os.ReadFile(sourceFile)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(destinationFile, input, 0644)
+	err = os.WriteFile(destinationFile, input, 0644)
 	if err != nil {
 		return err
 	}
@@ -61,7 +60,7 @@ func pruneBackups(m *model.Manifest) {
 	}
 
 	// Read all files, sort by timestamp, and drop items > max count
-	files, err := ioutil.ReadDir(backupDir)
+	files, err := os.ReadDir(backupDir)
 	if err != nil {
 		log.Warningf("unable to read backup dir: %s\n", err)
 		return
@@ -71,7 +70,11 @@ func pruneBackups(m *model.Manifest) {
 	matches := []fs.FileInfo{}
 	for _, file := range files {
 		if isMatch, _ := regexp.MatchString(fmt.Sprintf("%s_\\d+\\.yaml", m.Name), file.Name()); isMatch {
-			matches = append(matches, file)
+			info, err := file.Info()
+			if err != nil {
+				continue
+			}
+			matches = append(matches, info)
 		}
 	}
 

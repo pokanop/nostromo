@@ -1,7 +1,7 @@
 package model
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"reflect"
 	"strconv"
@@ -191,12 +191,12 @@ func TestAsJSON(t *testing.T) {
 			}
 			defer f.Close()
 
-			b, err := ioutil.ReadAll(f)
+			b, err := io.ReadAll(f)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			expected := strings.Trim(string(b), " \n")
+			expected := strings.Trim(strings.ReplaceAll(string(b), "\r\n", "\n"), " \n")
 			if actual := strings.Trim(test.manifest.AsJSON(), " \n"); actual != expected {
 				t.Errorf("expected: %s, actual: %s", expected, actual)
 			}
@@ -221,12 +221,12 @@ func TestAsYAML(t *testing.T) {
 			}
 			defer f.Close()
 
-			b, err := ioutil.ReadAll(f)
+			b, err := io.ReadAll(f)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			expected := strings.Trim(string(b), " \n")
+			expected := strings.Trim(strings.ReplaceAll(string(b), "\r\n", "\n"), " \n")
 			if actual := strings.Trim(test.manifest.AsYAML(), " \n"); actual != expected {
 				t.Errorf("expected: %s, actual: %s", expected, actual)
 			}

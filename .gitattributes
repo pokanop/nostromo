@@ -1,0 +1,3 @@
+# Test fixtures must keep LF line endings on Windows checkouts
+# (tests compare fixture contents byte-for-byte).
+/testdata/* text eol=lf

@@ -1,7 +1,6 @@
 package pathutil
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -16,12 +15,10 @@ func Abs(path string) string {
 }
 
 // HomeDir returns the home directory for the executing user.
+// It honors $HOME on unix and %USERPROFILE% (or %HOMEDRIVE%%HOMEPATH%)
+// on Windows.
 func HomeDir() (string, error) {
-	if home := os.Getenv("HOME"); home != "" {
-		return home, nil
-	}
-
-	return "", fmt.Errorf("missing env var HOME")
+	return os.UserHomeDir()
 }
 
 // Expand expands the path to include the home directory if the path
