@@ -537,7 +537,7 @@ func manifestURL(target string) (*url.URL, error) {
 			p = p[1:]
 		}
 		p = filepath.Join(u.Host, filepath.FromSlash(p))
-		if _, err = os.Stat(p); !os.IsNotExist(err) {
+		if _, err = os.Stat(p); err == nil {
 			// Local file exists
 			return u, nil
 		}

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -507,6 +508,13 @@ func TestManifestURL(t *testing.T) {
 }
 
 func TestNormalizeFileSource(t *testing.T) {
+	tmpDir := t.TempDir()
+	tmpURL, err := fileURL(tmpDir)
+	if err != nil {
+		t.Fatalf("unable to build temp dir url: %s", err)
+	}
+	slashed := filepath.ToSlash(tmpDir)
+
 	tests := []struct {
 		name   string
 		source string
@@ -514,9 +522,16 @@ func TestNormalizeFileSource(t *testing.T) {
 	}{
 		{"empty", "", ""},
 		{"non file source", "https://foo.com/x.yaml", "https://foo.com/x.yaml"},
-		{"legacy single slash", "file:/home/u/x.yaml", "file:///home/u/x.yaml"},
-		{"canonical", "file:///home/u/x.yaml", "file:///home/u/x.yaml"},
+		{"legacy single slash", "file:" + slashed, tmpURL.String()},
+		{"canonical", "file:///" + strings.TrimPrefix(slashed, "/"), tmpURL.String()},
 		{"file host", "file://host/share/x.yaml", "file://host/share/x.yaml"},
+	}
+	if runtime.GOOS == "windows" {
+		tests = append(tests, struct {
+			name   string
+			source string
+			want   string
+		}{"legacy backslashes", "file:" + tmpDir, tmpURL.String()})
 	}
 
 	for _, tt := range tests {
