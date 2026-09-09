@@ -99,7 +99,10 @@ func DestroyConfig(nuke bool) int {
 		return -1
 	}
 
-	err = shell.Commit(m)
+	cfg.Spaceport().AddManifest(m)
+	cfg.Spaceport().Link()
+
+	err = saveConfig(cfg, true)
 	if err != nil {
 		log.Error(err)
 		return -1
