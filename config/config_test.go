@@ -655,7 +655,7 @@ func fakeManifest(path string) *model.Manifest {
 		panic(err)
 	}
 	m.Path = path
-	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
+	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate", nil)
 	m.AddSubstitution("one.two", "name", "alias")
 	return m
 }

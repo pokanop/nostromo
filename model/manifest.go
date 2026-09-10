@@ -68,14 +68,14 @@ func (m *Manifest) Link() {
 }
 
 // AddCommand tree up to key path
-func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, aliasOnly bool, mode string) (bool, error) {
+func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, aliasOnly bool, mode string, platforms []string) (bool, error) {
 	if len(keyPath) == 0 {
 		return false, fmt.Errorf("invalid key path")
 	}
 
 	// Only need to create one command for alias only mode
 	if aliasOnly {
-		cmd := newCommand(command, keyPath, description, code, true, mode)
+		cmd := newCommand(command, keyPath, description, code, true, mode, platforms)
 		m.Commands[cmd.Alias] = cmd
 		return true, nil
 	}
@@ -86,13 +86,13 @@ func (m *Manifest) AddCommand(keyPath, command, description string, code *Code, 
 	cmd := m.Commands[key]
 	if cmd == nil {
 		// Create new command to build our the rest
-		cmd = newCommand("", key, "", nil, false, mode)
+		cmd = newCommand("", key, "", nil, false, mode, nil)
 		m.Commands[cmd.Alias] = cmd
 		isRoot = true
 	}
 
 	// Modify or build the rest of the key path of commands
-	cmd.build(keyPath, command, description, code, aliasOnly, mode)
+	cmd.build(keyPath, command, description, code, aliasOnly, mode, platforms)
 
 	return isRoot, nil
 }
@@ -209,6 +209,13 @@ func (m *Manifest) ExecutionString(args []string) (string, string, error) {
 			if disabled, n := c.checkDisabled(); disabled {
 				return "", "", fmt.Errorf("command is disabled at %s", n.KeyPath)
 			}
+			if unavailable, n := c.checkUnavailable(); unavailable {
+				err := fmt.Errorf("command %s is not available on %s", c.KeyPath, CurrentPlatform())
+				if n != c {
+					err = fmt.Errorf("%s (restricted at %s)", err, n.KeyPath)
+				}
+				return "", "", err
+			}
 			return c.Code.Language, c.executionString(args[count:]), nil
 		}
 	}
@@ -252,7 +259,7 @@ func (m *Manifest) ImportCommands(cmds []*Command, kp, description string, creat
 	root := m.Find(kp)
 	if root == nil && create && len(kp) > 0 && kp != "." {
 		// Create destination key path
-		_, err := m.AddCommand(kp, "", description, nil, false, "")
+		_, err := m.AddCommand(kp, "", description, nil, false, "", nil)
 		if err != nil {
 			return err
 		}

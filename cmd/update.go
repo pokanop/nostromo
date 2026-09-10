@@ -31,14 +31,20 @@ independent  Execute this command with subcommands using ';' to separate
 exclusive    Execute this and only this command ignoring parent commands
 
 You can set using -m or --mode when adding a command or globally using:
-	nostromo manifest set mode <mode>`,
+	nostromo manifest set mode <mode>
+
+A command's platforms can be changed with -p or --platforms using Go OS names
+(e.g., linux, darwin, windows) or OS/arch pairs (e.g., linux/arm64). Existing
+platforms are kept when the flag is omitted, pass an empty list to allow all:
+  nostromo update foo.bar --platforms linux,darwin
+  nostromo update foo.bar --platforms ""`,
 	Args: updateCmdArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var name string
 		if len(args) > 1 {
 			name = args[1]
 		}
-		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode, true))
+		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode, platformsFlag(cmd), true))
 	},
 }
 
@@ -51,6 +57,7 @@ func init() {
 	updateCmd.Flags().StringVarP(&language, "language", "l", "", "Language of code snippet (e.g., ruby, python, perl, js)")
 	updateCmd.Flags().BoolVarP(&aliasOnly, "alias-only", "a", false, "Add shell alias only, not a nostromo command")
 	updateCmd.Flags().StringVarP(&mode, "mode", "m", "", "Set the mode for the command (concatenate, independent, exclusive)")
+	updateCmd.Flags().StringSliceVarP(&platforms, "platforms", "p", nil, "Limit the command to platforms (e.g., linux,darwin,windows/arm64), empty for all")
 }
 
 func updateCmdArgs(cmd *cobra.Command, args []string) error {
@@ -60,5 +67,5 @@ func updateCmdArgs(cmd *cobra.Command, args []string) error {
 	if codeValid() && !shell.IsSupportedLanguage(language) {
 		return fmt.Errorf("invalid code snippet and language, must be in [%s]", strings.Join(shell.SupportedLanguages(), ","))
 	}
-	return nil
+	return platformsValid()
 }
