@@ -21,24 +21,24 @@ const (
 )
 
 type ManifestV0 struct {
-	Version  string              `json:"version"`
-	Config   *Config             `json:"config"`
-	Commands map[string]*Command `json:"commands"`
+	Version  string              `json:"version" yaml:"version"`
+	Config   *Config             `json:"config" yaml:"config"`
+	Commands map[string]*Command `json:"commands" yaml:"commands"`
 }
 
 // Manifest is the main container for nostromo based commands
 type Manifest struct {
 	// Name of the manifest or "manifest" if the core manifest
-	Name string `json:"name"`
+	Name string `json:"name" yaml:"name"`
 	// Source URL of the manifest which can be local or remote
-	Source string `json:"source"`
+	Source string `json:"source" yaml:"source"`
 	// Path of the manifest in local storage
-	Path    string        `json:"path"`
-	Version *version.Info `json:"version"`
+	Path    string        `json:"path" yaml:"path"`
+	Version *version.Info `json:"version" yaml:"version"`
 	// Config is a legacy block kept so older manifests still parse. Settings
 	// live on the Spaceport and this is never written back.
 	Config   *Config             `json:"config,omitempty" yaml:"config,omitempty"`
-	Commands map[string]*Command `json:"commands"`
+	Commands map[string]*Command `json:"commands" yaml:"commands"`
 	// Links are other manifests this one depends on, fetched alongside it
 	Links []*LinkedManifest `json:"links,omitempty" yaml:"links,omitempty"`
 }

@@ -112,13 +112,15 @@ sequence:
   - manifest
 config:
   verbose: false
-  aliasesonly: false
+  aliasesOnly: false
   mode: 0
-  backupcount: 10
+  backupCount: 10
   theme: 2
 ```
 
 > Older versions stored a `config` block in the core manifest. Running any command (or `nostromo init`) lifts those settings into the spaceport once; config blocks in docked manifests are ignored.
+
+> Manifest and spaceport keys are written in camelCase (`keyPath`, `aliasOnly`, `backupCount`). Files written by older versions used lowercase keys (`keypath`, `aliasonly`, `backupcount`); these still load and are rewritten in the new format (with a backup in `~/.nostromo/cargo`) the first time `nostromo` runs.
 
 ## <img align="left" src="images/derelict-ship.png" alt="derelict ship">&nbsp;Key Features
 
@@ -368,7 +370,7 @@ In a manifest the fields look like this:
 ```yaml
 commands:
   app:
-    keypath: app
+    keyPath: app
     name: cd ~/src/app
     alias: app
     env:
@@ -377,7 +379,7 @@ commands:
       - ~/src/app/.env
     commands:
       serve:
-        keypath: app.serve
+        keyPath: app.serve
         name: make serve
         alias: serve
         env:

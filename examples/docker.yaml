@@ -3,22 +3,22 @@ source: https://github.com/pokanop/nostromo/raw/main/examples/docker.yaml
 path: /Users/gopher/.nostromo/ships/docker.yaml
 version:
   uuid: bbf2dc6e-59cc-4062-a36f-464908723f9d
-  semver: 0.9.11
-  gitcommit: e53f5fdb6f17fe4d18166aa2e80febad711a8b47
-  builddate: '2022-02-06T08:40:14Z'
+  semVer: 0.9.11
+  gitCommit: e53f5fdb6f17fe4d18166aa2e80febad711a8b47
+  buildDate: '2022-02-06T08:40:14Z'
 commands:
   dock:
-    keypath: dock
+    keyPath: dock
     name: docker
     alias: dock
-    aliasonly: false
+    aliasOnly: false
     description: Alias for docker
     commands:
       clean:
-        keypath: dock.clean
+        keyPath: dock.clean
         name: ps -a -q |xargs docker rm
         alias: clean
-        aliasonly: false
+        aliasOnly: false
         description: Remove Docker containers using docker rm
         commands: {}
         subs: {}
@@ -28,10 +28,10 @@ commands:
         mode: 0
         disabled: false
       rmi:
-        keypath: dock.rmi
+        keyPath: dock.rmi
         name: rmi $(docker images -q)
         alias: rmi
-        aliasonly: false
+        aliasOnly: false
         description: Remove Docker images using docker rmi
         commands: {}
         subs: {}
@@ -41,10 +41,10 @@ commands:
         mode: 0
         disabled: false
       stop:
-        keypath: dock.stop
+        keyPath: dock.stop
         name: ps -q |xargs docker stop
         alias: stop
-        aliasonly: false
+        aliasOnly: false
         description: Stop running Docker containers
         commands: {}
         subs: {}
@@ -54,10 +54,10 @@ commands:
         mode: 0
         disabled: false
       vol:
-        keypath: dock.vol
+        keyPath: dock.vol
         name: volume rm $(docker volume ls -qf dangling=true)
         alias: vol
-        aliasonly: false
+        aliasOnly: false
         description: Remove dangling Docker volumes
         commands: {}
         subs: {}

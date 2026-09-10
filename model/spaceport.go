@@ -11,11 +11,11 @@ import (
 // every docked manifest.
 type Spaceport struct {
 	manifests map[string]*Manifest
-	Sequence  []string `json:"sequence"`
+	Sequence  []string `json:"sequence" yaml:"sequence"`
 	// Docked holds manifests the user docked explicitly, as opposed to ones
 	// pulled in through links, so cleanup knows what is safe to remove
-	Docked []string `json:"docked"`
-	Config *Config  `json:"config"`
+	Docked []string `json:"docked" yaml:"docked"`
+	Config *Config  `json:"config" yaml:"config"`
 	// LegacyTheme is the pre-config top level theme setting, only populated
 	// when loading an older spaceport and lifted into Config by Migrate
 	LegacyTheme *log.ThemeType `json:"-" yaml:"theme,omitempty"`
