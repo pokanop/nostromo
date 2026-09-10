@@ -334,6 +334,59 @@ nostromo update copy.ssh --platforms ""
 
 > Set `NOSTROMO_PLATFORM=windows` (or `linux/arm64`) to preview how a manifest behaves on another platform.
 
+#### Environment Variables
+
+Commands can export environment variables before they run, inspired by [Taskfile](https://taskfile.dev/usage/#environment-variables). Pass `KEY=VALUE` pairs with the `-e` or `--env` flag and `.env` files with `--dotenv`, both may be repeated:
+
+```sh
+nostromo add cmd app "cd ~/src/app" --dotenv ~/src/app/.env --env APP_ENV=dev
+nostromo add cmd app.serve "make serve" --env APP_ENV=prod --env 'GOBIN=$PWD/bin:$PATH'
+```
+
+Environment is inherited down the command tree and merged root to leaf, so `app serve` exports everything from `~/src/app/.env`, then `APP_ENV=prod` since a child overrides its parents. On each command the `.env` files load first and the `env` values override them. Values may reference other variables with normal shell syntax like `$HOME` or `${PATH}`, they are quoted for the shell running the command and are exported with `export` for `bash` and `zsh`, `set -gx` for `fish` and `$env:NAME = ...` for PowerShell.
+
+`.env` files are parsed by `nostromo` rather than sourced by the shell so the same file works everywhere. They support `KEY=VALUE` lines, an optional `export` prefix, `#` comments, and single or double quoted values, where `~` and `$VARS` in the file paths are expanded. A file that is missing or malformed is reported as a warning and skipped when the command runs.
+
+The stored values appear in the `env` and `dotenv` fields of `show -v` and `find -v`, and `nostromo env` prints the effective merged environment of a keypath, add `-v` to see where each value came from or `-s <shell>` to print the export statements:
+
+```sh
+nostromo env app.serve
+nostromo env app.serve -v
+nostromo env app.serve -s fish
+```
+
+Change the environment of an existing command with `nostromo update`. Vars are merged, `--unset-env` removes them, and `--dotenv` replaces the list of files, pass an empty path to clear it:
+
+```sh
+nostromo update app.serve --env APP_ENV=staging --unset-env GOBIN
+nostromo update app --dotenv ~/src/app/.env --dotenv ~/src/app/.env.local
+nostromo update app --dotenv ""
+```
+
+In a manifest the fields look like this:
+
+```yaml
+commands:
+  app:
+    keypath: app
+    name: cd ~/src/app
+    alias: app
+    env:
+      APP_ENV: dev
+    dotenv:
+      - ~/src/app/.env
+    commands:
+      serve:
+        keypath: app.serve
+        name: make serve
+        alias: serve
+        env:
+          APP_ENV: prod
+          GOBIN: $PWD/bin:$PATH
+```
+
+> Environment is not supported for alias only commands since the shell runs them directly.
+
 ### Shell Completion
 
 `nostromo` provides completion scripts to allow tab completion for `bash`, `zsh`, `fish` and PowerShell. `nostromo init` adds a `# nostromo [section begin]` … `# nostromo [section end]` block to the init files that already exist for these shells:

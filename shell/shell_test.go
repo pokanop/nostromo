@@ -69,7 +69,7 @@ func TestEvalString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := EvalString(tt.args.command, tt.args.language, true)
+			got, err := EvalString(Bash, tt.args.command, tt.args.language, nil, true)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("EvalString() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -107,10 +107,10 @@ func TestShellAliasFuncs(t *testing.T) {
 		sh   string
 		want string
 	}{
-		{Bash, "\nalias three='command'\none() { eval $(__nostromo_cmd eval one \"$@\"); }\ntwo() { eval $(__nostromo_cmd eval two \"$@\"); }\n"},
-		{Zsh, "\nalias three='command'\none() { eval $(__nostromo_cmd eval one \"$@\"); }\ntwo() { eval $(__nostromo_cmd eval two \"$@\"); }\n"},
-		{Fish, "\nalias three='command'\nfunction one; eval (__nostromo_cmd eval one $argv | string collect); end\nfunction two; eval (__nostromo_cmd eval two $argv | string collect); end\n"},
-		{Powershell, "\nfunction one { Invoke-Expression (__nostromo_cmd eval one @args | Out-String) }\nfunction three { command @args }\nfunction two { Invoke-Expression (__nostromo_cmd eval two @args | Out-String) }\n"},
+		{Bash, "\nalias three='command'\none() { eval \"$(__nostromo_cmd eval --shell bash one \"$@\")\"; }\ntwo() { eval \"$(__nostromo_cmd eval --shell bash two \"$@\")\"; }\n"},
+		{Zsh, "\nalias three='command'\none() { eval \"$(__nostromo_cmd eval --shell zsh one \"$@\")\"; }\ntwo() { eval \"$(__nostromo_cmd eval --shell zsh two \"$@\")\"; }\n"},
+		{Fish, "\nalias three='command'\nfunction one; eval (__nostromo_cmd eval --shell fish one $argv | string collect); end\nfunction two; eval (__nostromo_cmd eval --shell fish two $argv | string collect); end\n"},
+		{Powershell, "\nfunction one { Invoke-Expression (__nostromo_cmd eval --shell powershell one @args | Out-String) }\nfunction three { command @args }\nfunction two { Invoke-Expression (__nostromo_cmd eval --shell powershell two @args | Out-String) }\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.sh, func(t *testing.T) {
@@ -127,10 +127,10 @@ func TestShellAliasFuncsSkipUnavailable(t *testing.T) {
 		sh   string
 		want string
 	}{
-		{Bash, "\nalias three='command'\none() { eval $(__nostromo_cmd eval one \"$@\"); }\n"},
-		{Zsh, "\nalias three='command'\none() { eval $(__nostromo_cmd eval one \"$@\"); }\n"},
-		{Fish, "\nalias three='command'\nfunction one; eval (__nostromo_cmd eval one $argv | string collect); end\n"},
-		{Powershell, "\nfunction one { Invoke-Expression (__nostromo_cmd eval one @args | Out-String) }\nfunction three { command @args }\n"},
+		{Bash, "\nalias three='command'\none() { eval \"$(__nostromo_cmd eval --shell bash one \"$@\")\"; }\n"},
+		{Zsh, "\nalias three='command'\none() { eval \"$(__nostromo_cmd eval --shell zsh one \"$@\")\"; }\n"},
+		{Fish, "\nalias three='command'\nfunction one; eval (__nostromo_cmd eval --shell fish one $argv | string collect); end\n"},
+		{Powershell, "\nfunction one { Invoke-Expression (__nostromo_cmd eval --shell powershell one @args | Out-String) }\nfunction three { command @args }\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.sh, func(t *testing.T) {

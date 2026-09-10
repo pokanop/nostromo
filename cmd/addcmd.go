@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pokanop/nostromo/dotenv"
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/shell"
 	"github.com/pokanop/nostromo/task"
@@ -18,6 +19,9 @@ var (
 	aliasOnly   bool
 	mode        string
 	platforms   []string
+	env         []string
+	unsetEnv    []string
+	dotenvFiles []string
 )
 
 // addcmdCmd represents the addcmd command
@@ -47,14 +51,22 @@ A command can be limited to specific platforms with -p or --platforms using
 Go OS names (e.g., linux, darwin, windows) or OS/arch pairs (e.g., linux/arm64).
 Commands unavailable on the current platform, including their sub commands,
 are not aliased or completed in the shell and cannot be run:
-  nostromo add cmd foo.bar "pbcopy" --platforms darwin`,
+  nostromo add cmd foo.bar "pbcopy" --platforms darwin
+
+Environment variables can be exported before a command runs with -e or --env
+and loaded from .env files with --dotenv. Both are inherited by sub commands
+which may override them, and values may reference other variables:
+  nostromo add cmd foo "cd ~/foo" --dotenv ~/foo/.env --env APP_ENV=dev
+  nostromo add cmd foo.bar "make" --env BIN='$PWD/bin:$PATH'
+
+Use "nostromo env foo.bar" to see the effective environment for a command.`,
 	Args: addCmdArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var name string
 		if len(args) > 1 {
 			name = args[1]
 		}
-		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode, platformsFlag(cmd), false))
+		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode, platformsFlag(cmd), envFlags(cmd), false))
 	},
 }
 
@@ -68,6 +80,43 @@ func init() {
 	addcmdCmd.Flags().BoolVarP(&aliasOnly, "alias-only", "a", false, "Add shell alias only, not a nostromo command")
 	addcmdCmd.Flags().StringVarP(&mode, "mode", "m", "", "Set the mode for the command (concatenate, independent, exclusive)")
 	addcmdCmd.Flags().StringSliceVarP(&platforms, "platforms", "p", nil, "Limit the command to platforms (e.g., linux,darwin,windows/arm64)")
+	addEnvFlags(addcmdCmd)
+}
+
+// addEnvFlags shared by add and update
+func addEnvFlags(cmd *cobra.Command) {
+	cmd.Flags().StringArrayVarP(&env, "env", "e", nil, "Export an env var as KEY=VALUE before running, repeatable")
+	cmd.Flags().StringArrayVar(&unsetEnv, "unset-env", nil, "Remove an env var by KEY, repeatable")
+	cmd.Flags().StringArrayVar(&dotenvFiles, "dotenv", nil, "Load a .env file before running (~ and $VARS expanded), repeatable")
+}
+
+// envFlags returns the env changes from --env, --unset-env and --dotenv,
+// dotenv is nil if the flag was not given so existing files are kept when
+// updating and an empty --dotenv "" clears them
+func envFlags(cmd *cobra.Command) model.EnvChanges {
+	changes := model.EnvChanges{Unset: unsetEnv}
+	changes.Set, _ = model.ParseEnv(env)
+	if cmd.Flags().Changed("dotenv") {
+		changes.Dotenv = []string{}
+		for _, path := range dotenvFiles {
+			if len(path) > 0 {
+				changes.Dotenv = append(changes.Dotenv, path)
+			}
+		}
+	}
+	return changes
+}
+
+func envValid() error {
+	if _, err := model.ParseEnv(env); err != nil {
+		return err
+	}
+	for _, key := range unsetEnv {
+		if !dotenv.ValidKey(key) {
+			return fmt.Errorf("invalid env key %q", key)
+		}
+	}
+	return nil
 }
 
 func codeValid() bool {
@@ -101,6 +150,9 @@ func addCmdArgs(cmd *cobra.Command, args []string) error {
 	}
 	if codeValid() && !shell.IsSupportedLanguage(language) {
 		return fmt.Errorf("invalid code snippet and language, must be in [%s]", strings.Join(shell.SupportedLanguages(), ","))
+	}
+	if err := envValid(); err != nil {
+		return err
 	}
 	return platformsValid()
 }

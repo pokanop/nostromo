@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
+	"github.com/pokanop/nostromo/shell"
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
 )
@@ -37,33 +39,71 @@ The root "build" command can do things like cd to a folder, set env vars, and
 run the main command. Lastly, substitutions can further shorten any sets of
 commands that need to be run across the scope of the command.`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		evalArgs, _ := evalFlags(args)
+		evalArgs, _, err := evalFlags(args)
+		if err != nil {
+			return err
+		}
 		return cobra.MinimumNArgs(1)(cmd, evalArgs)
 	},
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		evalArgs, v := evalFlags(args)
-		if v {
+		evalArgs, opts, err := evalFlags(args)
+		if err != nil {
+			log.Error(err)
+			os.Exit(-1)
+		}
+		if opts.verbose {
 			log.SetVerbose(true)
 			model.SetVerbose(true)
 		}
-		os.Exit(task.EvalString(evalArgs))
+		os.Exit(task.EvalString(opts.shell, evalArgs))
 	},
 }
 
-// evalFlags consumes leading -v/--verbose flags that cobra cannot parse
-// since flag parsing is disabled to pass user arguments through untouched.
-func evalFlags(args []string) ([]string, bool) {
-	verbose := false
+type evalOptions struct {
+	verbose bool
+	shell   string
+}
+
+// evalFlags consumes leading -v/--verbose and --shell flags that cobra cannot
+// parse since flag parsing is disabled to pass user arguments through
+// untouched. The shell is used to render env exports and defaults to bash.
+func evalFlags(args []string) ([]string, evalOptions, error) {
+	opts := evalOptions{shell: shell.Bash}
 	for len(args) > 0 {
-		v, ok := verboseFlagValue(args[0])
-		if !ok {
-			break
+		if v, ok := verboseFlagValue(args[0]); ok {
+			opts.verbose = v
+			args = args[1:]
+			continue
 		}
-		verbose = v
-		args = args[1:]
+		if sh, n, ok := shellFlagValue(args); ok {
+			if !shell.IsSupported(sh) {
+				return nil, opts, fmt.Errorf("unsupported shell %q, must be one of %s", sh, strings.Join(shell.Shells, ", "))
+			}
+			opts.shell = sh
+			args = args[n:]
+			continue
+		}
+		break
 	}
-	return args, verbose
+	return args, opts, nil
+}
+
+// shellFlagValue returns the shell from a leading --shell flag along with the
+// number of arguments consumed
+func shellFlagValue(args []string) (string, int, bool) {
+	switch {
+	case args[0] == "--shell" || args[0] == "-s":
+		if len(args) > 1 {
+			return args[1], 2, true
+		}
+		return "", 1, true
+	case strings.HasPrefix(args[0], "--shell="):
+		return strings.TrimPrefix(args[0], "--shell="), 1, true
+	case strings.HasPrefix(args[0], "-s="):
+		return strings.TrimPrefix(args[0], "-s="), 1, true
+	}
+	return "", 0, false
 }
 
 func verboseFlagValue(arg string) (bool, bool) {

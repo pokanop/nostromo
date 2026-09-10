@@ -195,6 +195,16 @@ func (m *Manifest) AsYAML() string {
 
 // ExecutionString from input if possible or return error
 func (m *Manifest) ExecutionString(args []string) (string, string, error) {
+	c, rest, err := m.Resolve(args)
+	if err != nil {
+		return "", "", err
+	}
+	return c.Code.Language, c.executionString(rest), nil
+}
+
+// Resolve the runnable command for input returning it along with the
+// remaining arguments, or an error if none matches or it cannot run
+func (m *Manifest) Resolve(args []string) (*Command, []string, error) {
 	for _, cmd := range m.Commands {
 		keyPath := cmd.shortestKeyPath(keypath.KeyPath(args))
 		if len(keyPath) > 0 {
@@ -207,22 +217,22 @@ func (m *Manifest) ExecutionString(args []string) (string, string, error) {
 
 			c := cmd.find(keyPath)
 			if disabled, n := c.checkDisabled(); disabled {
-				return "", "", fmt.Errorf("command is disabled at %s", n.KeyPath)
+				return nil, nil, fmt.Errorf("command is disabled at %s", n.KeyPath)
 			}
 			if unavailable, n := c.checkUnavailable(); unavailable {
 				err := fmt.Errorf("command %s is not available on %s", c.KeyPath, CurrentPlatform())
 				if n != c {
 					err = fmt.Errorf("%s (restricted at %s)", err, n.KeyPath)
 				}
-				return "", "", err
+				return nil, nil, err
 			}
-			return c.Code.Language, c.executionString(args[count:]), nil
+			return c, args[count:], nil
 		}
 	}
 
 	log.Debug("arguments:", args)
 
-	return "", "", fmt.Errorf("unable to execute command '%s'", strings.Join(args, " "))
+	return nil, nil, fmt.Errorf("unable to execute command '%s'", strings.Join(args, " "))
 }
 
 // Keys as ordered list of fields for logging
