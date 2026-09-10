@@ -240,6 +240,29 @@ func TestGetCommand(t *testing.T) {
 
 	rec = request(t, s, http.MethodGet, "/api/command", nil)
 	expectStatus(t, rec, http.StatusBadRequest)
+
+	// Key paths shared between manifests resolve to the core manifest unless
+	// a manifest is named explicitly
+	rec = request(t, s, http.MethodPost, "/api/command", addCommandRequest{KeyPath: "deploy", Name: "make deploy"})
+	expectStatus(t, rec, http.StatusCreated)
+	for i := 0; i < 5; i++ {
+		rec = request(t, s, http.MethodGet, "/api/command?keypath=deploy", nil)
+		expectStatus(t, rec, http.StatusOK)
+		decode(t, rec, &node)
+		if node.Manifest != "manifest" || node.ReadOnly || node.Name != "make deploy" {
+			t.Fatalf("want core command for ambiguous key path, got %+v", node)
+		}
+	}
+	rec = request(t, s, http.MethodGet, "/api/command?keypath=deploy&manifest=team", nil)
+	expectStatus(t, rec, http.StatusOK)
+	decode(t, rec, &node)
+	if node.Manifest != "team" || !node.ReadOnly || node.Name != "kubectl apply" {
+		t.Errorf("want docked command when manifest is named, got %+v", node)
+	}
+	rec = request(t, s, http.MethodGet, "/api/command?keypath=docker&manifest=team", nil)
+	expectStatus(t, rec, http.StatusNotFound)
+	rec = request(t, s, http.MethodGet, "/api/command?keypath=deploy&manifest=nope", nil)
+	expectStatus(t, rec, http.StatusNotFound)
 }
 
 func TestAddCommand(t *testing.T) {
@@ -477,6 +500,16 @@ func TestSearch(t *testing.T) {
 		if len(c.Commands) != 0 {
 			t.Errorf("search results should be flat, got %+v", c.Commands)
 		}
+	}
+
+	// A command with several matching substitutions is listed once
+	rec = request(t, s, http.MethodPost, "/api/command/sub?keypath=docker", subInfo{Alias: "dcp", Name: "docker-compose-plus"})
+	expectStatus(t, rec, http.StatusCreated)
+	rec = request(t, s, http.MethodGet, "/api/search?q=docker-compose", nil)
+	expectStatus(t, rec, http.StatusOK)
+	decode(t, rec, &res)
+	if len(res.Substitutions) != 1 || res.Substitutions[0].KeyPath != "docker" {
+		t.Errorf("want a single substitution match for docker, got %+v", res.Substitutions)
 	}
 
 	rec = request(t, s, http.MethodGet, "/api/search?q=", nil)

@@ -192,6 +192,7 @@ func FindMatches(cfg *config.Config, name string) ([]*model.Command, []*model.Co
 				for _, sub := range c.Subs {
 					if stringutil.ContainsCaseInsensitive(sub.Name, name) || stringutil.ContainsCaseInsensitive(sub.Alias, name) {
 						matchingSubs = append(matchingSubs, c)
+						break
 					}
 				}
 			})
