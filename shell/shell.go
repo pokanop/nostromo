@@ -24,8 +24,20 @@ var (
 	prefFiles = preferredStartupFiles(initFiles)
 )
 
-// EvalString returns the command as a string to evaluate or an error.
-func EvalString(command, language string, verbose bool) (string, error) {
+// EvalString returns the command as a string to evaluate by sh or an error,
+// with exports for vars prepended, see Exports
+func EvalString(sh, command, language string, vars []model.EnvVar, verbose bool) (string, error) {
+	cmdStr, err := evalString(command, language, verbose)
+	if err != nil {
+		return "", err
+	}
+	if len(vars) == 0 {
+		return cmdStr, nil
+	}
+	return Exports(sh, vars) + "; " + cmdStr, nil
+}
+
+func evalString(command, language string, verbose bool) (string, error) {
 	if len(command) == 0 {
 		return "", fmt.Errorf("cannot run empty command")
 	}
@@ -133,8 +145,9 @@ func shellWrapperFunc(sh string) string {
 // top level commands in the given shell's syntax.
 //
 // When users run a command, it actually runs `eval` on the result of
-// `nostromo eval` with arguments resolved. Commands unavailable on the
-// current platform are left out.
+// `nostromo eval --shell <sh>` with arguments resolved so env exports are
+// rendered for the right shell. Commands unavailable on the current
+// platform are left out.
 func shellAliasFuncs(sh string, m *model.Manifest) string {
 	var aliases []string
 	for _, c := range m.Commands {
@@ -153,17 +166,17 @@ func shellAliasFunc(sh string, c *model.Command) string {
 		if c.AliasOnly {
 			return fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
 		}
-		return fmt.Sprintf("function %s; eval (__nostromo_cmd eval %s $argv | string collect); end", c.Alias, c.Alias)
+		return fmt.Sprintf("function %s; eval (__nostromo_cmd eval --shell fish %s $argv | string collect); end", c.Alias, c.Alias)
 	case Powershell:
 		if c.AliasOnly {
 			// Set-Alias cannot carry arguments, so use a function
 			return fmt.Sprintf("function %s { %s @args }", c.Alias, c.Name)
 		}
-		return fmt.Sprintf("function %s { Invoke-Expression (__nostromo_cmd eval %s @args | Out-String) }", c.Alias, c.Alias)
+		return fmt.Sprintf("function %s { Invoke-Expression (__nostromo_cmd eval --shell powershell %s @args | Out-String) }", c.Alias, c.Alias)
 	default:
 		if c.AliasOnly {
 			return fmt.Sprintf("alias %s='%s'", c.Alias, c.Name)
 		}
-		return fmt.Sprintf("%s() { eval $(__nostromo_cmd eval %s \"$@\"); }", c.Alias, c.Alias)
+		return fmt.Sprintf("%s() { eval \"$(__nostromo_cmd eval --shell %s %s \"$@\")\"; }", c.Alias, sh, c.Alias)
 	}
 }
