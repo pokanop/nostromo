@@ -211,7 +211,7 @@ func (s *Server) handleCommand(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusConflict, fmt.Sprintf("command %s already exists", req.KeyPath))
 			return
 		}
-		cmd, err := task.AddCommandToConfig(cfg, req.KeyPath, req.Name, req.Description, req.Code.Snippet, req.Code.Language, req.AliasOnly, req.Mode, false)
+		cmd, err := task.AddCommandToConfig(cfg, req.KeyPath, req.Name, req.Description, req.Code.Snippet, req.Code.Language, req.AliasOnly, req.Mode, nil, false)
 		if err != nil {
 			writeError(w, http.StatusBadRequest, err.Error())
 			return

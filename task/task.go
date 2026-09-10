@@ -243,6 +243,9 @@ func FetchCommands() []*cobra.Command {
 	}
 
 	for _, cmd := range cfg.Spaceport().Commands() {
+		if !cmd.IsAvailable() {
+			continue
+		}
 		cmds = append(cmds, cmd.CobraCommand())
 	}
 
@@ -360,6 +363,14 @@ func AddInteractive() int {
 			modes := model.SupportedModes()
 			mode = modes[prompt.Choose("Choose a command mode to use (concatenate)", modes, 0)]
 		}
+
+		log.Regular("\nCommands can be limited to specific platforms, e.g. 'darwin' or 'linux,windows/arm64'. Commands\n" +
+			"unavailable on the current platform are hidden from the shell. Leave this blank for all platforms.\n")
+		platforms, err := model.ParsePlatforms([]string{prompt.String("Enter platforms (e.g., 'linux,darwin') to limit your command (all)", "")})
+		if err != nil {
+			log.Error(err)
+			return -1
+		}
 		if len(keypath) == 0 {
 			keypath = alias
 		} else {
@@ -367,7 +378,7 @@ func AddInteractive() int {
 		}
 		log.Highlight("\nCreating command...\n")
 
-		return AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode, false)
+		return AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode, platforms, false)
 	}
 
 	log.Regularf("A key path is a dot '.' delimited path to where you want to add your command.\n")
@@ -387,13 +398,15 @@ func AddInteractive() int {
 }
 
 // AddCommand to the manifest
-func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string, update bool) int {
+//
+// A nil platforms list keeps the existing platforms when updating a command.
+func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string, platforms []string, update bool) int {
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
 	}
 
-	cmd, err := AddCommandToConfig(cfg, keyPath, command, description, code, language, aliasOnly, mode, update)
+	cmd, err := AddCommandToConfig(cfg, keyPath, command, description, code, language, aliasOnly, mode, platforms, update)
 	if err != nil {
 		log.Error(err)
 		return -1

@@ -26,10 +26,13 @@ type Command struct {
 	Code        *Code                    `json:"code"`
 	Mode        Mode                     `json:"mode"`
 	Disabled    bool                     `json:"disabled"`
+	// Platforms this command is available on as GOOS or GOOS/GOARCH names,
+	// empty for all platforms. Children inherit the restriction.
+	Platforms []string `json:"platforms,omitempty" yaml:"platforms,omitempty"`
 }
 
 // newCommand returns a newly initialized command
-func newCommand(name, alias, description string, code *Code, aliasOnly bool, mode string) *Command {
+func newCommand(name, alias, description string, code *Code, aliasOnly bool, mode string, platforms []string) *Command {
 	// Default alias to same as command name
 	if len(alias) == 0 {
 		alias = name
@@ -50,6 +53,7 @@ func newCommand(name, alias, description string, code *Code, aliasOnly bool, mod
 		Code:        code,
 		Mode:        ModeFromString(mode),
 		Disabled:    false,
+		Platforms:   platforms,
 	}
 }
 
@@ -59,7 +63,7 @@ func (c *Command) String() string {
 
 // Keys as ordered list of fields for logging
 func (c *Command) Keys() []string {
-	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled"}
+	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled", "platforms"}
 }
 
 // Fields interface for logging
@@ -75,11 +79,32 @@ func (c *Command) Fields() map[string]interface{} {
 		"mode":          c.Mode.String(),
 		"aliasOnly":     c.AliasOnly,
 		"disabled":      c.Disabled,
+		"platforms":     c.platformsField(),
 	}
+}
+
+// platformsField describes the platform restriction and availability, e.g.
+// "linux, darwin" or "linux (unavailable on windows/amd64)"
+func (c *Command) platformsField() string {
+	s := strings.Join(c.Platforms, ", ")
+	if unavailable, n := c.checkUnavailable(); unavailable {
+		note := fmt.Sprintf("unavailable on %s", CurrentPlatform())
+		if n != c {
+			note += fmt.Sprintf(" via %s", n.KeyPath)
+		}
+		if len(s) > 0 {
+			return fmt.Sprintf("%s (%s)", s, note)
+		}
+		return note
+	}
+	return s
 }
 
 // Data method for Node interface to print tree
 func (c *Command) Data() interface{} {
+	if !c.IsAvailable() {
+		return c.Alias + " (unavailable)"
+	}
 	return c.Alias
 }
 
@@ -108,6 +133,9 @@ func (c *Command) CobraCommand() *cobra.Command {
 		Run:       func(cmd *cobra.Command, args []string) {},
 	}
 	for _, childCmd := range c.Commands {
+		if !childCmd.IsAvailable() {
+			continue
+		}
 		cmd.AddCommand(childCmd.CobraCommand())
 	}
 	return cmd
@@ -313,7 +341,7 @@ func (c *Command) link(parent *Command) {
 	}
 }
 
-func (c *Command) build(keyPath, command, description string, code *Code, aliasOnly bool, mode string) {
+func (c *Command) build(keyPath, command, description string, code *Code, aliasOnly bool, mode string, platforms []string) {
 	if len(keyPath) == 0 {
 		return
 	}
@@ -333,7 +361,7 @@ func (c *Command) build(keyPath, command, description string, code *Code, aliasO
 		last = cmd
 		cmd = cmd.Commands[key]
 		if cmd == nil {
-			cmd = newCommand("", key, "", nil, false, mode)
+			cmd = newCommand("", key, "", nil, false, mode, nil)
 			last.addCommand(cmd)
 		}
 	}
@@ -344,11 +372,15 @@ func (c *Command) build(keyPath, command, description string, code *Code, aliasO
 	cmd.Code = code
 	cmd.AliasOnly = aliasOnly
 	cmd.Mode = ModeFromString(mode)
+	cmd.Platforms = platforms
 }
 
 func (c *Command) commandList() []string {
 	var cmds []string
 	for _, cmd := range c.Commands {
+		if !cmd.IsAvailable() {
+			continue
+		}
 		cmds = append(cmds, fmt.Sprintf("%s\t%s", cmd.Alias, cmd.Description))
 	}
 	sort.Strings(cmds)
@@ -365,6 +397,32 @@ func (c *Command) checkDisabled() (bool, *Command) {
 			break
 		}
 		if cmd.Disabled {
+			return true, cmd
+		}
+		cmd = cmd.parent
+	}
+	return false, nil
+}
+
+// IsAvailable returns true if this command can run on the current platform,
+// see checkUnavailable
+func (c *Command) IsAvailable() bool {
+	unavailable, _ := c.checkUnavailable()
+	return !unavailable
+}
+
+// checkUnavailable returns true if this command or any parent node restricts
+// platforms and excludes the current platform, and otherwise false
+//
+// Returns the restricting command if unavailable, and otherwise nil
+func (c *Command) checkUnavailable() (bool, *Command) {
+	platform := CurrentPlatform()
+	cmd := c
+	for {
+		if cmd == nil {
+			break
+		}
+		if !platformsInclude(cmd.Platforms, platform) {
 			return true, cmd
 		}
 		cmd = cmd.parent

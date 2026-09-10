@@ -45,7 +45,7 @@ func SaveConfig(cfg *config.Config) error {
 }
 
 // AddCommandToConfig adds or updates a command in the core manifest and saves
-func AddCommandToConfig(cfg *config.Config, keyPath, command, description, code, language string, aliasOnly bool, mode string, update bool) (*model.Command, error) {
+func AddCommandToConfig(cfg *config.Config, keyPath, command, description, code, language string, aliasOnly bool, mode string, platforms []string, update bool) (*model.Command, error) {
 	m := cfg.Spaceport().CoreManifest()
 
 	if update {
@@ -56,6 +56,9 @@ func AddCommandToConfig(cfg *config.Config, keyPath, command, description, code,
 		if len(command) == 0 {
 			// Keep same command if not supplied
 			command = cmd.Name
+		}
+		if platforms == nil {
+			platforms = cmd.Platforms
 		}
 	}
 
@@ -76,7 +79,7 @@ func AddCommandToConfig(cfg *config.Config, keyPath, command, description, code,
 		mode = cfg.Spaceport().Config.Mode.String()
 	}
 
-	if _, err := m.AddCommand(keyPath, command, description, snippet, aliasOnly, mode); err != nil {
+	if _, err := m.AddCommand(keyPath, command, description, snippet, aliasOnly, mode, platforms); err != nil {
 		return nil, err
 	}
 

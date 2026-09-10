@@ -85,6 +85,8 @@ commands:
           snippet: ''
         mode: 0
         disabled: false
+        platforms:
+        - darwin
     subs: {}
     code:
       language: ''
