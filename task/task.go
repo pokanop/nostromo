@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pokanop/nostromo/banner"
 	"github.com/pokanop/nostromo/config"
 	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
@@ -27,8 +28,9 @@ func SetVersion(v *version.Info) {
 	ver = v
 }
 
-// InitConfig of nostromo config file if not already initialized
-func InitConfig(cmd *cobra.Command) int {
+// InitConfig of nostromo config file if not already initialized.
+// The banner is only shown when a fresh config is created.
+func InitConfig(cmd *cobra.Command, showBanner bool) int {
 	// Attempt to load existing config
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -37,6 +39,9 @@ func InitConfig(cmd *cobra.Command) int {
 		if err != nil {
 			log.Error(err)
 			return -1
+		}
+		if showBanner {
+			PrintBanner()
 		}
 		log.Highlight("nostromo config created")
 	} else {
@@ -64,6 +69,11 @@ func InitConfig(cmd *cobra.Command) int {
 	}
 
 	return 0
+}
+
+// PrintBanner prints the nostromo ascii-art banner and tagline
+func PrintBanner() {
+	log.Banner(banner.Lines("nostromo"), banner.Tagline)
 }
 
 // DestroyConfig for core manifest file
