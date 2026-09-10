@@ -227,6 +227,9 @@ func (c *Config) syncMerge(items []*syncItem, force bool) ([]*model.Manifest, er
 			// Update source
 			m.Source = item.source
 
+			// Docked manifests never carry settings
+			m.Config = nil
+
 			var shouldSave bool
 			if c.spaceport.IsUnique(m.Name) {
 				// New manifest
@@ -246,7 +249,7 @@ func (c *Config) syncMerge(items []*syncItem, force bool) ([]*model.Manifest, er
 			}
 
 			if shouldSave {
-				err = SaveManifest(m, false)
+				err = c.SaveManifest(m, false)
 				if err != nil {
 					log.Warningf("failed to save manifest %s\n", m.Name)
 				}

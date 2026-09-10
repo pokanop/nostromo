@@ -6,6 +6,11 @@ version:
   semver: ""
   gitcommit: ""
   builddate: ""
+config:
+  verbose: true
+  aliasesonly: false
+  mode: 0
+  backupcount: 10
 commands:
   0-one-alias:
     keypath: 0-one-alias

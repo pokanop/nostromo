@@ -88,11 +88,37 @@ To destroy the core manifest and start over you can always run:
 nostromo destroy
 ```
 
-Backups of manifests are automatically taken to prevent data loss in case of shenanigans gone wrong. These are located under `${NOSTROMO_HOME}/cargo`. The maximum number of backups can be configured with the `backupCount` manifest setting.
+Backups of manifests are automatically taken to prevent data loss in case of shenanigans gone wrong. These are located under `${NOSTROMO_HOME}/cargo`. The maximum number of backups can be configured with the `backupCount` setting.
 
 ```sh
 nostromo set backupCount 10
 ```
+
+### Settings
+
+Global settings live in the **spaceport** (`~/.nostromo/spaceport.yaml`), not in any manifest, so they apply to every docked manifest. Use `nostromo set` and `nostromo get` to manage them:
+
+| Key           | Values                                    | Default       |
+| ------------- | ----------------------------------------- | ------------- |
+| `verbose`     | `true`, `false`                           | `false`       |
+| `aliasesOnly` | `true`, `false`                           | `false`       |
+| `mode`        | `concatenate`, `independent`, `exclusive` | `concatenate` |
+| `backupCount` | number                                    | `10`          |
+| `theme`       | `default`, `grayscale`, `emoji`           | `emoji`       |
+
+```yaml
+# ~/.nostromo/spaceport.yaml
+sequence:
+  - manifest
+config:
+  verbose: false
+  aliasesonly: false
+  mode: 0
+  backupcount: 10
+  theme: 2
+```
+
+> Older versions stored a `config` block in the core manifest. Running any command (or `nostromo init`) lifts those settings into the spaceport once; config blocks in docked manifests are ignored.
 
 ## <img align="left" src="images/derelict-ship.png" alt="derelict ship">&nbsp;Key Features
 
@@ -331,7 +357,7 @@ For more complex snippets you can edit `~/.nostromo/ships/manifest.yaml` directl
 
 > Details on supported file formats and requirements can be found in the [go-getter](https://github.com/hashicorp/go-getter) documentation as `nostromo` uses that for downloading files
 
-Configs can be found in the `~/.nostromo/ships` folder. The **core manifest** is named `manifest.yaml`.
+Manifests can be found in the `~/.nostromo/ships` folder. The **core manifest** is named `manifest.yaml`. Manifests only hold commands; global [settings](#settings) live in the spaceport.
 
 You can add as many additional manifests in the same folder and `nostromo` will parse and aggregate all the commands, useful for organizations wanting to build their own command suite.
 

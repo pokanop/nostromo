@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pokanop/nostromo/log"
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/version"
 )
@@ -68,6 +69,107 @@ func TestLoadConfig(t *testing.T) {
 					t.Errorf("want core manifest with some commands, got %d", len(c.spaceport.CoreManifest().Commands))
 				}
 			}
+		})
+	}
+}
+
+func TestLoadConfigMigratesLegacySettings(t *testing.T) {
+	tests := []struct {
+		name            string
+		spaceport       string
+		wantVerbose     bool
+		wantAliasesOnly bool
+		wantMode        model.Mode
+		wantBackupCount int
+		wantTheme       log.ThemeType
+	}{
+		{"no spaceport", "", true, true, model.IndependentMode, 3, log.EmojiTheme},
+		{"legacy spaceport theme", "sequence:\n- manifest\ntheme: 1\n", true, true, model.IndependentMode, 3, log.GrayscaleTheme},
+		{"spaceport already migrated", "sequence:\n- manifest\nconfig:\n  verbose: false\n  aliasesonly: false\n  mode: 2\n  backupcount: 7\n  theme: 1\n", false, false, model.ExclusiveMode, 7, log.GrayscaleTheme},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			baseDir := t.TempDir()
+			t.Setenv("NOSTROMO_HOME", baseDir)
+			os.MkdirAll(filepath.Join(baseDir, "ships"), 0777)
+
+			// Core manifest with a legacy config block, plus a docked manifest
+			// whose config block must be ignored
+			src, err := os.ReadFile("../testdata/legacy_manifest.yaml")
+			if err != nil {
+				t.Fatalf("unable to read legacy manifest: %s", err)
+			}
+			core := strings.Replace(string(src), "aliasesonly: false", "aliasesonly: true", 1)
+			core = strings.Replace(core, "mode: 0", "mode: 1", 1)
+			core = strings.Replace(core, "backupcount: 10", "backupcount: 3", 1)
+			if err := os.WriteFile(coreManifestPath(), []byte(core), 0644); err != nil {
+				t.Fatalf("unable to write core manifest: %s", err)
+			}
+			docked := strings.Replace(string(src), "name: manifest", "name: docked", 1)
+			docked = strings.Replace(docked, "backupcount: 10", "backupcount: 99", 1)
+			if err := os.WriteFile(manifestFile("docked"), []byte(docked), 0644); err != nil {
+				t.Fatalf("unable to write docked manifest: %s", err)
+			}
+			if len(tt.spaceport) > 0 {
+				if err := os.WriteFile(spaceportFile(), []byte(tt.spaceport), 0644); err != nil {
+					t.Fatalf("unable to write spaceport: %s", err)
+				}
+			}
+
+			c, err := LoadConfig()
+			if err != nil {
+				t.Fatalf("unable to load config: %s", err)
+			}
+
+			check := func(s *model.Spaceport) {
+				cfg := s.Config
+				if cfg == nil {
+					t.Fatalf("want spaceport config, got nil")
+				}
+				if cfg.Verbose != tt.wantVerbose || cfg.AliasesOnly != tt.wantAliasesOnly || cfg.Mode != tt.wantMode || cfg.BackupCount != tt.wantBackupCount || cfg.Theme != tt.wantTheme {
+					t.Errorf("unexpected spaceport config: %+v", cfg)
+				}
+				for _, m := range s.Manifests() {
+					if m != nil && m.Config != nil {
+						t.Errorf("want %s manifest config dropped, got %+v", m.Name, m.Config)
+					}
+				}
+			}
+			check(c.spaceport)
+
+			// Settings must persist in the spaceport
+			if s, err := loadSpaceport(); err != nil {
+				t.Fatalf("unable to reload spaceport: %s", err)
+			} else {
+				check(s)
+			}
+
+			// Migrating rewrites the core manifest without its config block,
+			// otherwise stale blocks are dropped on the next save
+			checkCore := func() {
+				saved, err := os.ReadFile(coreManifestPath())
+				if err != nil {
+					t.Fatalf("unable to read core manifest: %s", err)
+				}
+				if strings.Contains(string(saved), "config:") {
+					t.Errorf("want config block removed from core manifest, got:\n%s", saved)
+				}
+			}
+			if !strings.Contains(tt.spaceport, "config:") {
+				checkCore()
+			}
+			if err := c.Save(); err != nil {
+				t.Fatalf("unable to save config: %s", err)
+			}
+			checkCore()
+
+			// A second load must not migrate again
+			c, err = LoadConfig()
+			if err != nil {
+				t.Fatalf("unable to reload config: %s", err)
+			}
+			check(c.spaceport)
 		})
 	}
 }
@@ -174,7 +276,7 @@ func TestSave(t *testing.T) {
 			if test.config != nil {
 				m = test.config.spaceport.CoreManifest()
 			}
-			err := SaveManifest(m, false)
+			err := saveManifest(m, false, 10)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -201,7 +303,7 @@ func TestDelete(t *testing.T) {
 				if test.config != nil {
 					m = test.config.spaceport.CoreManifest()
 				}
-				err := SaveManifest(m, false)
+				err := test.config.SaveManifest(m, false)
 				if err != nil {
 					t.Errorf("unable to save temporary manifest: %s", err)
 				}
@@ -249,14 +351,14 @@ func TestGet(t *testing.T) {
 		{"aliasesOnly", "aliasesOnly", "true"},
 		{"mode", "mode", "concatenate"},
 		{"backupCount", "backupCount", "10"},
+		{"theme", "theme", "emoji"},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			c := fakeConfig("")
-			m := c.spaceport.CoreManifest()
-			m.Config.Verbose = true
-			m.Config.AliasesOnly = true
+			c.spaceport.Config.Verbose = true
+			c.spaceport.Config.AliasesOnly = true
 			if actual := c.Get(test.key); actual != test.expected {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
@@ -287,6 +389,7 @@ func TestSet(t *testing.T) {
 		{"backupCount empty", "backupCount", "", true, ""},
 		{"backupCount 5", "backupCount", "5", false, "5"},
 		{"backupCount 100", "backupCount", "100", false, "100"},
+		{"theme grayscale", "theme", "grayscale", false, "grayscale"},
 	}
 
 	for _, test := range tests {
@@ -312,12 +415,12 @@ func TestKeys(t *testing.T) {
 		config   *Config
 		expected []string
 	}{
-		{"keys", fakeConfig(""), []string{"verbose", "aliasesOnly", "mode", "backupCount"}},
+		{"keys", fakeConfig(""), []string{"verbose", "aliasesOnly", "mode", "backupCount", "theme"}},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if actual := test.config.spaceport.CoreManifest().Config.Keys(); !reflect.DeepEqual(actual, test.expected) {
+			if actual := test.config.spaceport.Config.Keys(); !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
@@ -338,13 +441,14 @@ func TestFields(t *testing.T) {
 				"aliasesOnly": false,
 				"mode":        model.ConcatenateMode.String(),
 				"backupCount": 10,
+				"theme":       "emoji",
 			},
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if actual := test.config.spaceport.CoreManifest().Config.Fields(); !reflect.DeepEqual(actual, test.expected) {
+			if actual := test.config.spaceport.Config.Fields(); !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
@@ -399,11 +503,7 @@ func TestBackup(t *testing.T) {
 				t.Errorf("failed to Parse manifest: %s", err)
 			}
 
-			manifests := []*model.Manifest{m}
-			c := &Config{model.NewSpaceport(manifests)}
-
-			c.spaceport.CoreManifest().Config.BackupCount = tt.backupCount
-			err = backupManifest(m)
+			err = backupManifest(m, tt.backupCount)
 			if err != nil {
 				if tt.expErr == true {
 					return
@@ -413,7 +513,7 @@ func TestBackup(t *testing.T) {
 
 			for i := 0; i < 9; i++ {
 				time.Sleep(10 * time.Millisecond)
-				backupManifest(m)
+				backupManifest(m, tt.backupCount)
 			}
 
 			backupDir, _ := ensureBackupDir()

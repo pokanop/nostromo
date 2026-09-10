@@ -6,11 +6,6 @@ version:
   semver: 0.9.11
   gitcommit: e53f5fdb6f17fe4d18166aa2e80febad711a8b47
   builddate: '2022-02-06T08:40:14Z'
-config:
-  verbose: false
-  aliasesonly: false
-  mode: 0
-  backupcount: 10
 commands:
   edit:
     keypath: edit
