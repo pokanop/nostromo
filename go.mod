@@ -3,6 +3,7 @@ module github.com/pokanop/nostromo
 go 1.21
 
 require (
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-getter v1.7.5
 	github.com/jinzhu/copier v0.3.5

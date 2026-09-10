@@ -72,6 +72,8 @@ nostromo init
 
 To customize the directory (and change it from `~/.nostromo`), set the `NOSTROMO_HOME` environment variable to a location of your choosing.
 
+The first time a config is created in an interactive terminal, `nostromo` greets you with an ascii-art banner. It is never printed when output is piped or on subsequent runs; pass `--no-banner` to keep scripted installs quiet. You can bring it back any time with `nostromo version --banner`.
+
 > With every update, it's a good idea to run `nostromo init` to ensure any manifest changes are migrated and commands continue to work. `nostromo` will attempt to perform any migrations as well at this time to files and folders so 🤞
 
 The quickest way to populate your commands database is using the `dock` feature:

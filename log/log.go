@@ -83,6 +83,20 @@ func Boldf(format string, a ...interface{}) {
 	fmt.Print(aurora.Bold(fmt.Sprintf(format, a...)))
 }
 
+// Banner prints ascii-art rows followed by a highlighted tagline.
+// Nothing is printed in echo mode so shell eval output stays clean.
+func Banner(lines []string, tagline string) {
+	if opt.echo {
+		return
+	}
+	for _, line := range lines {
+		fmt.Println(opt.theme.formatBanner(line))
+	}
+	fmt.Println()
+	Highlight(tagline)
+	fmt.Println()
+}
+
 // Debug logs a debug message
 func Debug(a ...interface{}) {
 	if !opt.verbose {

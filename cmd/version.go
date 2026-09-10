@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
 )
+
+var versionBanner bool
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
@@ -12,10 +15,15 @@ var versionCmd = &cobra.Command{
 
 Supplies tag version, commit hash, and date`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if versionBanner {
+			task.PrintBanner()
+		}
 		printVersion()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+
+	versionCmd.Flags().BoolVar(&versionBanner, "banner", false, "print the nostromo ascii-art banner")
 }
