@@ -50,17 +50,88 @@ The possibilities are endless 🚀 and up to your imagination with the ability t
 
 ### Installation
 
+Every release ships binaries and packages for macOS, Linux and Windows on the [releases](https://github.com/pokanop/nostromo/releases) page. Pick your platform below.
+
+#### macOS
+
 Using `brew`:
 
 ```sh
 brew install pokanop/pokanop/nostromo
 ```
 
-Using `go get`:
+#### Linux
+
+Using `brew` (Linuxbrew):
 
 ```sh
-go get -u github.com/pokanop/nostromo
+brew install pokanop/pokanop/nostromo
 ```
+
+Debian / Ubuntu: download the `.deb` for your architecture from the [latest release](https://github.com/pokanop/nostromo/releases/latest) and run:
+
+```sh
+sudo dpkg -i nostromo_<version>_amd64.deb
+```
+
+Fedora / RHEL / openSUSE: download the `.rpm` and run:
+
+```sh
+sudo rpm -i nostromo-<version>-1.x86_64.rpm
+```
+
+Alpine: download the `.apk` and run:
+
+```sh
+sudo apk add --allow-untrusted nostromo_<version>_x86_64.apk
+```
+
+Arch Linux (AUR, using `yay` or any AUR helper):
+
+```sh
+yay -S nostromo-bin
+```
+
+or download the `.pkg.tar.zst` from the release and run `sudo pacman -U nostromo-<version>-1-x86_64.pkg.tar.zst`.
+
+Nix (NUR-style repository):
+
+```sh
+nix profile install github:pokanop/nur-packages#nostromo
+```
+
+Snap (classic confinement):
+
+```sh
+sudo snap install nostromo --classic
+```
+
+> `arm64` (`aarch64`) and `i386` (`i686`) variants of every Linux package are published alongside the `amd64` / `x86_64` ones.
+
+#### Windows
+
+Using `scoop`:
+
+```powershell
+scoop bucket add pokanop https://github.com/pokanop/scoop-bucket
+scoop install nostromo
+```
+
+Using `winget`:
+
+```powershell
+winget install pokanop.nostromo
+```
+
+#### From source
+
+Using `go install` (any platform with Go 1.21+):
+
+```sh
+go install github.com/pokanop/nostromo@latest
+```
+
+> The AUR, Nix, Snap, Scoop and Winget channels are published automatically from each release and become available once their package repositories have been set up (see [#64](https://github.com/pokanop/nostromo/issues/64)). Until then, grab the archive or package for your platform from the [releases](https://github.com/pokanop/nostromo/releases) page.
 
 ### Initialization
 
@@ -432,6 +503,8 @@ Contributions are what makes the open-source community such an amazing place to 
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+A `Makefile` wraps the common workflows: `make build`, `make test`, `make snapshot` (build every release artifact and package manager manifest locally under `dist/` with [goreleaser](https://goreleaser.com)) and `make release VERSION=vX.Y.Z` (tag and push; the release workflow then publishes to GitHub Releases and all package managers). Run `make help` for the full list.
 
 ## <img align="left" src="images/loader.png" alt="loader">&nbsp;License
 

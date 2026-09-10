@@ -10,6 +10,24 @@ permissions:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    env:
+      # Package manager publishers. Each one is skipped by .goreleaser.yml
+      # when its secret is not configured, so releases keep working while
+      # the external repositories / accounts are being set up.
+      #
+      # SCOOP_BUCKET_TOKEN         PAT (contents:write) for pokanop/scoop-bucket
+      # NUR_GITHUB_TOKEN           PAT (contents:write) for pokanop/nur-packages
+      # WINGET_GITHUB_TOKEN        PAT (contents:write, pull_requests:write) for
+      #                            the pokanop/winget-pkgs fork of microsoft/winget-pkgs
+      # AUR_KEY                    private SSH key registered on the AUR account
+      #                            that owns the nostromo-bin package
+      # SNAPCRAFT_STORE_CREDENTIALS output of `snapcraft export-login -` for the
+      #                            account that registered the nostromo snap
+      SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+      NUR_GITHUB_TOKEN: ${{ secrets.NUR_GITHUB_TOKEN }}
+      WINGET_GITHUB_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
+      AUR_KEY: ${{ secrets.AUR_KEY }}
+      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,6 +39,17 @@ jobs:
         with:
           go-version: stable
           cache: true
+
+      # goreleaser's nix publisher needs `nix-hash` on PATH; without it the
+      # pipe is skipped, so only install Nix when we can actually publish.
+      - name: Install Nix
+        if: env.NUR_GITHUB_TOKEN != ''
+        uses: cachix/install-nix-action@v31
+
+      # goreleaser's snapcraft publisher needs the `snapcraft` binary.
+      - name: Install Snapcraft
+        if: env.SNAPCRAFT_STORE_CREDENTIALS != ''
+        run: sudo snap install snapcraft --classic
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
