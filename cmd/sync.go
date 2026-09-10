@@ -23,7 +23,7 @@ the manifests as arguments to sync.
 
 Sync will only update manifests with changed identifiers, to
 force update use the -f flag.`,
-	Args: cobra.NoArgs,
+	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(task.Sync(force, keep, args))
 	},

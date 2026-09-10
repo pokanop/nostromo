@@ -1,0 +1,100 @@
+site_name: nostromo
+site_url: https://nostromo.sh/
+site_description: nostromo is a CLI to rapidly build declarative aliases making multi-dimensional tools on the fly.
+site_author: pokanop
+copyright: Copyright &copy; pokanop &mdash; MIT License
+
+repo_name: pokanop/nostromo
+repo_url: https://github.com/pokanop/nostromo
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  logo: assets/images/nostromo-drop-ship.png
+  favicon: assets/favicon.ico
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search
+  - literate-nav:
+      nav_file: SUMMARY.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/pokanop/nostromo
+    - icon: fontawesome/solid/heart
+      link: https://github.com/sponsors/pokanop
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - getting-started/index.md
+      - Installation: getting-started/installation.md
+      - Quick start: getting-started/quickstart.md
+      - Shell integration: getting-started/shell-integration.md
+  - Concepts:
+      - concepts/index.md
+      - Manifests and the spaceport: concepts/manifests.md
+      - Commands and keypaths: concepts/commands.md
+      - Substitutions: concepts/substitutions.md
+      - Execution modes: concepts/modes.md
+      - Alias-only commands: concepts/alias-only.md
+      - Code snippets: concepts/code-snippets.md
+      - Dock, undock and sync: concepts/distributed-manifests.md
+      - Tree management: concepts/tree-management.md
+      - Backups (cargo): concepts/backups.md
+      - Configuration and themes: concepts/configuration.md
+  - Reference:
+      - Command reference: reference/
+      - Manifest YAML schema: schema.md
+  - Examples: examples.md
+  - FAQ: faq.md
+  - Contributing: contributing.md

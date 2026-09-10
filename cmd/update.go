@@ -26,12 +26,13 @@ A command's mode indicates how it will be executed. By default, nostromo
 concatenates parent and child commands along the tree. There are 3 modes
 available to commands:
 
-concatenate  Concatenate this command with subcommands exactly as defined
-independent  Execute this command with subcommands using ';' to separate
-exclusive    Execute this and only this command ignoring parent commands
+    concatenate  Concatenate this command with subcommands exactly as defined
+    independent  Execute this command with subcommands using ';' to separate
+    exclusive    Execute this and only this command ignoring parent commands
 
 You can set using -m or --mode when adding a command or globally using:
-	nostromo manifest set mode <mode>`,
+
+    nostromo set mode <mode>`,
 	Args: updateCmdArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var name string
