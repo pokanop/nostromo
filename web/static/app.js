@@ -399,12 +399,12 @@
     const f = els.detail.elements;
     els.keypath.textContent = c.keyPath;
 
-    els.badges.replaceChildren(
+    els.badges.replaceChildren(...[
       h("span", { class: "badge" + (c.readOnly ? " docked" : ""), text: c.manifest + (c.readOnly ? " · docked" : " · core") }),
       c.disabled ? h("span", { class: "badge disabled", text: "disabled" }) : null,
       c.aliasOnly ? h("span", { class: "badge alias", text: "alias only" }) : null,
       c.code && c.code.language ? h("span", { class: "badge code", text: c.code.language }) : null,
-    );
+    ].filter(Boolean));
     els.readonlyNote.hidden = !c.readOnly;
 
     f.alias.value = c.alias || "";
