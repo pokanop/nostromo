@@ -113,6 +113,8 @@ commands:
           snippet: ''
         mode: 0
         disabled: false
+        env:
+          COMPOSE_PROJECT_NAME: scratch
       rmi:
         keypath: dock.rmi
         name: rmi $(docker images -q)
@@ -158,6 +160,11 @@ commands:
       snippet: ''
     mode: 0
     disabled: false
+    env:
+      DOCKER_BUILDKIT: '1'
+      COMPOSE_PROJECT_NAME: nostromo
+    dotenv:
+      - ~/.nostromo/docker.env
   edit:
     keypath: edit
     name: ''

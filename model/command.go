@@ -29,6 +29,13 @@ type Command struct {
 	// Platforms this command is available on as GOOS or GOOS/GOARCH names,
 	// empty for all platforms. Children inherit the restriction.
 	Platforms []string `json:"platforms,omitempty" yaml:"platforms,omitempty"`
+	// Env vars exported before this command runs, inherited by children
+	// which may override them. Values may reference other vars using shell
+	// syntax like "$HOME/bin:$PATH".
+	Env map[string]string `json:"env,omitempty" yaml:"env,omitempty"`
+	// Dotenv files (~ and $VARS expanded) loaded before env, inherited by
+	// children
+	Dotenv []string `json:"dotenv,omitempty" yaml:"dotenv,omitempty"`
 }
 
 // newCommand returns a newly initialized command
@@ -63,7 +70,7 @@ func (c *Command) String() string {
 
 // Keys as ordered list of fields for logging
 func (c *Command) Keys() []string {
-	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled", "platforms"}
+	return []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled", "platforms", "env", "dotenv"}
 }
 
 // Fields interface for logging
@@ -80,6 +87,8 @@ func (c *Command) Fields() map[string]interface{} {
 		"aliasOnly":     c.AliasOnly,
 		"disabled":      c.Disabled,
 		"platforms":     c.platformsField(),
+		"env":           c.envField(),
+		"dotenv":        strings.Join(c.Dotenv, ", "),
 	}
 }
 
@@ -252,6 +261,11 @@ func (c *Command) shortestKeyPath(keyPath string) string {
 	}
 
 	return keypath.KeyPath(keys[0:i])
+}
+
+// ExecutionString to run the command with provided arguments
+func (c *Command) ExecutionString(args []string) string {
+	return c.executionString(args)
 }
 
 // executionString to run the command with provided arguments

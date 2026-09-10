@@ -45,8 +45,12 @@ func SaveConfig(cfg *config.Config) error {
 }
 
 // AddCommandToConfig adds or updates a command in the core manifest and saves
-func AddCommandToConfig(cfg *config.Config, keyPath, command, description, code, language string, aliasOnly bool, mode string, platforms []string, update bool) (*model.Command, error) {
+func AddCommandToConfig(cfg *config.Config, keyPath, command, description, code, language string, aliasOnly bool, mode string, platforms []string, env model.EnvChanges, update bool) (*model.Command, error) {
 	m := cfg.Spaceport().CoreManifest()
+
+	if (cfg.Spaceport().Config.AliasesOnly || aliasOnly) && (len(env.Set) > 0 || len(env.Dotenv) > 0) {
+		return nil, fmt.Errorf("env and dotenv are not supported for alias only commands")
+	}
 
 	if update {
 		cmd := m.Find(keyPath)
@@ -87,6 +91,7 @@ func AddCommandToConfig(cfg *config.Config, keyPath, command, description, code,
 	if cmd == nil {
 		return nil, fmt.Errorf("unable to find newly created command")
 	}
+	cmd.ApplyEnv(env)
 
 	if err := saveConfig(cfg, false); err != nil {
 		return nil, err
