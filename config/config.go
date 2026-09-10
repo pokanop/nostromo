@@ -77,13 +77,23 @@ func LoadConfig() (*Config, error) {
 	s, err := loadSpaceport()
 	if err != nil {
 		log.Warning("spaceport not found, creating...")
-		s = model.NewSpaceport(manifests)
+		s = &model.Spaceport{}
+		s.Init()
 	}
 
 	s.Import(manifests)
+	migrated := s.Migrate()
 	s.Link()
 	if err := SaveSpaceport(s); err != nil {
 		return nil, err
+	}
+
+	// Settings were lifted out of the core manifest, rewrite it without them
+	if migrated {
+		log.Debug("migrating settings into spaceport")
+		if err := saveManifest(m, true, s.Config.BackupCount); err != nil {
+			return nil, err
+		}
 	}
 
 	return &Config{s}, nil
@@ -217,11 +227,10 @@ func Parse(path string) (*model.Manifest, error) {
 		return nil, err
 	}
 
-	// Initialize manifest with some defaults
+	// Initialize manifest with default legacy settings so partial config
+	// blocks in older manifests migrate with sensible values
 	m := &model.Manifest{
-		Config: &model.Config{
-			BackupCount: 10,
-		},
+		Config: model.NewConfig(),
 	}
 	ext := filepath.Ext(path)
 	if ext == ".yaml" {
@@ -240,6 +249,11 @@ func Parse(path string) (*model.Manifest, error) {
 
 	// Normalize file: sources written by older versions (e.g. "file:/path")
 	m.Source = normalizeFileSource(m.Source)
+
+	// Only the core manifest carries settings worth migrating into the spaceport
+	if !m.IsCore() {
+		m.Config = nil
+	}
 
 	// Manifest path should match
 	m.Path = path
@@ -269,7 +283,13 @@ func SaveSpaceport(s *model.Spaceport) error {
 }
 
 // SaveManifest to nostromo config folder and backup optionally
-func SaveManifest(manifest *model.Manifest, backup bool) error {
+func (c *Config) SaveManifest(manifest *model.Manifest, backup bool) error {
+	return saveManifest(manifest, backup, c.spaceport.Config.BackupCount)
+}
+
+// saveManifest to nostromo config folder keeping up to backupCount backups
+// if requested
+func saveManifest(manifest *model.Manifest, backup bool, backupCount int) error {
 	if manifest == nil {
 		return fmt.Errorf("manifest is nil")
 	}
@@ -295,7 +315,7 @@ func SaveManifest(manifest *model.Manifest, backup bool) error {
 
 	// Save backup if requested
 	if backup {
-		if err = backupManifest(manifest); err != nil {
+		if err = backupManifest(manifest, backupCount); err != nil {
 			return err
 		}
 	}
@@ -334,7 +354,7 @@ func (c *Config) Save() error {
 	}
 
 	// Save core manifest
-	if err := SaveManifest(c.spaceport.CoreManifest(), true); err != nil {
+	if err := c.SaveManifest(c.spaceport.CoreManifest(), true); err != nil {
 		return err
 	}
 
@@ -376,55 +396,55 @@ func (c *Config) Exists() bool {
 
 // Get setting value from config
 func (c *Config) Get(key string) string {
-	m := c.spaceport.CoreManifest()
+	cfg := c.spaceport.Config
 	switch key {
 	case "verbose":
-		return strconv.FormatBool(m.Config.Verbose)
+		return strconv.FormatBool(cfg.Verbose)
 	case "aliasesOnly":
-		return strconv.FormatBool(m.Config.AliasesOnly)
+		return strconv.FormatBool(cfg.AliasesOnly)
 	case "mode":
-		return m.Config.Mode.String()
+		return cfg.Mode.String()
 	case "backupCount":
-		return strconv.FormatInt(int64(m.Config.BackupCount), 10)
+		return strconv.FormatInt(int64(cfg.BackupCount), 10)
 	case "theme":
-		return log.ThemeToString(c.spaceport.Theme)
+		return log.ThemeToString(cfg.Theme)
 	}
 	return "key not found"
 }
 
 // Set setting value for key
 func (c *Config) Set(key, value string) error {
-	m := c.spaceport.CoreManifest()
+	cfg := c.spaceport.Config
 	switch key {
 	case "verbose":
 		verbose, err := strconv.ParseBool(value)
 		if err != nil {
 			return err
 		}
-		m.Config.Verbose = verbose
+		cfg.Verbose = verbose
 		return nil
 	case "aliasesOnly":
 		aliasesOnly, err := strconv.ParseBool(value)
 		if err != nil {
 			return err
 		}
-		m.Config.AliasesOnly = aliasesOnly
+		cfg.AliasesOnly = aliasesOnly
 		return nil
 	case "mode":
 		if !model.IsModeSupported(value) {
 			return fmt.Errorf("invalid mode, supported modes: %s", model.SupportedModes())
 		}
-		m.Config.Mode = model.ModeFromString(value)
+		cfg.Mode = model.ModeFromString(value)
 		return nil
 	case "backupCount":
 		count, err := strconv.ParseInt(value, 10, 0)
 		if err != nil {
 			return err
 		}
-		m.Config.BackupCount = int(count)
+		cfg.BackupCount = int(count)
 		return nil
 	case "theme":
-		c.spaceport.Theme = log.ThemeFromString(value)
+		cfg.Theme = log.ThemeFromString(value)
 		return nil
 	}
 	return fmt.Errorf("key not found")
@@ -580,10 +600,7 @@ func loadSpaceport() (*model.Spaceport, error) {
 		return nil, err
 	}
 
-	// Set default values
-	s := &model.Spaceport{
-		Theme: log.EmojiTheme,
-	}
+	s := &model.Spaceport{}
 	ext := filepath.Ext(path)
 	if ext == ".yaml" {
 		err = yaml.Unmarshal(b, &s)

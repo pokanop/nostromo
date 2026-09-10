@@ -33,7 +33,7 @@ func TestManifestAddCommand(t *testing.T) {
 		{"multi existing command", "0-one-alias.0-two-alias.0-three-alias", "command", ConcatenateMode, fakeManifest(1, 3), false, 3},
 		{"multi all new commands", "one-alias.two-alias.three-alias", "command", ConcatenateMode, fakeManifest(2, 1), false, 5},
 		{"multi many new commands", "one-alias.two-alias.three-alias.four-alias", "command", ConcatenateMode, fakeManifest(3, 4), false, 16},
-		{"alias only", "new alias", "command", ConcatenateMode, fakeManifestAliasesOnly(1, 1), false, 2},
+		{"alias only", "new alias", "command", ConcatenateMode, fakeManifest(1, 1), false, 2},
 	}
 
 	for _, test := range tests {
@@ -312,7 +312,6 @@ func TestManifestFields(t *testing.T) {
 func TestManifestData(t *testing.T) {
 	type fields struct {
 		Version  *version.Info
-		Config   *Config
 		Commands map[string]*Command
 	}
 	tests := []struct {
@@ -320,14 +319,13 @@ func TestManifestData(t *testing.T) {
 		fields fields
 		want   interface{}
 	}{
-		{"data", fields{&version.Info{}, &Config{true, true, ConcatenateMode, 10}, map[string]*Command{"foo": {}}}, "manifest"},
+		{"data", fields{&version.Info{}, map[string]*Command{"foo": {}}}, "manifest"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &Manifest{
 				Name:     tt.want.(string),
 				Version:  tt.fields.Version,
-				Config:   tt.fields.Config,
 				Commands: tt.fields.Commands,
 			}
 			if got := m.Data(); !reflect.DeepEqual(got, tt.want) {
@@ -344,7 +342,6 @@ func TestManifestChildren(t *testing.T) {
 	}
 	type fields struct {
 		Version  *version.Info
-		Config   *Config
 		Commands map[string]*Command
 	}
 	tests := []struct {
@@ -352,13 +349,12 @@ func TestManifestChildren(t *testing.T) {
 		fields fields
 		want   []tree.Node
 	}{
-		{"children", fields{&version.Info{}, &Config{true, true, ConcatenateMode, 10}, commands}, []tree.Node{commands["foo"], commands["bar"]}},
+		{"children", fields{&version.Info{}, commands}, []tree.Node{commands["foo"], commands["bar"]}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &Manifest{
 				Version:  tt.fields.Version,
-				Config:   tt.fields.Config,
 				Commands: tt.fields.Commands,
 			}
 			if got := m.Children(); !reflect.DeepEqual(got, tt.want) {
@@ -388,17 +384,6 @@ func TestIsCore(t *testing.T) {
 
 func fakeManifest(n, depth int) *Manifest {
 	m := NewManifest("manifest", "file://path/to/manifest.yaml", "/path/to/manifest.yaml", &version.Info{})
-	m.Config.Verbose = true
-	for i := 0; i < n; i++ {
-		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
-		m.Commands[c.Alias] = c
-	}
-	return m
-}
-
-func fakeManifestAliasesOnly(n, depth int) *Manifest {
-	m := NewManifest("manifest", "file://path/to/manifest.yaml", "/path/to/manifest.yaml", &version.Info{})
-	m.Config.AliasesOnly = true
 	for i := 0; i < n; i++ {
 		c := fakeCommandWithPrefix(depth, strconv.Itoa(i)+"-")
 		m.Commands[c.Alias] = c

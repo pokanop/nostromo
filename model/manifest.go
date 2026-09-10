@@ -33,9 +33,11 @@ type Manifest struct {
 	// Source URL of the manifest which can be local or remote
 	Source string `json:"source"`
 	// Path of the manifest in local storage
-	Path     string              `json:"path"`
-	Version  *version.Info       `json:"version"`
-	Config   *Config             `json:"config"`
+	Path    string        `json:"path"`
+	Version *version.Info `json:"version"`
+	// Config is a legacy block kept so older manifests still parse. Settings
+	// live on the Spaceport and this is never written back.
+	Config   *Config             `json:"config,omitempty" yaml:"config,omitempty"`
 	Commands map[string]*Command `json:"commands"`
 }
 
@@ -46,7 +48,6 @@ func NewManifest(name, source, path string, version *version.Info) *Manifest {
 		Source:   source,
 		Path:     path,
 		Version:  version,
-		Config:   NewConfig(),
 		Commands: map[string]*Command{},
 	}
 }
