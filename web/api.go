@@ -184,7 +184,7 @@ func (s *Server) handleCommand(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusBadRequest, "keypath is required")
 			return
 		}
-		cmd, m := cfg.Spaceport().FindCommand(keyPath)
+		cmd, m := findCommand(cfg, strings.TrimSpace(r.URL.Query().Get("manifest")), keyPath)
 		if cmd == nil {
 			writeError(w, http.StatusNotFound, "command not found")
 			return
@@ -358,6 +358,29 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// findCommand looks up a key path in the named manifest, or when no name is
+// given, in the core manifest first and then docked manifests in order so the
+// result is deterministic when manifests share key paths
+func findCommand(cfg *config.Config, manifest, keyPath string) (*model.Command, *model.Manifest) {
+	sp := cfg.Spaceport()
+	if manifest != "" {
+		m := sp.FindManifest(manifest)
+		if m == nil {
+			return nil, nil
+		}
+		return m.Find(keyPath), m
+	}
+	if cmd := sp.CoreManifest().Find(keyPath); cmd != nil {
+		return cmd, sp.CoreManifest()
+	}
+	for _, m := range sp.Manifests() {
+		if cmd := m.Find(keyPath); cmd != nil {
+			return cmd, m
+		}
+	}
+	return nil, nil
+}
+
 // writableCommand finds the manifest for a core command that can be edited
 // or returns a status code and error describing why it cannot be
 func writableCommand(cfg *config.Config, keyPath string) (*model.Manifest, int, error) {
@@ -368,7 +391,7 @@ func writableCommand(cfg *config.Config, keyPath string) (*model.Manifest, int, 
 	if core.Find(keyPath) != nil {
 		return core, http.StatusOK, nil
 	}
-	if cmd, m := cfg.Spaceport().FindCommand(keyPath); cmd != nil {
+	if cmd, m := findCommand(cfg, "", keyPath); cmd != nil {
 		return nil, http.StatusForbidden, fmt.Errorf("%s belongs to docked manifest %s which is read-only, use the CLI to detach or edit it", keyPath, m.Name)
 	}
 	return nil, http.StatusNotFound, fmt.Errorf("command not found")

@@ -160,7 +160,7 @@
 
   async function loadCommand(keyPath) {
     try {
-      state.command = await api("GET", "/api/command?" + qs({ keypath: keyPath }));
+      state.command = await api("GET", "/api/command?" + qs({ keypath: keyPath, manifest: state.manifest || "" }));
       state.selected = keyPath;
       state.dirty = false;
       renderDetail();
@@ -581,7 +581,10 @@
     onSearchInput();
     els.search.focus();
   });
-  els.refresh.addEventListener("click", () => refreshAll(true).then(() => toast("Reloaded", "ok")).catch((e) => toast(e.message, "error")));
+  els.refresh.addEventListener("click", () => {
+    if (state.dirty && !confirm("Discard unsaved changes?")) return;
+    refreshAll(true).then(() => toast("Reloaded", "ok")).catch((e) => toast(e.message, "error"));
+  });
   els.newCommand.addEventListener("click", () => openAddDialog(""));
   els.expandAll.addEventListener("click", () => setAllCollapsed(false));
   els.collapseAll.addEventListener("click", () => setAllCollapsed(true));
