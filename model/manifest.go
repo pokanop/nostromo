@@ -123,6 +123,21 @@ func (m *Manifest) RenameCommand(keyPath, name, description string) error {
 	if cmd == nil {
 		return fmt.Errorf("command not found")
 	}
+	if len(name) == 0 || len(keypath.Keys(name)) != 1 {
+		return fmt.Errorf("invalid command name: %s", name)
+	}
+
+	siblings := m.Commands
+	if p := cmd.parent; p != nil {
+		siblings = p.Commands
+	}
+	if name != cmd.Alias {
+		if _, exists := siblings[name]; exists {
+			return fmt.Errorf("command %s already exists", name)
+		}
+		delete(siblings, cmd.Alias)
+		siblings[name] = cmd
+	}
 
 	cmd.Alias = name
 	if len(description) > 0 {

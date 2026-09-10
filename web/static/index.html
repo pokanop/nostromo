@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>nostromo</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="favicon.svg" alt="" width="28" height="28">
+      <span class="brand-name">nostromo</span>
+      <span id="version" class="version"></span>
+    </div>
+    <div class="search">
+      <input id="search" type="search" placeholder="Search commands and substitutions…" autocomplete="off" spellcheck="false">
+      <button id="search-clear" class="icon-btn" title="Clear search" hidden>&times;</button>
+    </div>
+    <div class="actions">
+      <button id="refresh" class="btn" title="Reload manifests">Refresh</button>
+      <button id="new-command" class="btn primary">+ New command</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Manifests</h2>
+        <ul id="manifests" class="manifest-list"></ul>
+      </section>
+      <section class="panel grow">
+        <div class="panel-head">
+          <h2 id="tree-title">Commands</h2>
+          <div class="tree-tools">
+            <button id="expand-all" class="link-btn">Expand</button>
+            <button id="collapse-all" class="link-btn">Collapse</button>
+          </div>
+        </div>
+        <div id="tree" class="tree"></div>
+        <div id="results" class="results" hidden></div>
+      </section>
+    </aside>
+
+    <section class="content">
+      <div id="empty" class="empty">
+        <img src="favicon.svg" alt="" width="64" height="64">
+        <h3>Select a command</h3>
+        <p>Pick a command from the tree on the left to view and edit it, or create a new one.</p>
+      </div>
+
+      <form id="detail" class="detail" hidden autocomplete="off">
+        <div class="detail-head">
+          <div>
+            <div class="keypath-label">key path</div>
+            <code id="detail-keypath" class="keypath"></code>
+          </div>
+          <div class="badges" id="detail-badges"></div>
+        </div>
+
+        <div id="readonly-note" class="note" hidden>
+          This command lives in a docked manifest. Docked manifests are synchronized from their source and would be
+          overwritten, so they are read-only here. Use <code>nostromo detach</code> to move commands into your core manifest.
+        </div>
+
+        <div class="grid">
+          <label>Alias
+            <input name="alias" required pattern="[^.\s]+" title="Alias cannot contain dots or spaces">
+          </label>
+          <label>Mode
+            <select name="mode"></select>
+          </label>
+          <label class="span-2">Command
+            <input name="name" placeholder="e.g. docker compose up -d">
+          </label>
+          <label class="span-2">Description
+            <input name="description" placeholder="What does this command do?">
+          </label>
+          <label class="check"><input type="checkbox" name="aliasOnly"> Alias only (plain shell alias, not a nostromo command)</label>
+          <label class="check"><input type="checkbox" name="disabled"> Disabled (this command and its children cannot run)</label>
+        </div>
+
+        <fieldset class="code">
+          <legend>Code snippet</legend>
+          <div class="grid">
+            <label>Language
+              <select name="language"></select>
+            </label>
+            <label class="span-2">Snippet
+              <textarea name="snippet" rows="3" placeholder="Runs instead of the command when a language is chosen" spellcheck="false"></textarea>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary" id="save">Save</button>
+          <button type="button" class="btn" id="reset">Reset</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn" id="add-child">+ Subcommand</button>
+          <button type="button" class="btn danger" id="delete">Delete</button>
+        </div>
+
+        <section class="subs">
+          <h3>Substitutions <span id="subs-count" class="count"></span></h3>
+          <p class="hint">Arguments passed on the command line matching an alias are swapped for the original value.
+            Substitutions are inherited by subcommands.</p>
+          <table id="subs-table">
+            <thead><tr><th>Alias</th><th>Original</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="sub-add">
+            <input id="sub-alias" placeholder="alias (e.g. dc)">
+            <input id="sub-name" placeholder="original (e.g. docker-compose)">
+            <button type="button" class="btn" id="sub-add-btn">Add</button>
+          </div>
+        </section>
+      </form>
+    </section>
+  </main>
+
+  <dialog id="add-dialog">
+    <form id="add-form" method="dialog" autocomplete="off">
+      <h3>New command</h3>
+      <div class="grid">
+        <label class="span-2">Parent key path
+          <input name="parent" placeholder="leave empty for a root command" pattern="[^\s]*">
+        </label>
+        <label>Alias
+          <input name="alias" required pattern="[^.\s]+" title="Alias cannot contain dots or spaces" placeholder="e.g. up">
+        </label>
+        <label>Mode
+          <select name="mode"><option value="">default</option></select>
+        </label>
+        <label class="span-2">Command
+          <input name="name" placeholder="e.g. docker compose up -d">
+        </label>
+        <label class="span-2">Description
+          <input name="description">
+        </label>
+        <label class="check"><input type="checkbox" name="aliasOnly"> Alias only</label>
+      </div>
+      <fieldset class="code">
+        <legend>Code snippet (optional)</legend>
+        <div class="grid">
+          <label>Language
+            <select name="language"></select>
+          </label>
+          <label class="span-2">Snippet
+            <textarea name="snippet" rows="2" spellcheck="false"></textarea>
+          </label>
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="add-cancel">Cancel</button>
+        <button type="submit" class="btn primary">Create</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

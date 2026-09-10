@@ -96,6 +96,9 @@ func (s *Spaceport) IsUnique(name string) bool {
 
 func (s *Spaceport) UpdateVersion(ver *version.Info) {
 	for _, m := range s.manifests {
+		if m.Version == nil {
+			m.Version = &version.Info{}
+		}
 		m.Version.Update(ver)
 	}
 }

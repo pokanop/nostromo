@@ -103,6 +103,7 @@ nostromo set backupCount 10
 - [Execute code snippets](#execute-code-snippets)
 - [Distributed manifests](#distributed-manifests)
 - [Powerful tree management](#command-tree-management)
+- [Web UI](#web-ui)
 - [Neato themes](#themes)
 
 ### Managing Aliases
@@ -396,6 +397,20 @@ Since `nostromo` updates manifests if the identifier is unique, there might be t
 ```sh
 nostromo uuidgen <name>
 ```
+
+### Web UI
+
+Prefer clicking to typing? `nostromo` ships with a local web UI for browsing and editing your manifests:
+
+```sh
+nostromo web [--port 8080] [--no-open]
+```
+
+This starts a server bound to `127.0.0.1` only and opens the UI in your browser (pass `--no-open` to skip that, or `--port 0` to pick a free port). Press `ctrl+c` to stop it.
+
+The UI shows every docked manifest along with a collapsible command tree, lets you search commands and substitutions, and edit a command's alias, command, description, mode, code snippet and substitutions. Every change is saved through the same path as the CLI so cargo backups keep working and the result is exactly what `nostromo add` or `nostromo remove` would produce. Docked manifests are shown read-only since `nostromo sync` would overwrite any edits; use `nostromo detach` to bring commands into your core manifest first.
+
+The frontend is embedded in the binary and follows your system's dark or light appearance.
 
 ### Themes
 
