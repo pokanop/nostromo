@@ -393,43 +393,7 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 		return -1
 	}
 
-	m := cfg.Spaceport().CoreManifest()
-
-	if update {
-		cmd := m.Find(keyPath)
-		if cmd == nil {
-			log.Error("no matching command found to update")
-			return -1
-		}
-		if len(command) == 0 {
-			// Keep same command if not supplied
-			command = cmd.Name
-		}
-	}
-
-	snippet := &model.Code{
-		Language: language,
-		Snippet:  code,
-	}
-
-	aliasOnly = m.Config.AliasesOnly || aliasOnly
-	if len(mode) == 0 {
-		mode = m.Config.Mode.String()
-	}
-
-	_, err := m.AddCommand(keyPath, command, description, snippet, aliasOnly, mode)
-	if err != nil {
-		log.Error(err)
-		return -1
-	}
-
-	cmd := m.Find(keyPath)
-	if cmd == nil {
-		log.Error("unable to find newly created command")
-		return -1
-	}
-
-	err = saveConfig(cfg, false)
+	cmd, err := AddCommandToConfig(cfg, keyPath, command, description, code, language, aliasOnly, mode, update)
 	if err != nil {
 		log.Error(err)
 		return -1
@@ -438,7 +402,7 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 	if update {
 		log.Highlightf("updated command %s\n", keyPath)
 	} else {
-		logFields(cmd, m.Config.Verbose)
+		logFields(cmd, cfg.Spaceport().CoreManifest().Config.Verbose)
 	}
 	return 0
 }
@@ -450,14 +414,7 @@ func RemoveCommand(keyPath string) int {
 		return -1
 	}
 
-	_, err := cfg.Spaceport().CoreManifest().RemoveCommand(keyPath)
-	if err != nil {
-		log.Error(err)
-		return -1
-	}
-
-	err = saveConfig(cfg, false)
-	if err != nil {
+	if err := RemoveCommandFromConfig(cfg, keyPath); err != nil {
 		log.Error(err)
 		return -1
 	}
@@ -539,13 +496,7 @@ func RenameCommand(source, dest, description string) int {
 		return -1
 	}
 
-	m := cfg.Spaceport().CoreManifest()
-	if err := m.RenameCommand(source, dest, description); err != nil {
-		log.Error(err)
-		return -1
-	}
-
-	if err := saveConfig(cfg, false); err != nil {
+	if err := RenameCommandInConfig(cfg, source, dest, description); err != nil {
 		log.Error(err)
 		return -1
 	}
@@ -562,21 +513,13 @@ func AddSubstitution(keyPath, name, alias string) int {
 		return -1
 	}
 
-	m := cfg.Spaceport().CoreManifest()
-
-	err := m.AddSubstitution(keyPath, name, alias)
+	cmd, err := AddSubstitutionToConfig(cfg, keyPath, name, alias)
 	if err != nil {
 		log.Error(err)
 		return -1
 	}
 
-	err = saveConfig(cfg, false)
-	if err != nil {
-		log.Error(err)
-		return -1
-	}
-
-	logFields(m.Find(keyPath), m.Config.IsVerbose())
+	logFields(cmd, cfg.Spaceport().CoreManifest().Config.IsVerbose())
 	return 0
 }
 
@@ -587,14 +530,7 @@ func RemoveSubstitution(keyPath, alias string) int {
 		return -1
 	}
 
-	err := cfg.Spaceport().CoreManifest().RemoveSubstitution(keyPath, alias)
-	if err != nil {
-		log.Error(err)
-		return -1
-	}
-
-	err = saveConfig(cfg, false)
-	if err != nil {
+	if err := RemoveSubstitutionFromConfig(cfg, keyPath, alias); err != nil {
 		log.Error(err)
 		return -1
 	}
@@ -920,7 +856,7 @@ func checkConfig() *config.Config {
 }
 
 func checkConfigCommon(quiet bool) *config.Config {
-	cfg, err := config.LoadConfig()
+	cfg, err := LoadConfig()
 	if err != nil {
 		if !quiet {
 			log.Error(err)
@@ -928,9 +864,6 @@ func checkConfigCommon(quiet bool) *config.Config {
 		}
 		return nil
 	}
-
-	log.SetTheme(cfg.Spaceport().Theme)
-	log.SetVerbose(cfg.Spaceport().CoreManifest().Config.IsVerbose())
 
 	return cfg
 }
