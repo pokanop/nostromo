@@ -3,11 +3,13 @@ package model
 import (
 	"reflect"
 	"testing"
+
+	"github.com/pokanop/nostromo/log"
 )
 
 func TestNewConfig(t *testing.T) {
 	c := NewConfig()
-	if c.BackupCount != 10 {
+	if c.BackupCount != 10 || c.Theme != log.EmojiTheme {
 		t.Errorf("unexpected default values for config")
 	}
 }
@@ -15,15 +17,15 @@ func TestNewConfig(t *testing.T) {
 func TestConfigKeys(t *testing.T) {
 	tests := []struct {
 		name     string
-		manifest *Manifest
+		config   *Config
 		expected []string
 	}{
-		{"keys", fakeManifest(1, 1), []string{"verbose", "aliasesOnly", "mode", "backupCount"}},
+		{"keys", fakeConfig(), []string{"verbose", "aliasesOnly", "mode", "backupCount", "theme"}},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if actual := test.manifest.Config.Keys(); !reflect.DeepEqual(actual, test.expected) {
+			if actual := test.config.Keys(); !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
@@ -33,26 +35,33 @@ func TestConfigKeys(t *testing.T) {
 func TestConfigFields(t *testing.T) {
 	tests := []struct {
 		name     string
-		manifest *Manifest
+		config   *Config
 		expected map[string]interface{}
 	}{
 		{
 			"keys",
-			fakeManifest(1, 1),
+			fakeConfig(),
 			map[string]interface{}{
 				"verbose":     true,
 				"aliasesOnly": false,
 				"mode":        "concatenate",
 				"backupCount": 10,
+				"theme":       "emoji",
 			},
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if actual := test.manifest.Config.Fields(); !reflect.DeepEqual(actual, test.expected) {
+			if actual := test.config.Fields(); !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
 	}
+}
+
+func fakeConfig() *Config {
+	c := NewConfig()
+	c.Verbose = true
+	return c
 }

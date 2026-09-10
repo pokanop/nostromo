@@ -34,7 +34,7 @@ func setup(t *testing.T) *Server {
 		t.Fatal(err)
 	}
 	core := cfg.Spaceport().CoreManifest()
-	core.Config.BackupCount = 5
+	cfg.Spaceport().Config.BackupCount = 5
 	mustAdd(t, core, "docker", "docker", "docker root")
 	mustAdd(t, core, "docker.up", "compose up -d", "start services")
 	mustAdd(t, core, "docker.down", "compose down", "stop services")
@@ -50,7 +50,7 @@ func setup(t *testing.T) *Server {
 	docked.Source = "https://example.com/team.yaml"
 	mustAdd(t, docked, "deploy", "kubectl apply", "deploy the thing")
 	mustAdd(t, docked, "deploy.prod", "kubectl apply -f prod", "")
-	if err := config.SaveManifest(docked, false); err != nil {
+	if err := cfg.SaveManifest(docked, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -323,12 +323,16 @@ func TestAddCommand(t *testing.T) {
 
 func TestAddCommandWithVersionlessDockedManifest(t *testing.T) {
 	s := setup(t)
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// A hand-written docked manifest without version metadata must not break saves
 	handwritten := config.NewManifest("handwritten")
 	handwritten.Version = nil
 	mustAdd(t, handwritten, "hello", "echo hello", "")
-	if err := config.SaveManifest(handwritten, false); err != nil {
+	if err := cfg.SaveManifest(handwritten, false); err != nil {
 		t.Fatal(err)
 	}
 
