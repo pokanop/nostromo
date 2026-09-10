@@ -39,8 +39,8 @@
                   "commands": {},
                   "subs": {
                     "0-four-sub": {
-                      "Name": "0-four",
-                      "Alias": "0-four-sub"
+                      "name": "0-four",
+                      "alias": "0-four-sub"
                     }
                   },
                   "code": {
@@ -53,8 +53,8 @@
               },
               "subs": {
                 "0-three-sub": {
-                  "Name": "0-three",
-                  "Alias": "0-three-sub"
+                  "name": "0-three",
+                  "alias": "0-three-sub"
                 }
               },
               "code": {
@@ -67,8 +67,8 @@
           },
           "subs": {
             "0-two-sub": {
-              "Name": "0-two",
-              "Alias": "0-two-sub"
+              "name": "0-two",
+              "alias": "0-two-sub"
             }
           },
           "code": {
@@ -81,8 +81,8 @@
       },
       "subs": {
         "0-one-sub": {
-          "Name": "0-one",
-          "Alias": "0-one-sub"
+          "name": "0-one",
+          "alias": "0-one-sub"
         }
       },
       "code": {
@@ -122,8 +122,8 @@
                   "commands": {},
                   "subs": {
                     "1-four-sub": {
-                      "Name": "1-four",
-                      "Alias": "1-four-sub"
+                      "name": "1-four",
+                      "alias": "1-four-sub"
                     }
                   },
                   "code": {
@@ -136,8 +136,8 @@
               },
               "subs": {
                 "1-three-sub": {
-                  "Name": "1-three",
-                  "Alias": "1-three-sub"
+                  "name": "1-three",
+                  "alias": "1-three-sub"
                 }
               },
               "code": {
@@ -150,8 +150,8 @@
           },
           "subs": {
             "1-two-sub": {
-              "Name": "1-two",
-              "Alias": "1-two-sub"
+              "name": "1-two",
+              "alias": "1-two-sub"
             }
           },
           "code": {
@@ -164,8 +164,8 @@
       },
       "subs": {
         "1-one-sub": {
-          "Name": "1-one",
-          "Alias": "1-one-sub"
+          "name": "1-one",
+          "alias": "1-one-sub"
         }
       },
       "code": {

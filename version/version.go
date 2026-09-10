@@ -8,10 +8,10 @@ import (
 
 // Info identifying version information for releases
 type Info struct {
-	UUID      string `json:"uuid"`
-	SemVer    string `json:"semVer"`
-	GitCommit string `json:"gitCommit"`
-	BuildDate string `json:"buildDate"`
+	UUID      string `json:"uuid" yaml:"uuid"`
+	SemVer    string `json:"semVer" yaml:"semVer"`
+	GitCommit string `json:"gitCommit" yaml:"gitCommit"`
+	BuildDate string `json:"buildDate" yaml:"buildDate"`
 }
 
 // Create a new version info with unique identifier

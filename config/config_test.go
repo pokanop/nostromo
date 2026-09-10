@@ -257,6 +257,146 @@ func TestParse(t *testing.T) {
 	}
 }
 
+func TestParseLegacyKeys(t *testing.T) {
+	// Manifests written before yaml tags used lowercased keys and must load
+	// into the same model as the camelCase format
+	legacy, stale, err := parse("../testdata/legacy_manifest.yaml")
+	if err != nil {
+		t.Fatalf("unable to parse legacy manifest: %s", err)
+	}
+	if !stale {
+		t.Errorf("want legacy manifest reported as stale")
+	}
+
+	current, stale, err := parse("../testdata/manifest.yaml")
+	if err != nil {
+		t.Fatalf("unable to parse manifest: %s", err)
+	}
+	if stale {
+		t.Errorf("want current manifest not reported as stale")
+	}
+
+	// Only the legacy fixture carries a config block, the current one keeps
+	// the defaults
+	if legacy.Config == nil || !legacy.Config.Verbose || legacy.Config.BackupCount != 10 {
+		t.Errorf("want legacy config block parsed, got %+v", legacy.Config)
+	}
+	legacy.Config = nil
+	current.Config = nil
+	legacy.Path = current.Path
+	if !reflect.DeepEqual(legacy, current) {
+		t.Errorf("legacy and current manifests differ:\n%s\n%s", legacy.AsYAML(), current.AsYAML())
+	}
+
+	// Spot check fields whose keys changed case
+	cmd := current.Find("0-one-alias.0-two-alias")
+	if cmd == nil || cmd.KeyPath != "0-one-alias.0-two-alias" || cmd.Subs["0-two-sub"] == nil || cmd.Subs["0-two-sub"].Name != "0-two" {
+		t.Errorf("unexpected command parsed: %+v", cmd)
+	}
+}
+
+func TestLoadConfigMigratesLegacyKeys(t *testing.T) {
+	baseDir := t.TempDir()
+	t.Setenv("NOSTROMO_HOME", baseDir)
+	os.MkdirAll(filepath.Join(baseDir, "ships"), 0777)
+
+	legacySrc, err := os.ReadFile("../testdata/legacy_manifest.yaml")
+	if err != nil {
+		t.Fatalf("unable to read legacy manifest: %s", err)
+	}
+	currentSrc, err := os.ReadFile("../testdata/manifest.yaml")
+	if err != nil {
+		t.Fatalf("unable to read manifest: %s", err)
+	}
+
+	// Legacy core and docked manifests, plus a docked manifest already in the
+	// current format which must be left untouched
+	if err := os.WriteFile(coreManifestPath(), legacySrc, 0644); err != nil {
+		t.Fatalf("unable to write core manifest: %s", err)
+	}
+	legacyDocked := strings.Replace(string(legacySrc), "name: manifest", "name: legacy", 1)
+	if err := os.WriteFile(manifestFile("legacy"), []byte(legacyDocked), 0644); err != nil {
+		t.Fatalf("unable to write docked manifest: %s", err)
+	}
+	currentDocked := strings.Replace(string(currentSrc), "name: manifest", "name: current", 1)
+	if err := os.WriteFile(manifestFile("current"), []byte(currentDocked), 0644); err != nil {
+		t.Fatalf("unable to write docked manifest: %s", err)
+	}
+	spaceport := "sequence:\n- manifest\n- legacy\n- current\nconfig:\n  verbose: false\n  aliasesonly: true\n  mode: 0\n  backupcount: 10\n  theme: 1\n"
+	if err := os.WriteFile(spaceportFile(), []byte(spaceport), 0644); err != nil {
+		t.Fatalf("unable to write spaceport: %s", err)
+	}
+
+	c, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("unable to load config: %s", err)
+	}
+
+	// Legacy spaceport keys must load into the config
+	if cfg := c.spaceport.Config; !cfg.AliasesOnly || cfg.BackupCount != 10 || cfg.Theme != log.GrayscaleTheme {
+		t.Errorf("unexpected spaceport config: %+v", cfg)
+	}
+
+	checkCurrent := func(path string, want []byte) {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("unable to read %s: %s", path, err)
+		}
+		for _, key := range []string{"keypath:", "aliasonly:", "semver:", "gitcommit:", "builddate:", "backupcount:", "aliasesonly:"} {
+			if strings.Contains(string(b), key) {
+				t.Errorf("want legacy key %s rewritten in %s", key, path)
+			}
+		}
+		for _, key := range []string{"keyPath:", "aliasOnly:", "semVer:", "gitCommit:", "buildDate:"} {
+			if !strings.Contains(string(b), key) {
+				t.Errorf("want key %s in %s", key, path)
+			}
+		}
+		if want != nil && string(b) != string(want) {
+			t.Errorf("want %s unchanged", path)
+		}
+	}
+	checkCurrent(coreManifestPath(), nil)
+	checkCurrent(manifestFile("legacy"), nil)
+	checkCurrent(manifestFile("current"), []byte(currentDocked))
+
+	b, err := os.ReadFile(spaceportFile())
+	if err != nil {
+		t.Fatalf("unable to read spaceport: %s", err)
+	}
+	if !strings.Contains(string(b), "aliasesOnly: true") || !strings.Contains(string(b), "backupCount: 10") {
+		t.Errorf("want spaceport rewritten with camelCase keys, got:\n%s", b)
+	}
+
+	// Migrated manifests are backed up first
+	backups, err := os.ReadDir(backupsPath())
+	if err != nil {
+		t.Fatalf("unable to read backups: %s", err)
+	}
+	names := []string{}
+	for _, f := range backups {
+		names = append(names, f.Name())
+	}
+	if len(backups) != 2 || !strings.HasPrefix(names[0], "legacy_") || !strings.HasPrefix(names[1], "manifest_") {
+		t.Errorf("want backups of migrated manifests, got %v", names)
+	}
+
+	// A second load finds everything current and rewrites nothing
+	core, _ := os.ReadFile(coreManifestPath())
+	if _, err := LoadConfig(); err != nil {
+		t.Fatalf("unable to reload config: %s", err)
+	}
+	if len(c.spaceport.Manifests()) != 3 {
+		t.Errorf("want 3 manifests, got %d", len(c.spaceport.Manifests()))
+	}
+	if backups, _ := os.ReadDir(backupsPath()); len(backups) != 2 {
+		t.Errorf("want no new backups, got %d", len(backups))
+	}
+	if reloaded, _ := os.ReadFile(coreManifestPath()); string(reloaded) != string(core) {
+		t.Errorf("want core manifest unchanged on reload")
+	}
+}
+
 func TestSave(t *testing.T) {
 	tests := []struct {
 		name   string

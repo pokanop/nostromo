@@ -12,9 +12,9 @@ import (
 // The UUID is the version identifier of the linked manifest at the time it
 // was linked and is kept for future versioning support.
 type LinkedManifest struct {
-	UUID   string `json:"uuid"`
-	Name   string `json:"name"`
-	Source string `json:"source"`
+	UUID   string `json:"uuid" yaml:"uuid"`
+	Name   string `json:"name" yaml:"name"`
+	Source string `json:"source" yaml:"source"`
 }
 
 // NewLinkedManifest returns a link record for the given manifest
