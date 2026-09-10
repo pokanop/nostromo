@@ -22,8 +22,8 @@ The block sources the output of `nostromo completion <shell>`, which contains:
 | ---------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | bash       | `~/.bashrc`                                                                                                          | `source <(nostromo completion bash)`                                    |
 | zsh        | `~/.zshrc` (or `$ZDOTDIR/.zshrc`)                                                                                    | `autoload -U compinit; compinit`<br>`source <(nostromo completion zsh)` |
-| fish       | `~/.config/fish/config.fish` (or `$XDG_CONFIG_HOME/fish/config.fish`)                                                | `nostromo completion fish \| source`                                    |
-| PowerShell | `~/.config/powershell/Microsoft.PowerShell_profile.ps1` (Windows: `~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1`) | `nostromo completion powershell \| Out-String \| Invoke-Expression`     |
+| fish       | `~/.config/fish/config.fish` (or `$XDG_CONFIG_HOME/fish/config.fish`)                                                | `nostromo completion fish | source`                                    |
+| PowerShell | `~/.config/powershell/Microsoft.PowerShell_profile.ps1` (Windows: `~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1`) | `nostromo completion powershell | Out-String | Invoke-Expression`     |
 
 !!! note "The startup file must exist"
     `nostromo` only edits files that already exist so it never creates a startup file for a shell you don't use. If you use zsh but only have a `~/.bashrc`, create `~/.zshrc` first (`touch ~/.zshrc`) and run `nostromo init` again. Before writing, `nostromo` saves a timestamped backup of the startup file to your system temp directory.
