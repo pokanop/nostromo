@@ -314,6 +314,26 @@ nostromo set mode independent
 
 > All subsequent commands would inherit the above mode if set.
 
+#### Platform Specific Commands
+
+Commands can be limited to specific platforms, handy when the same manifest is shared between machines running different operating systems. Pass a comma separated list of Go OS names (`linux`, `darwin`, `windows`, …) or `os/arch` pairs (`linux/arm64`) with the `-p` or `--platforms` flag:
+
+```sh
+nostromo add cmd copy.ssh "cat ~/.ssh/id_rsa.pub | pbcopy" --platforms darwin
+nostromo add cmd copy.ssh "cat ~/.ssh/id_rsa.pub | xclip -selection clipboard" --platforms linux/amd64,linux/arm64
+```
+
+A command with no platforms is available everywhere. Sub commands inherit the restriction of their parents, so limiting `copy` limits `copy.ssh` as well. Commands that are unavailable on the current platform are skipped when generating shell aliases, functions and completions, `nostromo eval` reports `command copy.ssh is not available on linux/amd64`, and `show` and `find` mark them with an `unavailable on <platform>` note. Platform names are validated, so typos like `macos` are rejected.
+
+Change or clear the platforms of an existing command with `nostromo update`. Platforms are kept if the flag is omitted:
+
+```sh
+nostromo update copy.ssh --platforms linux,darwin
+nostromo update copy.ssh --platforms ""
+```
+
+> Set `NOSTROMO_PLATFORM=windows` (or `linux/arm64`) to preview how a manifest behaves on another platform.
+
 ### Shell Completion
 
 `nostromo` provides completion scripts to allow tab completion for `bash`, `zsh`, `fish` and PowerShell. `nostromo init` adds a `# nostromo [section begin]` … `# nostromo [section end]` block to the init files that already exist for these shells:

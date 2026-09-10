@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/shell"
 	"github.com/pokanop/nostromo/task"
 	"github.com/spf13/cobra"
@@ -16,6 +17,7 @@ var (
 	language    string
 	aliasOnly   bool
 	mode        string
+	platforms   []string
 )
 
 // addcmdCmd represents the addcmd command
@@ -39,14 +41,20 @@ available to commands:
   exclusive    Execute this and only this command ignoring parent commands
 
 You can set using -m or --mode when adding a command or globally using:
-  nostromo manifest set mode <mode>`,
+  nostromo manifest set mode <mode>
+
+A command can be limited to specific platforms with -p or --platforms using
+Go OS names (e.g., linux, darwin, windows) or OS/arch pairs (e.g., linux/arm64).
+Commands unavailable on the current platform, including their sub commands,
+are not aliased or completed in the shell and cannot be run:
+  nostromo add cmd foo.bar "pbcopy" --platforms darwin`,
 	Args: addCmdArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var name string
 		if len(args) > 1 {
 			name = args[1]
 		}
-		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode, false))
+		os.Exit(task.AddCommand(args[0], name, description, code, language, aliasOnly, mode, platformsFlag(cmd), false))
 	},
 }
 
@@ -59,10 +67,29 @@ func init() {
 	addcmdCmd.Flags().StringVarP(&language, "language", "l", "", "Language of code snippet (e.g., ruby, python, perl, js)")
 	addcmdCmd.Flags().BoolVarP(&aliasOnly, "alias-only", "a", false, "Add shell alias only, not a nostromo command")
 	addcmdCmd.Flags().StringVarP(&mode, "mode", "m", "", "Set the mode for the command (concatenate, independent, exclusive)")
+	addcmdCmd.Flags().StringSliceVarP(&platforms, "platforms", "p", nil, "Limit the command to platforms (e.g., linux,darwin,windows/arm64)")
 }
 
 func codeValid() bool {
 	return len(code) > 0 && len(language) > 0
+}
+
+// platformsFlag returns the parsed --platforms list, or nil if the flag was
+// not given so existing platforms are kept when updating
+func platformsFlag(cmd *cobra.Command) []string {
+	if !cmd.Flags().Changed("platforms") {
+		return nil
+	}
+	parsed, err := model.ParsePlatforms(platforms)
+	if err != nil {
+		return nil
+	}
+	return parsed
+}
+
+func platformsValid() error {
+	_, err := model.ParsePlatforms(platforms)
+	return err
 }
 
 func addCmdArgs(cmd *cobra.Command, args []string) error {
@@ -75,5 +102,5 @@ func addCmdArgs(cmd *cobra.Command, args []string) error {
 	if codeValid() && !shell.IsSupportedLanguage(language) {
 		return fmt.Errorf("invalid code snippet and language, must be in [%s]", strings.Join(shell.SupportedLanguages(), ","))
 	}
-	return nil
+	return platformsValid()
 }

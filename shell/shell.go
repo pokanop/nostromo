@@ -133,10 +133,14 @@ func shellWrapperFunc(sh string) string {
 // top level commands in the given shell's syntax.
 //
 // When users run a command, it actually runs `eval` on the result of
-// `nostromo eval` with arguments resolved.
+// `nostromo eval` with arguments resolved. Commands unavailable on the
+// current platform are left out.
 func shellAliasFuncs(sh string, m *model.Manifest) string {
 	var aliases []string
 	for _, c := range m.Commands {
+		if !c.IsAvailable() {
+			continue
+		}
 		aliases = append(aliases, shellAliasFunc(sh, c))
 	}
 	sort.Strings(aliases)

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/shivamMg/ppds/tree"
+	"gopkg.in/yaml.v2"
 
 	"github.com/pokanop/nostromo/keypath"
 	"github.com/pokanop/nostromo/pathutil"
@@ -38,7 +39,7 @@ func TestManifestAddCommand(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := test.manifest.AddCommand(test.keyPath, test.command, "", nil, false, test.mode.String())
+			_, err := test.manifest.AddCommand(test.keyPath, test.command, "", nil, false, test.mode.String(), nil)
 			if test.expErr && err == nil {
 				t.Errorf("expected error but got none")
 			} else if !test.expErr && err != nil {
@@ -258,6 +259,53 @@ func TestManifestExecutionString(t *testing.T) {
 			} else if !test.expErr && err != nil {
 				t.Errorf("expected no error but got %s", err)
 			} else if !test.expErr && test.expected != actual {
+				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
+func TestManifestExecutionStringPlatforms(t *testing.T) {
+	tests := []struct {
+		name      string
+		platform  string
+		keyPath   string
+		platforms []string
+		args      []string
+		wantErr   string
+		expected  string
+	}{
+		{"available", "linux/amd64", "0-one-alias", []string{"linux", "darwin"}, keypath.Keys("0-one-alias.0-two-alias"), "", "0-one 0-two"},
+		{"available arch", "linux/arm64", "0-one-alias", []string{"linux/arm64"}, keypath.Keys("0-one-alias"), "", "0-one"},
+		{"unavailable", "windows/amd64", "0-one-alias", []string{"linux", "darwin"}, keypath.Keys("0-one-alias"), "command 0-one-alias is not available on windows/amd64", ""},
+		{"unavailable arch", "linux/amd64", "0-one-alias", []string{"linux/arm64"}, keypath.Keys("0-one-alias"), "command 0-one-alias is not available on linux/amd64", ""},
+		{"unavailable inherited", "windows/amd64", "0-one-alias", []string{"darwin"}, keypath.Keys("0-one-alias.0-two-alias.0-three-alias"), "command 0-one-alias.0-two-alias.0-three-alias is not available on windows/amd64 (restricted at 0-one-alias)", ""},
+		{"unavailable leaf", "windows/amd64", "0-one-alias.0-two-alias.0-three-alias", []string{"darwin"}, keypath.Keys("0-one-alias.0-two-alias.0-three-alias"), "command 0-one-alias.0-two-alias.0-three-alias is not available on windows/amd64", ""},
+		{"sibling available", "windows/amd64", "0-one-alias.0-two-alias.0-three-alias", []string{"darwin"}, keypath.Keys("0-one-alias.0-two-alias"), "", "0-one 0-two"},
+		{"yaml roundtrip unavailable", "windows/amd64", "0-one-alias", []string{"linux"}, keypath.Keys("0-one-alias.0-two-alias"), "command 0-one-alias.0-two-alias is not available on windows/amd64 (restricted at 0-one-alias)", ""},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Setenv(PlatformEnv, test.platform)
+			m := fakeManifest(1, 3)
+			m.Find(test.keyPath).Platforms = test.platforms
+			if strings.HasPrefix(test.name, "yaml roundtrip") {
+				loaded := &Manifest{}
+				if err := yaml.Unmarshal([]byte(m.AsYAML()), loaded); err != nil {
+					t.Fatal(err)
+				}
+				loaded.Link()
+				m = loaded
+			}
+			_, actual, err := m.ExecutionString(test.args)
+			if len(test.wantErr) > 0 {
+				if err == nil || err.Error() != test.wantErr {
+					t.Errorf("expected error %q but got %v", test.wantErr, err)
+				}
+			} else if err != nil {
+				t.Errorf("expected no error but got %s", err)
+			} else if test.expected != actual {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
 		})
