@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/pokanop/nostromo/config"
@@ -13,7 +14,6 @@ import (
 	"github.com/pokanop/nostromo/pathutil"
 	"github.com/pokanop/nostromo/prompt"
 	"github.com/pokanop/nostromo/shell"
-	"github.com/pokanop/nostromo/stringutil"
 	"github.com/pokanop/nostromo/version"
 	"github.com/shivamMg/ppds/tree"
 	"github.com/spf13/cobra"
@@ -628,59 +628,120 @@ func EvalString(args []string) int {
 	return 0
 }
 
-// Find matching commands and substitutions
-func Find(name string) int {
+// Find commands and substitutions by exact key path or matching name
+//
+// An exact key path match prints only that command and its substitutions
+// unless all is set. With exact set, no fallback search is performed.
+func Find(name string, exact, all bool) int {
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
 	}
 
-	var matchingCmds []*model.Command
-	var matchingSubs []*model.Command
+	sp := cfg.Spaceport()
+	verbose := sp.CoreManifest().Config.IsVerbose()
 
-	for _, m := range cfg.Spaceport().Manifests() {
-		for _, cmd := range m.Commands {
-			cmd.Walk(func(c *model.Command, s *bool) {
-				if stringutil.ContainsCaseInsensitive(c.Name, name) || stringutil.ContainsCaseInsensitive(c.Alias, name) {
-					matchingCmds = append(matchingCmds, c)
+	if !all {
+		if results := sp.FindCommands(name); len(results) > 0 {
+			for i, r := range results {
+				if i > 0 && !verbose {
+					log.Regular()
 				}
-				for _, sub := range c.Subs {
-					if stringutil.ContainsCaseInsensitive(sub.Name, name) || stringutil.ContainsCaseInsensitive(sub.Alias, name) {
-						matchingSubs = append(matchingSubs, c)
-					}
-				}
-			})
+				logFindCommand(r, verbose)
+			}
+			return 0
+		}
+		if exact {
+			log.Highlight(fmt.Sprintf("no command found at key path %s", name))
+			return -1
 		}
 	}
 
-	if len(matchingCmds) == 0 && len(matchingSubs) == 0 {
+	cmds, subs := sp.Search(name)
+	if len(cmds) == 0 && len(subs) == 0 {
 		log.Highlight("no matching commands or substitutions found")
 		return -1
 	}
 
-	m := cfg.Spaceport().CoreManifest()
-	verbose := m.Config.IsVerbose()
-
 	log.Regular("[commands]")
-	for _, cmd := range matchingCmds {
-		logFields(cmd, verbose)
-		if verbose {
-			log.Regular()
-		}
+	for _, r := range cmds {
+		logFindResult(r, verbose)
 	}
 
 	if !verbose {
 		log.Regular()
 	}
 	log.Regular("[substitutions]")
-	for _, cmd := range matchingSubs {
-		logFields(cmd, verbose)
-		if verbose {
-			log.Regular()
-		}
+	for _, r := range subs {
+		logFindResult(r, verbose)
 	}
 
 	return 0
+}
+
+// logFindCommand prints a command's details followed by its substitutions
+func logFindCommand(r *model.SearchResult, verbose bool) {
+	logFindResult(r, verbose)
+
+	subs := make([]*model.Substitution, 0, len(r.Command.Subs))
+	for _, sub := range r.Command.Subs {
+		subs = append(subs, sub)
+	}
+	if len(subs) == 0 {
+		return
+	}
+	sort.Slice(subs, func(i, j int) bool { return subs[i].Alias < subs[j].Alias })
+
+	if !verbose {
+		log.Regular()
+	}
+	log.Regular("[substitutions]")
+	for _, sub := range subs {
+		logFields(sub, verbose)
+	}
+	if verbose {
+		log.Regular()
+	}
+}
+
+func logFindResult(r *model.SearchResult, verbose bool) {
+	logFields(findResult{r, verbose}, verbose)
+	if verbose {
+		log.Regular()
+	}
+}
+
+// findResult adds manifest and key path context to search results for logging
+type findResult struct {
+	*model.SearchResult
+	verbose bool
+}
+
+func (r findResult) Keys() []string {
+	var keys []string
+	if r.Sub == nil {
+		keys = append(keys, r.Command.Keys()...)
+	} else {
+		keys = append(keys, "keypath", "alias", "name")
+	}
+	if r.verbose {
+		keys = append(keys, "manifest")
+	}
+	return keys
+}
+
+func (r findResult) Fields() map[string]interface{} {
+	var fields map[string]interface{}
+	if r.Sub == nil {
+		fields = r.Command.Fields()
+	} else {
+		fields = r.Sub.Fields()
+		fields["keypath"] = r.Command.KeyPath
+	}
+	if r.verbose {
+		fields["manifest"] = r.Manifest.Name
+	}
+	return fields
 }
 
 func Sync(force, keep bool, sources []string) int {
