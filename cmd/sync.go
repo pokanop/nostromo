@@ -19,7 +19,9 @@ makes commands available for execution.
 
 Sync can be used to update previously docked manifests from
 respective data sources. Provide one or more of the names of 
-the manifests as arguments to sync.
+the manifests as arguments to sync. Manifests linked from synced
+manifests are fetched as well and manifests no longer linked or
+docked are removed.
 
 Sync will only update manifests with changed identifiers, to
 force update use the -f flag.`,

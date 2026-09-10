@@ -460,6 +460,54 @@ If you're tired of someone else's manifest or it just isn't making you happy ☹
 nostromo undock <name>
 ```
 
+#### Linked Manifests
+
+Manifests can depend on other manifests through **links**, letting you compose a command suite out of smaller pieces. A manifest lists its dependencies in a `links:` block with the source of each linked manifest:
+
+```yaml
+name: manifest
+commands:
+  ...
+links:
+- uuid: d6353550-f89d-4bc4-86d6-cd5020cb9d6c
+  name: tools
+  source: https://github.com/pokanop/nostromo/raw/main/examples/tools.yaml
+- uuid: bd28c391-4ba9-43a1-9346-6008883def08
+  name: edit
+  source: https://github.com/pokanop/nostromo/raw/main/examples/edit.yaml
+```
+
+Docking or syncing a manifest fetches its links recursively, so a single `nostromo dock` brings in everything it depends on. To add a dependency to the core manifest yourself, link it:
+
+```sh
+nostromo link <source>
+```
+
+This downloads the manifest (and anything it links) just like `dock` and records the link on the core manifest. Use `--to` to record the link on another manifest instead:
+
+```sh
+nostromo link <source> --to <name>
+```
+
+`nostromo` keeps track of *why* each manifest is present, whether it was docked directly or pulled in by a link. Removing a link, undocking a manifest, or a synced manifest dropping a link only removes manifests that nothing else needs anymore:
+
+```sh
+nostromo unlink <name> [--to <manifest>]
+```
+
+Linking fails with a clear error if a manifest with the same name already exists from a different source or if the link would be circular, and cycles found while docking or syncing are reported and skipped. To see the dependency graph, run:
+
+```sh
+nostromo links [name]
+```
+
+```
+spaceport ┬─ manifest ── tools <- https://github.com/pokanop/nostromo/raw/main/examples/tools.yaml
+          └─ docker (docked) ── edit <- https://github.com/pokanop/nostromo/raw/main/examples/edit.yaml
+```
+
+> Links always fetch the latest manifest from the source; pinning a link to a specific version is not supported yet.
+
 ### Command Tree Management
 
 Moving and copying command subtrees can be done easily using `nostromo` as well to avoid manual copy pasta with yaml. If you want to move command nodes around just use:

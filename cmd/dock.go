@@ -17,7 +17,8 @@ available for execution.
 
 Dock can be used to copy a single manifest or more to nostromo's config
 folder. If a docked manifest already exists with the same name then
-nostromo will overwrite that file if the identifier is different.
+nostromo will overwrite that file if the identifier is different. Any
+manifests linked from a docked manifest are fetched as well.
 
 Run:
 
