@@ -26,9 +26,9 @@ nostromo dock github.com/pokanop/nostromo//examples
 | Command       | Runs                                                   |
 | ------------- | ------------------------------------------------------ |
 | `dock`        | `docker`                                               |
-| `dock clean`  | `docker ps -a -q \|xargs docker rm`                    |
+| `dock clean`  | `docker ps -a -q |xargs docker rm`                    |
 | `dock rmi`    | `docker rmi $(docker images -q)`                       |
-| `dock stop`   | `docker ps -q \|xargs docker stop`                     |
+| `dock stop`   | `docker ps -q |xargs docker stop`                     |
 | `dock vol`    | `docker volume rm $(docker volume ls -qf dangling=true)` |
 
 Recreate it yourself:
@@ -65,8 +65,8 @@ nostromo add cmd dock.vol 'volume rm $(docker volume ls -qf dangling=true)' -d "
 
 | Command              | Runs                                                                   |
 | -------------------- | ---------------------------------------------------------------------- |
-| `check <tool>`       | `which $1 > /dev/null 2>&1 && echo $1 exists \|\| (echo $1 not found && exit 1)` |
-| `exists <path>`      | `[ -f $1 ] \|\| [ -d $1 ] && echo $1 exists \|\| (echo $1 not found && exit 1)` |
+| `check <tool>`       | `which $1 > /dev/null 2>&1 && echo $1 exists || (echo $1 not found && exit 1)` |
+| `exists <path>`      | `[ -f $1 ] || [ -d $1 ] && echo $1 exists || (echo $1 not found && exit 1)` |
 | `install brew`       | the official Homebrew install script                                   |
 | `install jq`         | `brew install jq`                                                      |
 | `install nvm`        | the nvm install script                                                 |
@@ -94,9 +94,9 @@ nope not found
 | `gcdf`           | `git clean -df`                                             | alias-only                                |
 | `cat`            | `bat`                                                       | simple replacement                        |
 | `code nostromo`  | `command code ~/.nostromo/manifest.yaml`                    | [substitutions](concepts/substitutions.md) `nostromo` and `zsh` |
-| `copy ssh`       | `cat ~/.ssh/id_rsa.pub \| pbcopy`                           | namespace with empty root                 |
+| `copy ssh`       | `cat ~/.ssh/id_rsa.pub | pbcopy`                           | namespace with empty root                 |
 | `ios snap <file>`| `xcrun simctl io booted screenshot $1`                      | positional args                           |
-| `ip local`       | `ifconfig en0 \| grep --word-regexp inet \| awk "{print $2}"` | pipes and quoting                       |
+| `ip local`       | `ifconfig en0 | grep --word-regexp inet | awk "{print $2}"` | pipes and quoting                       |
 | `nuke docker`    | `dock stop && dock clean && dock rmi`                       | calling other `nostromo` commands         |
 | `reload`         | `. ~/.zshrc`                                                | sourcing in the current shell             |
 
