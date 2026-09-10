@@ -39,6 +39,8 @@ type Manifest struct {
 	// live on the Spaceport and this is never written back.
 	Config   *Config             `json:"config,omitempty" yaml:"config,omitempty"`
 	Commands map[string]*Command `json:"commands"`
+	// Links are other manifests this one depends on, fetched alongside it
+	Links []*LinkedManifest `json:"links,omitempty" yaml:"links,omitempty"`
 }
 
 // NewManifest returns a newly initialized manifest
@@ -237,7 +239,7 @@ func (m *Manifest) Resolve(args []string) (*Command, []string, error) {
 
 // Keys as ordered list of fields for logging
 func (m *Manifest) Keys() []string {
-	return []string{"name", "source", "version", "commands"}
+	return []string{"name", "source", "version", "commands", "links"}
 }
 
 // Fields interface for logging
@@ -247,6 +249,7 @@ func (m *Manifest) Fields() map[string]interface{} {
 		"source":   m.Source,
 		"version":  m.Version.SemVer,
 		"commands": joinedCommands(m.Commands),
+		"links":    joinedLinks(m.Links),
 	}
 }
 

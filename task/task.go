@@ -168,6 +168,11 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 				log.Regular()
 			}
 
+			if len(m.Links) > 0 {
+				log.Bold("\n[links]")
+				log.Regular(strings.TrimSpace(cfg.Spaceport().LinkTree(m).AsString()))
+			}
+
 			if !verbose {
 				log.Regular()
 			}
@@ -829,6 +834,7 @@ func Detach(name string, keyPaths []string, targetKeyPath, description string, k
 
 	// Update spaceport
 	s.AddManifest(m)
+	s.Dock(m.Name)
 
 	// Save manifests
 	for _, m := range saveList {
@@ -878,38 +884,135 @@ func RegenerateID(name string) int {
 }
 
 // Undock a manifest from nostromo installation
+//
+// Manifests still linked from another manifest stay docked but are no
+// longer tracked as explicitly docked. Manifests only pulled in through
+// links of the undocked manifest are removed as well.
 func Undock(names []string) int {
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
 	}
+	s := cfg.Spaceport()
 
 	undocked := []string{}
 	for _, name := range names {
-		if len(name) == 0 {
+		m := s.FindManifest(name)
+		if m == nil {
 			log.Warningf("no manifest named %s found\n", name)
+			continue
 		}
-
-		err := cfg.DeleteManifest(name)
-		if err != nil {
-			log.Warning(err)
+		if m.IsCore() {
+			log.Errorf("cannot undock the %s manifest\n", name)
 			return -1
 		}
 
-		if !cfg.Spaceport().RemoveManifest(name) {
-			log.Warningf("spaceport missing manifest %s\n", name)
+		if linkers := s.Linkers(name); len(linkers) > 0 {
+			linked := []string{}
+			for _, l := range linkers {
+				linked = append(linked, l.Name)
+			}
+			log.Warningf("%s is still linked from %s, keeping it docked\n", name, strings.Join(linked, ", "))
+			s.Undock(name)
+			continue
 		}
 
+		if err := cfg.DeleteManifest(name); err != nil {
+			log.Warning(err)
+			return -1
+		}
+		s.RemoveManifest(name)
 		undocked = append(undocked, name)
 	}
 
-	err := config.SaveSpaceport(cfg.Spaceport())
+	removed, err := cfg.Prune()
 	if err != nil {
+		log.Error(err)
+		return -1
+	}
+	undocked = append(undocked, removed...)
+
+	if err := config.SaveSpaceport(s); err != nil {
 		log.Error(err)
 		return -1
 	}
 
 	log.Highlightf("undocked manifests: %s\n", undocked)
+
+	return 0
+}
+
+// Link a manifest from source to the target manifest, defaulting to the
+// core manifest
+func Link(source, target string, force, keep bool) int {
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+
+	manifests, err := cfg.Link(source, target, force, keep)
+	if err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	if len(target) == 0 {
+		target = model.CoreManifestName
+	}
+	names := []string{}
+	for _, m := range manifests {
+		names = append(names, m.Name)
+	}
+	log.Highlightf("linked manifests to %s: %s\n", target, names)
+
+	return 0
+}
+
+// Unlink a manifest from the target manifest, defaulting to the core
+// manifest, removing it if nothing else needs it
+func Unlink(name, target string) int {
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+
+	removed, err := cfg.Unlink(name, target)
+	if err != nil {
+		log.Error(err)
+		return -1
+	}
+
+	if len(target) == 0 {
+		target = model.CoreManifestName
+	}
+	log.Highlightf("unlinked %s from %s\n", name, target)
+	if len(removed) > 0 {
+		log.Highlightf("undocked manifests: %s\n", removed)
+	}
+
+	return 0
+}
+
+// Links prints the manifest dependency graph, rooted at the named
+// manifest if given
+func Links(name string) int {
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+	s := cfg.Spaceport()
+
+	if len(name) == 0 {
+		tree.PrintHr(s.LinkGraph())
+		return 0
+	}
+
+	m := s.FindManifest(name)
+	if m == nil {
+		log.Errorf("no manifest named %s found\n", name)
+		return -1
+	}
+	tree.PrintHr(s.LinkTree(m))
 
 	return 0
 }

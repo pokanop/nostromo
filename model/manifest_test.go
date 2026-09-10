@@ -318,7 +318,7 @@ func TestManifestKeys(t *testing.T) {
 		manifest *Manifest
 		expected []string
 	}{
-		{"keys", fakeManifest(1, 1), []string{"name", "source", "version", "commands"}},
+		{"keys", fakeManifest(1, 1), []string{"name", "source", "version", "commands", "links"}},
 	}
 
 	for _, test := range tests {
@@ -344,6 +344,7 @@ func TestManifestFields(t *testing.T) {
 				"source":   "file://path/to/manifest.yaml",
 				"version":  "",
 				"commands": "0-one-alias",
+				"links":    "",
 			},
 		},
 	}
