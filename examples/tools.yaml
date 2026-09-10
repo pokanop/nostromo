@@ -3,15 +3,15 @@ source: https://github.com/pokanop/nostromo/raw/main/examples/tools.yaml
 path: /Users/gopher/.nostromo/ships/tools.yaml
 version:
   uuid: d6353550-f89d-4bc4-86d6-cd5020cb9d6c
-  semver: 0.9.11
-  gitcommit: e53f5fdb6f17fe4d18166aa2e80febad711a8b47
-  builddate: '2022-02-06T08:40:14Z'
+  semVer: 0.9.11
+  gitCommit: e53f5fdb6f17fe4d18166aa2e80febad711a8b47
+  buildDate: '2022-02-06T08:40:14Z'
 commands:
   check:
-    keypath: check
+    keyPath: check
     name: which $1 > /dev/null 2>&1 && echo $1 exists || (echo $1 not found && exit 1)
     alias: check
-    aliasonly: false
+    aliasOnly: false
     description: Check if a command or tool is installed
     commands: {}
     subs: {}
@@ -21,10 +21,10 @@ commands:
     mode: 0
     disabled: false
   exists:
-    keypath: exists
+    keyPath: exists
     name: '[ -f $1 ] || [ -d $1 ] && echo $1 exists || (echo $1 not found && exit 1)'
     alias: exists
-    aliasonly: false
+    aliasOnly: false
     description: Check if a file or folder exists
     commands: {}
     subs: {}
@@ -34,17 +34,17 @@ commands:
     mode: 0
     disabled: false
   install:
-    keypath: install
+    keyPath: install
     name: ''
     alias: install
-    aliasonly: false
+    aliasOnly: false
     description: ''
     commands:
       brew:
-        keypath: install.brew
+        keyPath: install.brew
         name: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         alias: brew
-        aliasonly: false
+        aliasOnly: false
         description: Install Homebrew
         commands: {}
         subs: {}
@@ -54,10 +54,10 @@ commands:
         mode: 0
         disabled: false
       htmlq:
-        keypath: install.htmlq
+        keyPath: install.htmlq
         name: brew install htmlq
         alias: htmlq
-        aliasonly: false
+        aliasOnly: false
         description: Install htmlq
         commands: {}
         subs: {}
@@ -67,10 +67,10 @@ commands:
         mode: 0
         disabled: false
       iterm:
-        keypath: install.iterm
+        keyPath: install.iterm
         name: curl --silent https://iterm2.com/downloads.html | htmlq --attribute href a | grep stable | head -n 1
         alias: iterm
-        aliasonly: false
+        aliasOnly: false
         description: Install iTerm2
         commands: {}
         subs: {}
@@ -80,10 +80,10 @@ commands:
         mode: 0
         disabled: false
       jq:
-        keypath: install.jq
+        keyPath: install.jq
         name: brew install jq
         alias: jq
-        aliasonly: false
+        aliasOnly: false
         description: Install jq
         commands: {}
         subs: {}
@@ -93,10 +93,10 @@ commands:
         mode: 0
         disabled: false
       lynx:
-        keypath: install.lynx
+        keyPath: install.lynx
         name: brew install lynx
         alias: lynx
-        aliasonly: false
+        aliasOnly: false
         description: Install lynx
         commands: {}
         subs: {}
@@ -106,10 +106,10 @@ commands:
         mode: 0
         disabled: false
       nvm:
-        keypath: install.nvm
+        keyPath: install.nvm
         name: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
         alias: nvm
-        aliasonly: false
+        aliasOnly: false
         description: Install nvm
         commands: {}
         subs: {}
@@ -119,10 +119,10 @@ commands:
         mode: 0
         disabled: false
       ohmyzsh:
-        keypath: install.ohmyzsh
+        keyPath: install.ohmyzsh
         name: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
         alias: ohmyzsh
-        aliasonly: false
+        aliasOnly: false
         description: Install ohmyzsh
         commands: {}
         subs: {}
@@ -132,10 +132,10 @@ commands:
         mode: 0
         disabled: false
       p10k:
-        keypath: install.p10k
+        keyPath: install.p10k
         name: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
         alias: p10k
-        aliasonly: false
+        aliasOnly: false
         description: Install powerlevel10k
         commands: {}
         subs: {}
@@ -145,10 +145,10 @@ commands:
         mode: 0
         disabled: false
       rbenv:
-        keypath: install.rbenv
+        keyPath: install.rbenv
         name: brew install rbenv && eval "$(rbenv init -)"
         alias: rbenv
-        aliasonly: false
+        aliasOnly: false
         description: Install rbenv
         commands: {}
         subs: {}
@@ -158,10 +158,10 @@ commands:
         mode: 0
         disabled: false
       rust:
-        keypath: install.rust
+        keyPath: install.rust
         name: curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
         alias: rust
-        aliasonly: false
+        aliasOnly: false
         description: Install Rust
         commands: {}
         subs: {}
@@ -177,17 +177,17 @@ commands:
     mode: 0
     disabled: false
   run:
-    keypath: run
+    keyPath: run
     name: ''
     alias: run
-    aliasonly: false
+    aliasOnly: false
     description: ''
     commands:
       quietly:
-        keypath: run.quietly
+        keyPath: run.quietly
         name: echo running $1;$2 > /dev/null 2>&1;if [$? == 0]; then echo success; else echo failed; fi
         alias: quietly
-        aliasonly: false
+        aliasOnly: false
         description: Execute a command quietly
         commands: {}
         subs: {}

@@ -15,6 +15,7 @@ import (
 	"github.com/pokanop/nostromo/model"
 	"github.com/pokanop/nostromo/pathutil"
 	"github.com/pokanop/nostromo/version"
+	"github.com/pokanop/nostromo/yamlutil"
 	"gopkg.in/yaml.v2"
 )
 
@@ -61,7 +62,7 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 	path := coreManifestPath()
-	m, err := Parse(coreManifestPath())
+	m, legacy, err := parse(coreManifestPath())
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +71,15 @@ func LoadConfig() (*Config, error) {
 	m.Path = path
 	manifests := []*model.Manifest{m}
 
+	// Track manifests that must be rewritten in the current format
+	stale := map[*model.Manifest]bool{m: legacy}
+
 	// Load synchronized manifests
-	manifests = append(manifests, loadManifests()...)
+	docked, legacyDocked := loadManifests()
+	manifests = append(manifests, docked...)
+	for _, d := range legacyDocked {
+		stale[d] = true
+	}
 
 	// Load spaceport
 	s, err := loadSpaceport()
@@ -91,7 +99,16 @@ func LoadConfig() (*Config, error) {
 	// Settings were lifted out of the core manifest, rewrite it without them
 	if migrated {
 		log.Debug("migrating settings into spaceport")
-		if err := saveManifest(m, true, s.Config.BackupCount); err != nil {
+		stale[m] = true
+	}
+
+	// Rewrite manifests that were migrated or still used legacy keys
+	for _, sm := range manifests {
+		if !stale[sm] {
+			continue
+		}
+		log.Debugf("migrating manifest %s to current format\n", sm.Name)
+		if err := saveManifest(sm, true, s.Config.BackupCount); err != nil {
 			return nil, err
 		}
 	}
@@ -109,7 +126,8 @@ func NewConfig() (*Config, error) {
 	manifests := []*model.Manifest{m}
 
 	// Load synchronized manifests
-	manifests = append(manifests, loadManifests()...)
+	docked, _ := loadManifests()
+	manifests = append(manifests, docked...)
 
 	s := model.NewSpaceport(manifests)
 	s.Link()
@@ -214,17 +232,24 @@ func UnlinkManPages() []error {
 
 // Parse nostromo config at path into a `Manifest` object
 func Parse(path string) (*model.Manifest, error) {
+	m, _, err := parse(path)
+	return m, err
+}
+
+// parse nostromo config at path into a `Manifest` object, also reporting
+// whether the file used legacy lowercase keys and should be saved again
+func parse(path string) (*model.Manifest, bool, error) {
 	log.Debugf("parsing manifest at %s\n", path)
 
 	f, err := os.Open(pathutil.Abs(path))
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer f.Close()
 
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	// Initialize manifest with default legacy settings so partial config
@@ -232,19 +257,20 @@ func Parse(path string) (*model.Manifest, error) {
 	m := &model.Manifest{
 		Config: model.NewConfig(),
 	}
+	var legacy bool
 	ext := filepath.Ext(path)
 	if ext == ".yaml" {
-		err = yaml.Unmarshal(b, &m)
+		legacy, err = yamlutil.Unmarshal(b, &m)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	} else {
-		return nil, fmt.Errorf("invalid file format: %s", ext)
+		return nil, false, fmt.Errorf("invalid file format: %s", ext)
 	}
 
 	// Sanity check parsed manifest
 	if len(m.Name) == 0 {
-		return nil, fmt.Errorf("invalid file content")
+		return nil, false, fmt.Errorf("invalid file content")
 	}
 
 	// Normalize file: sources written by older versions (e.g. "file:/path")
@@ -258,7 +284,7 @@ func Parse(path string) (*model.Manifest, error) {
 	// Manifest path should match
 	m.Path = path
 
-	return m, nil
+	return m, legacy, nil
 }
 
 // SaveSpaceport to nostromo config folder
@@ -603,7 +629,7 @@ func loadSpaceport() (*model.Spaceport, error) {
 	s := &model.Spaceport{}
 	ext := filepath.Ext(path)
 	if ext == ".yaml" {
-		err = yaml.Unmarshal(b, &s)
+		_, err = yamlutil.Unmarshal(b, &s)
 		if err != nil {
 			return nil, err
 		}
@@ -617,12 +643,15 @@ func loadSpaceport() (*model.Spaceport, error) {
 	return s, nil
 }
 
-func loadManifests() []*model.Manifest {
+// loadManifests from the manifests folder, also returning the ones that
+// still use legacy keys and should be saved again
+func loadManifests() ([]*model.Manifest, []*model.Manifest) {
 	manifests := []*model.Manifest{}
+	legacy := []*model.Manifest{}
 	path := manifestsPath()
 	files, err := os.ReadDir(path)
 	if err != nil {
-		return manifests
+		return manifests, legacy
 	}
 
 	for _, file := range files {
@@ -632,7 +661,7 @@ func loadManifests() []*model.Manifest {
 		}
 
 		path := filepath.Join(path, file.Name())
-		m, err := Parse(path)
+		m, stale, err := parse(path)
 		if err != nil {
 			log.Warningf("cannot read manifest %s\n", path)
 			continue
@@ -641,10 +670,13 @@ func loadManifests() []*model.Manifest {
 		// Skip core manifest
 		if m.Name != model.CoreManifestName {
 			manifests = append(manifests, m)
+			if stale {
+				legacy = append(legacy, m)
+			}
 		}
 	}
 
-	return manifests
+	return manifests, legacy
 }
 
 // sanitizeFiles is used for moving config files and fixing up any files during upgrades.
