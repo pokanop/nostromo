@@ -438,3 +438,10 @@ commands:
       snippet: ''
     mode: 0
     disabled: false
+links:
+- uuid: d6353550-f89d-4bc4-86d6-cd5020cb9d6c
+  name: tools
+  source: https://github.com/pokanop/nostromo/raw/main/examples/tools.yaml
+- uuid: bd28c391-4ba9-43a1-9346-6008883def08
+  name: edit
+  source: https://github.com/pokanop/nostromo/raw/main/examples/edit.yaml

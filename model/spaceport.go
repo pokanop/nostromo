@@ -12,7 +12,10 @@ import (
 type Spaceport struct {
 	manifests map[string]*Manifest
 	Sequence  []string `json:"sequence"`
-	Config    *Config  `json:"config"`
+	// Docked holds manifests the user docked explicitly, as opposed to ones
+	// pulled in through links, so cleanup knows what is safe to remove
+	Docked []string `json:"docked"`
+	Config *Config  `json:"config"`
 	// LegacyTheme is the pre-config top level theme setting, only populated
 	// when loading an older spaceport and lifted into Config by Migrate
 	LegacyTheme *log.ThemeType `json:"-" yaml:"theme,omitempty"`
@@ -33,6 +36,9 @@ func (s *Spaceport) Init() {
 	}
 	if s.Sequence == nil {
 		s.Sequence = []string{}
+	}
+	if s.Docked == nil {
+		s.Docked = []string{}
 	}
 }
 
@@ -94,8 +100,8 @@ func (s *Spaceport) Import(manifests []*Manifest) {
 	s.Sequence = []string{}
 	for _, m := range manifests {
 		s.AddManifest(m)
-		s.Sequence = append(s.Sequence, m.Name)
 	}
+	s.reconcile()
 }
 
 func (s *Spaceport) Link() {
@@ -110,10 +116,14 @@ func (s *Spaceport) CoreManifest() *Manifest {
 
 func (s *Spaceport) AddManifest(m *Manifest) {
 	s.manifests[m.Name] = m
+	if !contains(s.Sequence, m.Name) {
+		s.Sequence = append(s.Sequence, m.Name)
+	}
 }
 
 func (s *Spaceport) RemoveManifest(name string) bool {
-	s.manifests[name] = nil
+	delete(s.manifests, name)
+	s.Undock(name)
 	index := -1
 	for i, n := range s.Sequence {
 		if n == name {
