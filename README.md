@@ -162,6 +162,26 @@ where the last one will execute the `echo` command.
 
 You can compose several commands together by adding commands at any node of the keypath. The **default** behavior is to concatenate the commands together as you walk the tree. Targeted use of `;` or `&&` can allow for running multiple commands together instead of concatenating. More easily, you can change the command `mode` for any of the commands to do this for you automatically. More info on this later.
 
+#### Finding Commands
+
+Once the tree grows it can be hard to remember what lives where. Use `find` with a keypath to get the details of a single command along with its substitutions:
+
+```sh
+nostromo find foo.bar.baz -v
++--------------+-------------+
+| keypath      | foo.bar.baz |
+| alias        | baz         |
+| command      | echo hello  |
+| code         | false       |
+| mode         | concatenate |
+| aliasOnly    | false       |
+| disabled     | false       |
+| manifest     | manifest    |
++--------------+-------------+
+```
+
+Any other argument searches every docked manifest for commands whose name, alias or keypath contain it, as well as matching substitutions, e.g. `nostromo find bar` matches `foo.bar` and `foo.bar.baz`. Add `-v` to print tables including the manifest each match belongs to. Use `--exact` to only accept an exact keypath (handy in scripts since it fails when the command is missing) or `--all` to list every match even if the argument happens to be a keypath.
+
 #### Shell Aliases
 
 `nostromo` allows users to manage shell aliases. By default, all commands are designed to execute the binary and resolve a command to be evaluated in the shell. This allows you to run those declarative commands easily like `foo bar baz` in the shell. It only creates an alias as a shell function for the root command `foo` and passes the remaining arguments to `nostromo eval` to evaluate the command tree. The result of that is executed with `eval` in the shell. Standard shell aliases **do not** get this behavior.

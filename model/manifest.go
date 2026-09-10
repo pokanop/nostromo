@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/pokanop/nostromo/keypath"
@@ -306,5 +307,6 @@ func joinedCommands(cmdMap map[string]*Command) string {
 	for cmd := range cmdMap {
 		commands = append(commands, cmd)
 	}
+	sort.Strings(commands)
 	return strings.Join(commands, ", ")
 }
