@@ -124,6 +124,13 @@ func Serve(port int, openBrowser bool, ver *version.Info) int {
 // secure wraps the mux with same-origin and header checks
 func (s *Server) secure(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rec := recover(); rec != nil {
+				log.Debugf("panic serving %s: %v", r.URL.Path, rec)
+				writeError(w, http.StatusInternalServerError, fmt.Sprintf("internal error: %v", rec))
+			}
+		}()
+
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("Referrer-Policy", "no-referrer")

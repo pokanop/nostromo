@@ -298,6 +298,21 @@ func TestAddCommand(t *testing.T) {
 	expectStatus(t, rec, http.StatusBadRequest)
 }
 
+func TestAddCommandWithVersionlessDockedManifest(t *testing.T) {
+	s := setup(t)
+
+	// A hand-written docked manifest without version metadata must not break saves
+	handwritten := config.NewManifest("handwritten")
+	handwritten.Version = nil
+	mustAdd(t, handwritten, "hello", "echo hello", "")
+	if err := config.SaveManifest(handwritten, false); err != nil {
+		t.Fatal(err)
+	}
+
+	rec := request(t, s, http.MethodPost, "/api/command", addCommandRequest{KeyPath: "docker.ps", Name: "compose ps"})
+	expectStatus(t, rec, http.StatusCreated)
+}
+
 func TestUpdateCommand(t *testing.T) {
 	s := setup(t)
 
