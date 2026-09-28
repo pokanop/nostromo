@@ -389,5 +389,6 @@ func joinedSubs(subMap map[string]*Substitution) string {
 	for sub := range subMap {
 		subs = append(subs, sub)
 	}
+	sort.Strings(subs)
 	return strings.Join(subs, ", ")
 }
