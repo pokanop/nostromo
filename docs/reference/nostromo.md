@@ -32,6 +32,7 @@ substitutions to simplify calls.
 * [nostromo destroy](nostromo_destroy.md)	 - Destroy nostromo configuration
 * [nostromo detach](nostromo_detach.md)	 - Detach a command node into a new manifest
 * [nostromo dock](nostromo_dock.md)	 - Dock nostromo manifests
+* [nostromo env](nostromo_env.md)	 - Print the effective environment for a command
 * [nostromo eval](nostromo_eval.md)	 - Show eval command from manifest
 * [nostromo find](nostromo_find.md)	 - Find commands and substitutions by name or key path
 * [nostromo get](nostromo_get.md)	 - Get a config item from the spaceport

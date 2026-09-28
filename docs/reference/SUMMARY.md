@@ -8,6 +8,7 @@
 * [destroy](nostromo_destroy.md)
 * [detach](nostromo_detach.md)
 * [dock](nostromo_dock.md)
+* [env](nostromo_env.md)
 * [eval](nostromo_eval.md)
 * [find](nostromo_find.md)
 * [get](nostromo_get.md)
