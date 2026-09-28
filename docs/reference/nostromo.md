@@ -34,12 +34,12 @@ substitutions to simplify calls.
 * [nostromo dock](nostromo_dock.md)	 - Dock nostromo manifests
 * [nostromo eval](nostromo_eval.md)	 - Show eval command from manifest
 * [nostromo find](nostromo_find.md)	 - Find commands and substitutions by name or key path
-* [nostromo get](nostromo_get.md)	 - Get a config item from manifest
+* [nostromo get](nostromo_get.md)	 - Get a config item from the spaceport
 * [nostromo init](nostromo_init.md)	 - Initialize nostromo configuration
 * [nostromo move](nostromo_move.md)	 - Move a command in nostromo manifest
 * [nostromo remove](nostromo_remove.md)	 - Remove command or substitution
 * [nostromo rename](nostromo_rename.md)	 - Rename a command in nostromo manifest
-* [nostromo set](nostromo_set.md)	 - Set a config item in manifest
+* [nostromo set](nostromo_set.md)	 - Set a config item in the spaceport
 * [nostromo show](nostromo_show.md)	 - Show nostromo configuration
 * [nostromo sync](nostromo_sync.md)	 - Sync docked manifests from source locations
 * [nostromo undock](nostromo_undock.md)	 - Undock nostromo manifests

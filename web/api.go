@@ -163,7 +163,7 @@ func (s *Server) handleManifest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, newManifestDetail(m))
+	writeJSON(w, http.StatusOK, newManifestDetail(m, cfg.Spaceport().Config))
 }
 
 func (s *Server) handleCommand(w http.ResponseWriter, r *http.Request) {
@@ -417,17 +417,17 @@ func newManifestInfo(m *model.Manifest) manifestInfo {
 	return info
 }
 
-func newManifestDetail(m *model.Manifest) manifestDetail {
+func newManifestDetail(m *model.Manifest, c *model.Config) manifestDetail {
 	d := manifestDetail{
 		manifestInfo: newManifestInfo(m),
 		Commands:     []*commandNode{},
 	}
-	if m.IsCore() && m.Config != nil {
+	if m.IsCore() && c != nil {
 		d.Config = &configInfo{
-			Verbose:     m.Config.Verbose,
-			AliasesOnly: m.Config.AliasesOnly,
-			Mode:        m.Config.Mode.String(),
-			BackupCount: m.Config.BackupCount,
+			Verbose:     c.Verbose,
+			AliasesOnly: c.AliasesOnly,
+			Mode:        c.Mode.String(),
+			BackupCount: c.BackupCount,
 		}
 	}
 	for _, cmd := range m.Commands {

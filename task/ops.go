@@ -33,8 +33,8 @@ func LoadConfig() (*config.Config, error) {
 		return nil, err
 	}
 
-	log.SetTheme(cfg.Spaceport().Theme)
-	log.SetVerbose(cfg.Spaceport().CoreManifest().Config.IsVerbose())
+	log.SetTheme(cfg.Spaceport().Config.Theme)
+	log.SetVerbose(cfg.Spaceport().Config.IsVerbose())
 
 	return cfg, nil
 }
@@ -71,9 +71,9 @@ func AddCommandToConfig(cfg *config.Config, keyPath, command, description, code,
 		Snippet:  code,
 	}
 
-	aliasOnly = m.Config.AliasesOnly || aliasOnly
+	aliasOnly = cfg.Spaceport().Config.AliasesOnly || aliasOnly
 	if len(mode) == 0 {
-		mode = m.Config.Mode.String()
+		mode = cfg.Spaceport().Config.Mode.String()
 	}
 
 	if _, err := m.AddCommand(keyPath, command, description, snippet, aliasOnly, mode); err != nil {

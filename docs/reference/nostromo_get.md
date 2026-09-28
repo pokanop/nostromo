@@ -4,17 +4,19 @@ title: get
 
 # nostromo get
 
-Get a config item from manifest
+Get a config item from the spaceport
 
 ## Synopsis
 
-Get a config item from manifest.
-Nostromo config items are saved in the manifest.
+Get a config item from the spaceport.
+Nostromo config items are global and saved in the spaceport.
 
 Use this command to get keys to examine these settings:
-verbose: boolean
-aliasesOnly: boolean
-backupCount: number
+  verbose: boolean
+  aliasesOnly: boolean
+  mode: concatenate | independent | exclusive
+  backupCount: number
+  theme: default | grayscale | emoji
 
 ```
 nostromo get [key] [flags]

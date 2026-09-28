@@ -14,13 +14,13 @@ import (
 	"github.com/pokanop/nostromo/pathutil"
 )
 
-// backupManifest at config path based on timestamp
-func backupManifest(m *model.Manifest) error {
+// backupManifest at config path based on timestamp keeping at most count files
+func backupManifest(m *model.Manifest, count int) error {
 	// Before saving backup, prune old files
-	pruneBackups(m)
+	pruneBackups(m, count)
 
 	// Prevent backups if max count is 0
-	if m.Config.BackupCount == 0 {
+	if count == 0 {
 		return nil
 	}
 
@@ -53,7 +53,7 @@ func backupManifest(m *model.Manifest) error {
 	return nil
 }
 
-func pruneBackups(m *model.Manifest) {
+func pruneBackups(m *model.Manifest, count int) {
 	backupDir, err := ensureBackupDir()
 	if err != nil {
 		return
@@ -83,7 +83,7 @@ func pruneBackups(m *model.Manifest) {
 	})
 
 	// Add one more to backup count since a new backup will be created
-	maxCount := m.Config.BackupCount - 1
+	maxCount := count - 1
 	if maxCount < 0 {
 		maxCount = 0
 	}

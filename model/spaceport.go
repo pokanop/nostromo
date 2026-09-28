@@ -6,15 +6,23 @@ import (
 )
 
 // Spaceport type that manages and docks multiple ships' manifests
+//
+// The spaceport also holds the global nostromo settings that apply to
+// every docked manifest.
 type Spaceport struct {
 	manifests map[string]*Manifest
-	Sequence  []string      `json:"sequence"`
-	Theme     log.ThemeType `json:"themeType"`
+	Sequence  []string `json:"sequence"`
+	Config    *Config  `json:"config"`
+	// LegacyTheme is the pre-config top level theme setting, only populated
+	// when loading an older spaceport and lifted into Config by Migrate
+	LegacyTheme *log.ThemeType `json:"-" yaml:"theme,omitempty"`
 }
 
 func NewSpaceport(manifests []*Manifest) *Spaceport {
-	s := &Spaceport{map[string]*Manifest{}, []string{}, log.EmojiTheme}
+	s := &Spaceport{}
+	s.Init()
 	s.Import(manifests)
+	s.Migrate()
 	return s
 }
 
@@ -26,6 +34,40 @@ func (s *Spaceport) Init() {
 	if s.Sequence == nil {
 		s.Sequence = []string{}
 	}
+}
+
+// Migrate legacy settings into the spaceport config
+//
+// Settings used to live on the core manifest and the theme at the top level
+// of the spaceport. If the spaceport has no config yet, lift those values
+// into a new config. Manifest config blocks are always dropped so they are
+// no longer persisted.
+//
+// Returns true if a config was created and should be persisted.
+func (s *Spaceport) Migrate() bool {
+	migrated := false
+	if s.Config == nil {
+		s.Config = NewConfig()
+		if m := s.CoreManifest(); m != nil && m.Config != nil {
+			s.Config.Verbose = m.Config.Verbose
+			s.Config.AliasesOnly = m.Config.AliasesOnly
+			s.Config.Mode = m.Config.Mode
+			s.Config.BackupCount = m.Config.BackupCount
+		}
+		if s.LegacyTheme != nil {
+			s.Config.Theme = *s.LegacyTheme
+		}
+		migrated = true
+	}
+	s.LegacyTheme = nil
+
+	for _, m := range s.manifests {
+		if m != nil {
+			m.Config = nil
+		}
+	}
+
+	return migrated
 }
 
 func (s *Spaceport) Manifests() []*Manifest {

@@ -148,7 +148,7 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 		return 0
 	}
 
-	verbose := cfg.Spaceport().CoreManifest().Config.IsVerbose()
+	verbose := cfg.Spaceport().Config.IsVerbose()
 	for i, m := range cfg.Spaceport().Manifests() {
 		if i > 0 {
 			log.Regular()
@@ -216,7 +216,7 @@ func SetConfig(key, value string) int {
 		return -1
 	}
 
-	log.SetTheme(cfg.Spaceport().Theme)
+	log.SetTheme(cfg.Spaceport().Config.Theme)
 	log.Highlightf("set %s to %s\n", key, value)
 	return 0
 }
@@ -402,7 +402,7 @@ func AddCommand(keyPath, command, description, code, language string, aliasOnly 
 	if update {
 		log.Highlightf("updated command %s\n", keyPath)
 	} else {
-		logFields(cmd, cfg.Spaceport().CoreManifest().Config.Verbose)
+		logFields(cmd, cfg.Spaceport().Config.Verbose)
 	}
 	return 0
 }
@@ -457,14 +457,14 @@ func MoveCommand(source, dest, manifest, description string, copy bool) int {
 	}
 
 	// Save destination manifest
-	if err := config.SaveManifest(dm, false); err != nil {
+	if err := cfg.SaveManifest(dm, false); err != nil {
 		log.Error(err)
 		return -1
 	}
 
 	// Save source manifest if required
 	if !copy && dm.Name != sm.Name {
-		if err := config.SaveManifest(sm, false); err != nil {
+		if err := cfg.SaveManifest(sm, false); err != nil {
 			log.Error(err)
 			return -1
 		}
@@ -519,7 +519,7 @@ func AddSubstitution(keyPath, name, alias string) int {
 		return -1
 	}
 
-	logFields(cmd, cfg.Spaceport().CoreManifest().Config.IsVerbose())
+	logFields(cmd, cfg.Spaceport().Config.IsVerbose())
 	return 0
 }
 
@@ -558,7 +558,7 @@ func EvalString(args []string) int {
 			continue
 		}
 
-		cmdStr, err = shell.EvalString(cmd, language, m.Config.IsVerbose())
+		cmdStr, err = shell.EvalString(cmd, language, cfg.Spaceport().Config.IsVerbose())
 		if err != nil {
 			continue
 		}
@@ -585,7 +585,7 @@ func Find(name string, exact, all bool) int {
 	}
 
 	sp := cfg.Spaceport()
-	verbose := sp.CoreManifest().Config.IsVerbose()
+	verbose := sp.Config.IsVerbose()
 
 	if !all {
 		if results := sp.FindCommands(name); len(results) > 0 {
@@ -765,7 +765,7 @@ func Detach(name string, keyPaths []string, targetKeyPath, description string, k
 
 	// Save manifests
 	for _, m := range saveList {
-		err = config.SaveManifest(m, false)
+		err = cfg.SaveManifest(m, false)
 		if err != nil {
 			log.Error(err)
 			return -1
@@ -799,7 +799,7 @@ func RegenerateID(name string) int {
 	v := version.NewInfo(ver.SemVer, ver.GitCommit, ver.BuildDate)
 	m.Version.Update(v)
 
-	err := config.SaveManifest(m, m.IsCore())
+	err := cfg.SaveManifest(m, m.IsCore())
 	if err != nil {
 		log.Error(err)
 		return -1
