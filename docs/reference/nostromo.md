@@ -33,7 +33,7 @@ substitutions to simplify calls.
 * [nostromo detach](nostromo_detach.md)	 - Detach a command node into a new manifest
 * [nostromo dock](nostromo_dock.md)	 - Dock nostromo manifests
 * [nostromo eval](nostromo_eval.md)	 - Show eval command from manifest
-* [nostromo find](nostromo_find.md)	 - Find matching commands and substitutions
+* [nostromo find](nostromo_find.md)	 - Find commands and substitutions by name or key path
 * [nostromo get](nostromo_get.md)	 - Get a config item from manifest
 * [nostromo init](nostromo_init.md)	 - Initialize nostromo configuration
 * [nostromo move](nostromo_move.md)	 - Move a command in nostromo manifest

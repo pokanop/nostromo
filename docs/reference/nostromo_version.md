@@ -19,7 +19,8 @@ nostromo version [flags]
 ## Options
 
 ```
-  -h, --help   help for version
+      --banner   print the nostromo ascii-art banner
+  -h, --help     help for version
 ```
 
 ## Options inherited from parent commands
