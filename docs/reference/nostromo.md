@@ -46,4 +46,5 @@ substitutions to simplify calls.
 * [nostromo update](nostromo_update.md)	 - Update a command in nostromo manifest
 * [nostromo uuidgen](nostromo_uuidgen.md)	 - Generate a new unique id for a manifest
 * [nostromo version](nostromo_version.md)	 - Print version of nostromo
+* [nostromo web](nostromo_web.md)	 - Serve a local web UI for editing manifests
 
