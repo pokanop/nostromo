@@ -17,6 +17,7 @@ type theme interface {
 	formatStyle(fieldStyle, string) aurora.Value
 	formatRegular(string) aurora.Value
 	formatHighlight(string) aurora.Value
+	formatBanner(string) aurora.Value
 }
 
 // ThemeToString conversion from ThemeType to string
@@ -81,6 +82,10 @@ func (t *defaultTheme) formatHighlight(text string) aurora.Value {
 	return aurora.Blue(text)
 }
 
+func (t *defaultTheme) formatBanner(text string) aurora.Value {
+	return aurora.Blue(text).Bold()
+}
+
 type grayscaleTheme struct{}
 
 func (t *grayscaleTheme) formatLevel(level logLevel, text string) aurora.Value {
@@ -117,6 +122,10 @@ func (t *grayscaleTheme) formatHighlight(text string) aurora.Value {
 	return aurora.Gray(20-1, text).BgGray(4 - 1)
 }
 
+func (t *grayscaleTheme) formatBanner(text string) aurora.Value {
+	return aurora.Gray(20-1, text).Bold()
+}
+
 type emojiTheme struct{}
 
 func (t *emojiTheme) formatLevel(level logLevel, text string) aurora.Value {
@@ -151,4 +160,8 @@ func (t *emojiTheme) formatRegular(text string) aurora.Value {
 
 func (t *emojiTheme) formatHighlight(text string) aurora.Value {
 	return aurora.Blue("🚀 " + text)
+}
+
+func (t *emojiTheme) formatBanner(text string) aurora.Value {
+	return aurora.Blue(text).Bold()
 }
