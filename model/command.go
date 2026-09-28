@@ -16,16 +16,16 @@ import (
 // Command is a scope for running one or more commands
 type Command struct {
 	parent      *Command
-	KeyPath     string                   `json:"keyPath"`
-	Name        string                   `json:"name"`
-	Alias       string                   `json:"alias"`
-	AliasOnly   bool                     `json:"aliasOnly"`
-	Description string                   `json:"description"`
-	Commands    map[string]*Command      `json:"commands"`
-	Subs        map[string]*Substitution `json:"subs"`
-	Code        *Code                    `json:"code"`
-	Mode        Mode                     `json:"mode"`
-	Disabled    bool                     `json:"disabled"`
+	KeyPath     string                   `json:"keyPath" yaml:"keyPath"`
+	Name        string                   `json:"name" yaml:"name"`
+	Alias       string                   `json:"alias" yaml:"alias"`
+	AliasOnly   bool                     `json:"aliasOnly" yaml:"aliasOnly"`
+	Description string                   `json:"description" yaml:"description"`
+	Commands    map[string]*Command      `json:"commands" yaml:"commands"`
+	Subs        map[string]*Substitution `json:"subs" yaml:"subs"`
+	Code        *Code                    `json:"code" yaml:"code"`
+	Mode        Mode                     `json:"mode" yaml:"mode"`
+	Disabled    bool                     `json:"disabled" yaml:"disabled"`
 	// Platforms this command is available on as GOOS or GOOS/GOARCH names,
 	// empty for all platforms. Children inherit the restriction.
 	Platforms []string `json:"platforms,omitempty" yaml:"platforms,omitempty"`

@@ -3,15 +3,15 @@ source: https://github.com/pokanop/nostromo/blob/main/examples/manifest.yaml
 path: /Users/gopher/.nostromo/ships/manifest.yaml
 version:
   uuid: 4b897259-290b-4975-a7a9-a37e6813273d
-  semver: 0.9.9
-  gitcommit: 2e19036fcc51c9af254ff0fa5fa849558308a985
-  builddate: '2022-02-06T08:21:54Z'
+  semVer: 0.9.9
+  gitCommit: 2e19036fcc51c9af254ff0fa5fa849558308a985
+  buildDate: '2022-02-06T08:21:54Z'
 commands:
   c:
-    keypath: c
+    keyPath: c
     name: clear
     alias: c
-    aliasonly: true
+    aliasOnly: true
     description: Clear the console
     commands: {}
     subs: {}
@@ -21,10 +21,10 @@ commands:
     mode: 0
     disabled: false
   cat:
-    keypath: cat
+    keyPath: cat
     name: bat
     alias: cat
-    aliasonly: false
+    aliasOnly: false
     description: Use bat as a better cat tool
     commands: {}
     subs: {}
@@ -34,10 +34,10 @@ commands:
     mode: 0
     disabled: false
   check:
-    keypath: check
+    keyPath: check
     name: which $1 > /dev/null 2>&1 && echo $1 exists || (echo $1 not found && exit 1)
     alias: check
-    aliasonly: false
+    aliasOnly: false
     description: Check if a command or tool is installed
     commands: {}
     subs: {}
@@ -47,10 +47,10 @@ commands:
     mode: 0
     disabled: false
   code:
-    keypath: code
+    keyPath: code
     name: command code
     alias: code
-    aliasonly: false
+    aliasOnly: false
     description: Shortcut with substitutions for VSCode
     commands: {}
     subs:
@@ -66,17 +66,17 @@ commands:
     mode: 0
     disabled: false
   copy:
-    keypath: copy
+    keyPath: copy
     name: ''
     alias: copy
-    aliasonly: false
+    aliasOnly: false
     description: ''
     commands:
       ssh:
-        keypath: copy.ssh
+        keyPath: copy.ssh
         name: cat ~/.ssh/id_rsa.pub | pbcopy
         alias: ssh
-        aliasonly: false
+        aliasOnly: false
         description: Copy ssh public key to pasteboard
         commands: {}
         subs: {}
@@ -94,17 +94,17 @@ commands:
     mode: 0
     disabled: false
   dock:
-    keypath: dock
+    keyPath: dock
     name: docker
     alias: dock
-    aliasonly: false
+    aliasOnly: false
     description: Alias for docker
     commands:
       clean:
-        keypath: dock.clean
+        keyPath: dock.clean
         name: ps -a -q |xargs docker rm
         alias: clean
-        aliasonly: false
+        aliasOnly: false
         description: Remove Docker containers using docker rm
         commands: {}
         subs: {}
@@ -116,10 +116,10 @@ commands:
         env:
           COMPOSE_PROJECT_NAME: scratch
       rmi:
-        keypath: dock.rmi
+        keyPath: dock.rmi
         name: rmi $(docker images -q)
         alias: rmi
-        aliasonly: false
+        aliasOnly: false
         description: Remove Docker images using docker rmi
         commands: {}
         subs: {}
@@ -129,10 +129,10 @@ commands:
         mode: 0
         disabled: false
       stop:
-        keypath: dock.stop
+        keyPath: dock.stop
         name: ps -q |xargs docker stop
         alias: stop
-        aliasonly: false
+        aliasOnly: false
         description: Stop running Docker containers
         commands: {}
         subs: {}
@@ -142,10 +142,10 @@ commands:
         mode: 0
         disabled: false
       vol:
-        keypath: dock.vol
+        keyPath: dock.vol
         name: volume rm $(docker volume ls -qf dangling=true)
         alias: vol
-        aliasonly: false
+        aliasOnly: false
         description: Remove dangling Docker volumes
         commands: {}
         subs: {}
@@ -166,17 +166,17 @@ commands:
     dotenv:
       - ~/.nostromo/docker.env
   edit:
-    keypath: edit
+    keyPath: edit
     name: ''
     alias: edit
-    aliasonly: false
+    aliasOnly: false
     description: ''
     commands:
       bash:
-        keypath: edit.bash
+        keyPath: edit.bash
         name: vim ~/.bashrc
         alias: bash
-        aliasonly: false
+        aliasOnly: false
         description: Edit bashrc config file using vim
         commands: {}
         subs: {}
@@ -186,10 +186,10 @@ commands:
         mode: 0
         disabled: false
       bash_profile:
-        keypath: edit.bash_profile
+        keyPath: edit.bash_profile
         name: vim ~/.bash_profile
         alias: bash_profile
-        aliasonly: false
+        aliasOnly: false
         description: Edit bash_profile config file using vim
         commands: {}
         subs: {}
@@ -199,10 +199,10 @@ commands:
         mode: 0
         disabled: false
       nostromo:
-        keypath: edit.nostromo
+        keyPath: edit.nostromo
         name: vim ~/.nostromo/manifest.yaml
         alias: nostromo
-        aliasonly: false
+        aliasOnly: false
         description: Edit nostromo manifest file using vim
         commands: {}
         subs: {}
@@ -212,10 +212,10 @@ commands:
         mode: 0
         disabled: false
       p10k:
-        keypath: edit.p10k
+        keyPath: edit.p10k
         name: vim ~/.p10k.zsh
         alias: p10k
-        aliasonly: false
+        aliasOnly: false
         description: Edit p10k config file in vim
         commands: {}
         subs: {}
@@ -225,10 +225,10 @@ commands:
         mode: 0
         disabled: false
       profile:
-        keypath: edit.profile
+        keyPath: edit.profile
         name: vim ~/.profile
         alias: profile
-        aliasonly: false
+        aliasOnly: false
         description: Edit profile config file using vim
         commands: {}
         subs: {}
@@ -238,17 +238,17 @@ commands:
         mode: 0
         disabled: false
       ssh:
-        keypath: edit.ssh
+        keyPath: edit.ssh
         name: vim ~/.ssh/config
         alias: ssh
-        aliasonly: false
+        aliasOnly: false
         description: Edit ssh config file in vim
         commands:
           hosts:
-            keypath: edit.ssh.hosts
+            keyPath: edit.ssh.hosts
             name: vim ~/.ssh/hosts
             alias: hosts
-            aliasonly: false
+            aliasOnly: false
             description: Edit ssh hosts file in vim
             commands: {}
             subs: {}
@@ -264,10 +264,10 @@ commands:
         mode: 0
         disabled: false
       terminalizer:
-        keypath: edit.terminalizer
+        keyPath: edit.terminalizer
         name: vim ~/.terminalizer/config.yml
         alias: terminalizer
-        aliasonly: false
+        aliasOnly: false
         description: Edit terminalizer config file
         commands: {}
         subs: {}
@@ -277,10 +277,10 @@ commands:
         mode: 0
         disabled: false
       zsh:
-        keypath: edit.zsh
+        keyPath: edit.zsh
         name: vim ~/.zshrc
         alias: zsh
-        aliasonly: false
+        aliasOnly: false
         description: Edit zsh config file using vim
         commands: {}
         subs: {}
@@ -296,10 +296,10 @@ commands:
     mode: 0
     disabled: false
   gcdf:
-    keypath: gcdf
+    keyPath: gcdf
     name: git clean -df
     alias: gcdf
-    aliasonly: true
+    aliasOnly: true
     description: Clean untracked directories and files in Git
     commands: {}
     subs: {}
@@ -309,17 +309,17 @@ commands:
     mode: 0
     disabled: false
   ios:
-    keypath: ios
+    keyPath: ios
     name: ''
     alias: ios
-    aliasonly: false
+    aliasOnly: false
     description: ''
     commands:
       record:
-        keypath: ios.record
+        keyPath: ios.record
         name: xcrun simctl io booted recordVideo $1 --codec h264
         alias: record
-        aliasonly: false
+        aliasOnly: false
         description: Record a video of iOS Simulator
         commands: {}
         subs: {}
@@ -329,10 +329,10 @@ commands:
         mode: 0
         disabled: false
       snap:
-        keypath: ios.snap
+        keyPath: ios.snap
         name: xcrun simctl io booted screenshot $1
         alias: snap
-        aliasonly: false
+        aliasOnly: false
         description: Take a screenshot on iOS Simulator
         commands: {}
         subs: {}
@@ -348,17 +348,17 @@ commands:
     mode: 0
     disabled: false
   ip:
-    keypath: ip
+    keyPath: ip
     name: ''
     alias: ip
-    aliasonly: false
+    aliasOnly: false
     description: ''
     commands:
       local:
-        keypath: ip.local
+        keyPath: ip.local
         name: ifconfig en0 | grep --word-regexp inet | awk "{print $2}"
         alias: local
-        aliasonly: false
+        aliasOnly: false
         description: Print local IP address
         commands: {}
         subs: {}
@@ -368,10 +368,10 @@ commands:
         mode: 0
         disabled: false
       public:
-        keypath: ip.public
+        keyPath: ip.public
         name: curl ifconfig.me
         alias: public
-        aliasonly: false
+        aliasOnly: false
         description: Print public IP address
         commands: {}
         subs: {}
@@ -387,17 +387,17 @@ commands:
     mode: 0
     disabled: false
   nuke:
-    keypath: nuke
+    keyPath: nuke
     name: ''
     alias: nuke
-    aliasonly: false
+    aliasOnly: false
     description: ''
     commands:
       docker:
-        keypath: nuke.docker
+        keyPath: nuke.docker
         name: dock stop && dock clean && dock rmi
         alias: docker
-        aliasonly: false
+        aliasOnly: false
         description: Nuke docker by stopping, cleaning and removing images
         commands: {}
         subs: {}
@@ -407,10 +407,10 @@ commands:
         mode: 0
         disabled: false
       ds:
-        keypath: nuke.ds
+        keyPath: nuke.ds
         name: find . -type f -name '*.DS_Store' -ls -delete
         alias: ds
-        aliasonly: false
+        aliasOnly: false
         description: Nuke all those pesky .DS_Store files
         commands: {}
         subs: {}
@@ -426,10 +426,10 @@ commands:
     mode: 0
     disabled: false
   reload:
-    keypath: reload
+    keyPath: reload
     name: . ~/.zshrc
     alias: reload
-    aliasonly: false
+    aliasOnly: false
     description: Reload shell env by sourcing init file
     commands: {}
     subs: {}

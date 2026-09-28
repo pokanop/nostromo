@@ -6,11 +6,11 @@ var verbose bool
 
 // Config model for holding nostromo settings
 type Config struct {
-	Verbose     bool          `json:"verbose"`
-	AliasesOnly bool          `json:"aliasesOnly"`
-	Mode        Mode          `json:"mode"`
-	BackupCount int           `json:"backupCount"`
-	Theme       log.ThemeType `json:"theme"`
+	Verbose     bool          `json:"verbose" yaml:"verbose"`
+	AliasesOnly bool          `json:"aliasesOnly" yaml:"aliasesOnly"`
+	Mode        Mode          `json:"mode" yaml:"mode"`
+	BackupCount int           `json:"backupCount" yaml:"backupCount"`
+	Theme       log.ThemeType `json:"theme" yaml:"theme"`
 }
 
 // Create a new config model with default values
