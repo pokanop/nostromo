@@ -37,6 +37,8 @@ substitutions to simplify calls.
 * [nostromo find](nostromo_find.md)	 - Find commands and substitutions by name or key path
 * [nostromo get](nostromo_get.md)	 - Get a config item from the spaceport
 * [nostromo init](nostromo_init.md)	 - Initialize nostromo configuration
+* [nostromo link](nostromo_link.md)	 - Link a manifest as a dependency
+* [nostromo links](nostromo_links.md)	 - Show the manifest dependency graph
 * [nostromo move](nostromo_move.md)	 - Move a command in nostromo manifest
 * [nostromo remove](nostromo_remove.md)	 - Remove command or substitution
 * [nostromo rename](nostromo_rename.md)	 - Rename a command in nostromo manifest
@@ -44,6 +46,7 @@ substitutions to simplify calls.
 * [nostromo show](nostromo_show.md)	 - Show nostromo configuration
 * [nostromo sync](nostromo_sync.md)	 - Sync docked manifests from source locations
 * [nostromo undock](nostromo_undock.md)	 - Undock nostromo manifests
+* [nostromo unlink](nostromo_unlink.md)	 - Unlink a manifest dependency
 * [nostromo update](nostromo_update.md)	 - Update a command in nostromo manifest
 * [nostromo uuidgen](nostromo_uuidgen.md)	 - Generate a new unique id for a manifest
 * [nostromo version](nostromo_version.md)	 - Print version of nostromo
