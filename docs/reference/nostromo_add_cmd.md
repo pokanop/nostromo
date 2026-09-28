@@ -35,6 +35,15 @@ are not aliased or completed in the shell and cannot be run:
 
     nostromo add cmd foo.bar "pbcopy" --platforms darwin
 
+Environment variables can be exported before a command runs with -e or --env
+and loaded from .env files with --dotenv. Both are inherited by sub commands
+which may override them, and values may reference other variables:
+
+    nostromo add cmd foo "cd ~/foo" --dotenv ~/foo/.env --env APP_ENV=dev
+    nostromo add cmd foo.bar "make" --env BIN='$PWD/bin:$PATH'
+
+Use "nostromo env foo.bar" to see the effective environment for a command.
+
 ```
 nostromo add cmd [key.path] [command] [options] [flags]
 ```
@@ -42,13 +51,16 @@ nostromo add cmd [key.path] [command] [options] [flags]
 ## Options
 
 ```
-  -a, --alias-only           Add shell alias only, not a nostromo command
-  -c, --code string          Code snippet to run for this command
-  -d, --description string   Description of the command to add
-  -h, --help                 help for cmd
-  -l, --language string      Language of code snippet (e.g., ruby, python, perl, js)
-  -m, --mode string          Set the mode for the command (concatenate, independent, exclusive)
-  -p, --platforms strings    Limit the command to platforms (e.g., linux,darwin,windows/arm64)
+  -a, --alias-only              Add shell alias only, not a nostromo command
+  -c, --code string             Code snippet to run for this command
+  -d, --description string      Description of the command to add
+      --dotenv stringArray      Load a .env file before running (~ and $VARS expanded), repeatable
+  -e, --env stringArray         Export an env var as KEY=VALUE before running, repeatable
+  -h, --help                    help for cmd
+  -l, --language string         Language of code snippet (e.g., ruby, python, perl, js)
+  -m, --mode string             Set the mode for the command (concatenate, independent, exclusive)
+  -p, --platforms strings       Limit the command to platforms (e.g., linux,darwin,windows/arm64)
+      --unset-env stringArray   Remove an env var by KEY, repeatable
 ```
 
 ## Options inherited from parent commands

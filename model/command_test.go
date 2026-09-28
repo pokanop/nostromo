@@ -22,9 +22,9 @@ func TestNewCommand(t *testing.T) {
 		code        *Code
 		expected    *Command
 	}{
-		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil}},
-		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil}},
-		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil}},
+		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil, nil, nil}},
+		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil, nil, nil}},
+		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil, nil, nil}},
 	}
 
 	for _, test := range tests {
@@ -313,7 +313,7 @@ func TestKeys(t *testing.T) {
 		command  *Command
 		expected []string
 	}{
-		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled", "platforms"}},
+		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled", "platforms", "env", "dotenv"}},
 	}
 
 	for _, test := range tests {
@@ -346,6 +346,8 @@ func TestFields(t *testing.T) {
 				"aliasOnly":     false,
 				"disabled":      false,
 				"platforms":     "",
+				"env":           "",
+				"dotenv":        "",
 			},
 		},
 	}

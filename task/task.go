@@ -378,7 +378,7 @@ func AddInteractive() int {
 		}
 		log.Highlight("\nCreating command...\n")
 
-		return AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode, platforms, false)
+		return AddCommand(keypath, cmd, description, snippet, language, aliasOnly, mode, platforms, model.EnvChanges{}, false)
 	}
 
 	log.Regularf("A key path is a dot '.' delimited path to where you want to add your command.\n")
@@ -400,13 +400,13 @@ func AddInteractive() int {
 // AddCommand to the manifest
 //
 // A nil platforms list keeps the existing platforms when updating a command.
-func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string, platforms []string, update bool) int {
+func AddCommand(keyPath, command, description, code, language string, aliasOnly bool, mode string, platforms []string, env model.EnvChanges, update bool) int {
 	cfg := checkConfig()
 	if cfg == nil {
 		return -1
 	}
 
-	cmd, err := AddCommandToConfig(cfg, keyPath, command, description, code, language, aliasOnly, mode, platforms, update)
+	cmd, err := AddCommandToConfig(cfg, keyPath, command, description, code, language, aliasOnly, mode, platforms, env, update)
 	if err != nil {
 		log.Error(err)
 		return -1
@@ -554,7 +554,10 @@ func RemoveSubstitution(keyPath, alias string) int {
 }
 
 // EvalString returns a command that can be used with `eval`
-func EvalString(args []string) int {
+//
+// The output includes exports for the command's effective environment
+// rendered for sh, see shell.EvalString.
+func EvalString(sh string, args []string) int {
 	log.SetEcho(true)
 
 	cfg := checkConfig()
@@ -565,13 +568,19 @@ func EvalString(args []string) int {
 	var cmdStr string
 	var err error
 	for _, m := range cfg.Spaceport().Manifests() {
-		var language, cmd string
-		language, cmd, err = m.ExecutionString(args)
+		var c *model.Command
+		var rest []string
+		c, rest, err = m.Resolve(args)
 		if err != nil {
 			continue
 		}
 
-		cmdStr, err = shell.EvalString(cmd, language, cfg.Spaceport().Config.IsVerbose())
+		vars, errs := c.Environment()
+		for _, e := range errs {
+			log.Warning(e)
+		}
+
+		cmdStr, err = shell.EvalString(sh, c.ExecutionString(rest), c.Code.Language, vars, cfg.Spaceport().Config.IsVerbose())
 		if err != nil {
 			continue
 		}
@@ -584,6 +593,49 @@ func EvalString(args []string) int {
 	}
 
 	log.Print(cmdStr)
+	return 0
+}
+
+// Env prints the effective environment for the command at key path
+//
+// Vars print as KEY=VALUE lines, or as export statements for sh when given.
+// Verbose output appends where each var was defined as a comment.
+func Env(keyPath, sh string) int {
+	cfg := checkConfig()
+	if cfg == nil {
+		return -1
+	}
+
+	var cmd *model.Command
+	for _, m := range cfg.Spaceport().Manifests() {
+		if cmd = m.Find(keyPath); cmd != nil {
+			break
+		}
+	}
+	if cmd == nil {
+		log.Error("command not found")
+		return -1
+	}
+
+	vars, errs := cmd.Environment()
+	for _, err := range errs {
+		log.Warning(err)
+	}
+
+	verbose := cfg.Spaceport().Config.IsVerbose()
+	for _, v := range vars {
+		var line string
+		if len(sh) > 0 {
+			line = shell.Export(sh, v)
+		} else {
+			line = v.Key + "=" + v.Value
+		}
+		if verbose {
+			line += "  # " + v.Source
+		}
+		log.Regular(line)
+	}
+
 	return 0
 }
 
