@@ -16,6 +16,66 @@ archives:
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
+    # Scoop, Winget and Chocolatey can only consume zip archives on Windows.
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+# Linux packages attached to the GitHub release. These need no external
+# repository: Debian/Ubuntu (.deb), Fedora/RHEL (.rpm), Alpine (.apk) and
+# Arch (.pkg.tar.zst) users can download and install them directly.
+nfpms:
+  - id: packages
+    package_name: nostromo
+    file_name_template: '{{ .ConventionalFileName }}'
+    vendor: pokanop
+    homepage: 'https://nostromo.sh'
+    maintainer: 'Sahel Jalal <sahel@pokanop.com>'
+    description: 'CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.'
+    license: MIT
+    section: utils
+    priority: optional
+    bindir: /usr/bin
+    formats:
+      - deb
+      - rpm
+      - apk
+      - archlinux
+    contents:
+      - src: LICENSE
+        dst: /usr/share/licenses/nostromo/LICENSE
+        file_info:
+          mode: 0644
+      - src: README.md
+        dst: /usr/share/doc/nostromo/README.md
+        file_info:
+          mode: 0644
+    archlinux:
+      packager: 'Sahel Jalal <sahel@pokanop.com>'
+
+# Snap package published to the Snap Store. nostromo edits shell startup files
+# (~/.bashrc, ~/.zshrc, ...) and ~/.nostromo, which strict confinement does not
+# allow, so it needs classic confinement (requires manual store approval).
+# Disabled until SNAPCRAFT_STORE_CREDENTIALS (snapcraft export-login) is set,
+# so releases keep working without a store account.
+snapcrafts:
+  - id: snap
+    name: nostromo
+    title: nostromo
+    summary: 'Build declarative aliases and multi-dimensional shell tools on the fly.'
+    description: |
+      nostromo is a CLI to rapidly build declarative aliases making
+      multi-dimensional tools on the fly. Manage scoped aliases and
+      substitutions through simple commands, and share them as manifests.
+    license: MIT
+    grade: stable
+    confinement: classic
+    base: core22
+    publish: true
+    disable: '{{ not (isEnvSet "SNAPCRAFT_STORE_CREDENTIALS") }}'
+    apps:
+      nostromo:
+        command: nostromo
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -99,3 +159,107 @@ brews:
     # Default is 'bin.install "program"'.
     install: |
       bin.install "nostromo"
+
+# Scoop (Windows). Pushes a manifest to the pokanop/scoop-bucket repository.
+# Requires SCOOP_BUCKET_TOKEN (PAT with contents:write on that repo); the
+# upload is skipped when the token is not configured.
+scoops:
+  - name: nostromo
+    repository:
+      owner: pokanop
+      name: scoop-bucket
+      token: '{{ .Env.SCOOP_BUCKET_TOKEN }}'
+    directory: bucket
+    url_template: 'https://github.com/pokanop/nostromo/releases/download/{{ .Tag }}/{{ .ArtifactName }}'
+    commit_author:
+      name: saheljalal
+      email: sahel@pokanop.com
+    commit_msg_template: 'nostromo: update to {{ .Tag }}'
+    homepage: 'https://nostromo.sh'
+    description: 'CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.'
+    license: MIT
+    skip_upload: '{{ if isEnvSet "SCOOP_BUCKET_TOKEN" }}auto{{ else }}true{{ end }}'
+
+# AUR (Arch Linux). Pushes a PKGBUILD for nostromo-bin over SSH.
+# Requires AUR_KEY (private SSH key registered on the AUR account that owns
+# the nostromo-bin package); the upload is skipped when it is not configured.
+aurs:
+  - name: nostromo-bin
+    homepage: 'https://nostromo.sh'
+    description: 'CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.'
+    maintainers:
+      - 'Sahel Jalal <sahel@pokanop.com>'
+    license: MIT
+    provides:
+      - nostromo
+    conflicts:
+      - nostromo
+    private_key: '{{ .Env.AUR_KEY }}'
+    git_url: 'ssh://aur@aur.archlinux.org/nostromo-bin.git'
+    git_ssh_command: 'ssh -i {{ .KeyPath }} -o StrictHostKeyChecking=accept-new -F /dev/null'
+    url_template: 'https://github.com/pokanop/nostromo/releases/download/{{ .Tag }}/{{ .ArtifactName }}'
+    commit_author:
+      name: saheljalal
+      email: sahel@pokanop.com
+    commit_msg_template: 'Update to {{ .Tag }}'
+    skip_upload: '{{ if isEnvSet "AUR_KEY" }}auto{{ else }}true{{ end }}'
+    package: |-
+      install -Dm755 "./nostromo" "${pkgdir}/usr/bin/nostromo"
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/nostromo/LICENSE"
+
+# Nix (NUR-style repository). Writes pkgs/nostromo/default.nix to
+# pokanop/nur-packages. Requires NUR_GITHUB_TOKEN (PAT with contents:write on
+# that repo) and nix-hash on the release runner; skipped otherwise.
+nix:
+  - name: nostromo
+    repository:
+      owner: pokanop
+      name: nur-packages
+      token: '{{ .Env.NUR_GITHUB_TOKEN }}'
+    path: pkgs/nostromo/default.nix
+    url_template: 'https://github.com/pokanop/nostromo/releases/download/{{ .Tag }}/{{ .ArtifactName }}'
+    commit_author:
+      name: saheljalal
+      email: sahel@pokanop.com
+    commit_msg_template: 'nostromo: {{ .PreviousTag }} -> {{ .Tag }}'
+    homepage: 'https://nostromo.sh'
+    description: 'CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.'
+    license: mit
+    skip_upload: '{{ if isEnvSet "NUR_GITHUB_TOKEN" }}auto{{ else }}true{{ end }}'
+
+# Winget (Windows). Commits a manifest to the pokanop/winget-pkgs fork and
+# opens a pull request against microsoft/winget-pkgs. Requires
+# WINGET_GITHUB_TOKEN (PAT with contents:write + pull_requests:write on the
+# fork); the upload is skipped when it is not configured.
+winget:
+  - name: nostromo
+    publisher: pokanop
+    publisher_url: 'https://github.com/pokanop'
+    publisher_support_url: 'https://github.com/pokanop/nostromo/issues'
+    package_identifier: pokanop.nostromo
+    short_description: 'CLI to rapidly build declarative aliases making multi-dimensional tools on the fly.'
+    description: 'nostromo is a CLI to manage aliases through simple commands to add and remove scoped aliases and substitutions.'
+    homepage: 'https://nostromo.sh'
+    license: MIT
+    license_url: 'https://github.com/pokanop/nostromo/blob/main/LICENSE'
+    release_notes_url: 'https://github.com/pokanop/nostromo/releases/tag/{{ .Tag }}'
+    url_template: 'https://github.com/pokanop/nostromo/releases/download/{{ .Tag }}/{{ .ArtifactName }}'
+    tags:
+      - alias
+      - cli
+      - shell
+    commit_author:
+      name: saheljalal
+      email: sahel@pokanop.com
+    repository:
+      owner: pokanop
+      name: winget-pkgs
+      token: '{{ .Env.WINGET_GITHUB_TOKEN }}'
+      pull_request:
+        enabled: true
+        draft: false
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+    skip_upload: '{{ if isEnvSet "WINGET_GITHUB_TOKEN" }}auto{{ else }}true{{ end }}'
