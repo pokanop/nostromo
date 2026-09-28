@@ -80,6 +80,62 @@ func TestManifestRemoveCommand(t *testing.T) {
 	}
 }
 
+func TestManifestRenameCommand(t *testing.T) {
+	tests := []struct {
+		name     string
+		keyPath  string
+		newName  string
+		manifest *Manifest
+		expErr   bool
+		expPath  string
+	}{
+		{"missing command", "missing", "new", fakeManifest(1, 1), true, ""},
+		{"empty name", "0-one-alias", "", fakeManifest(1, 1), true, ""},
+		{"dotted name", "0-one-alias", "a.b", fakeManifest(1, 1), true, ""},
+		{"existing sibling", "0-one-alias", "1-one-alias", fakeManifest(2, 1), true, ""},
+		{"same name", "0-one-alias", "0-one-alias", fakeManifest(1, 2), false, "0-one-alias"},
+		{"root command", "0-one-alias", "renamed", fakeManifest(1, 2), false, "renamed"},
+		{"nested command", "0-one-alias.0-two-alias", "renamed", fakeManifest(1, 3), false, "0-one-alias.renamed"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			before := test.manifest.count()
+			err := test.manifest.RenameCommand(test.keyPath, test.newName, "")
+			if test.expErr {
+				if err == nil {
+					t.Errorf("expected error but got none")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected no error but got %s", err)
+			}
+			cmd := test.manifest.Find(test.expPath)
+			if cmd == nil {
+				t.Fatalf("expected to find renamed command at %s", test.expPath)
+			}
+			if cmd.KeyPath != test.expPath || cmd.Alias != test.newName {
+				t.Errorf("expected keypath %s alias %s, got %s %s", test.expPath, test.newName, cmd.KeyPath, cmd.Alias)
+			}
+			for _, child := range cmd.Commands {
+				if !strings.HasPrefix(child.KeyPath, test.expPath+".") {
+					t.Errorf("child keypath %s not updated", child.KeyPath)
+				}
+			}
+			if test.keyPath != test.expPath && test.manifest.Find(test.keyPath) != nil {
+				t.Errorf("old keypath %s still resolves", test.keyPath)
+			}
+			if count := test.manifest.count(); count != before {
+				t.Errorf("expected %d commands but got %d", before, count)
+			}
+			if _, err := test.manifest.RemoveCommand(test.expPath); err != nil {
+				t.Errorf("expected renamed command to be removable: %s", err)
+			}
+		})
+	}
+}
+
 func TestManifestAddSubstitution(t *testing.T) {
 	tests := []struct {
 		name     string

@@ -26,3 +26,4 @@
 * [update](nostromo_update.md)
 * [uuidgen](nostromo_uuidgen.md)
 * [version](nostromo_version.md)
+* [web](nostromo_web.md)
