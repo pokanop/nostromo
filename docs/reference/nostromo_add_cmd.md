@@ -28,6 +28,13 @@ You can set using -m or --mode when adding a command or globally using:
 
     nostromo set mode <mode>
 
+A command can be limited to specific platforms with -p or --platforms using
+Go OS names (e.g., linux, darwin, windows) or OS/arch pairs (e.g., linux/arm64).
+Commands unavailable on the current platform, including their sub commands,
+are not aliased or completed in the shell and cannot be run:
+
+    nostromo add cmd foo.bar "pbcopy" --platforms darwin
+
 ```
 nostromo add cmd [key.path] [command] [options] [flags]
 ```
@@ -41,6 +48,7 @@ nostromo add cmd [key.path] [command] [options] [flags]
   -h, --help                 help for cmd
   -l, --language string      Language of code snippet (e.g., ruby, python, perl, js)
   -m, --mode string          Set the mode for the command (concatenate, independent, exclusive)
+  -p, --platforms strings    Limit the command to platforms (e.g., linux,darwin,windows/arm64)
 ```
 
 ## Options inherited from parent commands

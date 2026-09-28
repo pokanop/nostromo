@@ -113,9 +113,10 @@ func ManifestCompletion(sh string, m *model.Manifest) ([]string, error) {
 	var completions []string
 	completions = append(completions, shellAliasFuncs(sh, m))
 	for _, cmd := range m.Commands {
-		// Skip completion scripts for leaf nodes or pure aliases.
-		// This allows for it to fallback to the shell's lookups.
-		if cmd.AliasOnly || len(cmd.Commands) == 0 {
+		// Skip completion scripts for leaf nodes, pure aliases and commands
+		// unavailable on this platform. This allows for it to fallback to
+		// the shell's lookups.
+		if cmd.AliasOnly || len(cmd.Commands) == 0 || !cmd.IsAvailable() {
 			continue
 		}
 		s, err := CommandCompletion(sh, cmd)

@@ -121,6 +121,55 @@ func TestShellAliasFuncs(t *testing.T) {
 	}
 }
 
+func TestShellAliasFuncsSkipUnavailable(t *testing.T) {
+	t.Setenv(model.PlatformEnv, "windows/amd64")
+	tests := []struct {
+		sh   string
+		want string
+	}{
+		{Bash, "\nalias three='command'\none() { eval $(__nostromo_cmd eval one \"$@\"); }\n"},
+		{Zsh, "\nalias three='command'\none() { eval $(__nostromo_cmd eval one \"$@\"); }\n"},
+		{Fish, "\nalias three='command'\nfunction one; eval (__nostromo_cmd eval one $argv | string collect); end\n"},
+		{Powershell, "\nfunction one { Invoke-Expression (__nostromo_cmd eval one @args | Out-String) }\nfunction three { command @args }\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.sh, func(t *testing.T) {
+			m := fakeManifest()
+			m.Find("two").Platforms = []string{"linux", "darwin"}
+			m.Find("one.two.three").Platforms = []string{"windows"}
+			if got := shellAliasFuncs(tt.sh, m); got != tt.want {
+				t.Errorf("shellAliasFuncs() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestManifestCompletionSkipsUnavailable(t *testing.T) {
+	t.Setenv(model.PlatformEnv, "windows/amd64")
+	for _, sh := range allShells {
+		t.Run(sh, func(t *testing.T) {
+			m := fakeManifest()
+			m.Find("two").Platforms = []string{"linux", "darwin"}
+			m.Find("one.two").Platforms = []string{"linux"}
+			completions, err := ManifestCompletion(sh, m)
+			if err != nil {
+				t.Fatalf("ManifestCompletion(%s) error: %v", sh, err)
+			}
+			joined := strings.Join(completions, "\n")
+			if !strings.Contains(joined, "__nostromo_cmd __complete run one ") {
+				t.Errorf("%s completion missing available command one", sh)
+			}
+			if strings.Contains(joined, "__nostromo_cmd __complete run two ") {
+				t.Errorf("%s completion includes unavailable command two", sh)
+			}
+			cmd := m.Find("one").CobraCommand()
+			if len(cmd.Commands()) != 0 {
+				t.Errorf("CobraCommand() for one includes unavailable child two")
+			}
+		})
+	}
+}
+
 func TestShellAliasFuncAliasOnly(t *testing.T) {
 	c := &model.Command{Alias: "gs", Name: "git status", AliasOnly: true}
 	tests := []struct {
@@ -225,9 +274,9 @@ func TestSpaceportCompletionPerShell(t *testing.T) {
 
 func fakeManifest() *model.Manifest {
 	m, _ := config.NewCoreManifest()
-	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate")
+	m.AddCommand("one.two.three", "command", "", &model.Code{}, false, "concatenate", nil)
 	m.AddSubstitution("one.two", "name", "alias")
-	m.AddCommand("two", "command", "", &model.Code{}, false, "concatenate")
-	m.AddCommand("three", "command", "", &model.Code{}, true, "concatenate")
+	m.AddCommand("two", "command", "", &model.Code{}, false, "concatenate", nil)
+	m.AddCommand("three", "command", "", &model.Code{}, true, "concatenate", nil)
 	return m
 }

@@ -10,7 +10,7 @@ import (
 func searchManifest(name string, cmds map[string]string, subs map[string][]string) *Manifest {
 	m := NewManifest(name, "", "", version.NewInfo("1.0.0", "", ""))
 	for keyPath, command := range cmds {
-		_, _ = m.AddCommand(keyPath, command, "", nil, false, "")
+		_, _ = m.AddCommand(keyPath, command, "", nil, false, "", nil)
 	}
 	for keyPath, sub := range subs {
 		_ = m.AddSubstitution(keyPath, sub[0], sub[1])

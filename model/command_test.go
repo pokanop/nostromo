@@ -22,14 +22,14 @@ func TestNewCommand(t *testing.T) {
 		code        *Code
 		expected    *Command
 	}{
-		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false}},
-		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false}},
-		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false}},
+		{"empty alias", "cmd", "", false, "", nil, &Command{nil, "cmd", "cmd", "cmd", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil}},
+		{"empty name", "", "alias", false, "", nil, &Command{nil, "alias", "", "alias", false, "", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil}},
+		{"valid alias", "cmd", "cmd-alias", false, "description", nil, &Command{nil, "cmd-alias", "cmd", "cmd-alias", false, "description", map[string]*Command{}, map[string]*Substitution{}, &Code{}, ConcatenateMode, false, nil}},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual := newCommand(test.cmdName, test.alias, test.description, test.code, test.aliasOnly, ConcatenateMode.String())
+			actual := newCommand(test.cmdName, test.alias, test.description, test.code, test.aliasOnly, ConcatenateMode.String(), nil)
 			if !reflect.DeepEqual(test.expected, actual) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
 			}
@@ -281,7 +281,7 @@ func TestBuild(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.command.build(test.keyPath, test.commandStr, "", &Code{}, test.aliasOnly, ConcatenateMode.String())
+			test.command.build(test.keyPath, test.commandStr, "", &Code{}, test.aliasOnly, ConcatenateMode.String(), nil)
 			if !reflect.DeepEqual(test.expected, test.command) {
 				t.Errorf("expected: %s, actual: %s", test.expected, test.command)
 			}
@@ -313,7 +313,7 @@ func TestKeys(t *testing.T) {
 		command  *Command
 		expected []string
 	}{
-		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled"}},
+		{"keys", fakeCommand(1), []string{"keypath", "alias", "command", "description", "commands", "substitutions", "code", "mode", "aliasOnly", "disabled", "platforms"}},
 	}
 
 	for _, test := range tests {
@@ -345,6 +345,7 @@ func TestFields(t *testing.T) {
 				"mode":          "concatenate",
 				"aliasOnly":     false,
 				"disabled":      false,
+				"platforms":     "",
 			},
 		},
 	}
@@ -353,6 +354,32 @@ func TestFields(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if actual := test.command.Fields(); !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("expected: %s, actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
+
+func TestPlatformsField(t *testing.T) {
+	t.Setenv(PlatformEnv, "windows/amd64")
+
+	tests := []struct {
+		name      string
+		keypath   string
+		platforms []string
+		check     string
+		want      string
+	}{
+		{"no platforms", "one-alias", nil, "one-alias", ""},
+		{"available", "one-alias", []string{"windows", "linux"}, "one-alias", "windows, linux"},
+		{"unavailable", "one-alias", []string{"linux", "darwin"}, "one-alias", "linux, darwin (unavailable on windows/amd64)"},
+		{"unavailable via parent", "one-alias", []string{"darwin"}, "one-alias.two-alias", "unavailable on windows/amd64 via one-alias"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			root := fakeCommand(2)
+			root.find(tt.keypath).Platforms = tt.platforms
+			if got := root.find(tt.check).Fields()["platforms"]; got != tt.want {
+				t.Errorf("Fields()[platforms] = %q, want %q", got, tt.want)
 			}
 		})
 	}
@@ -480,6 +507,64 @@ func TestCheckDisabled(t *testing.T) {
 	}
 }
 
+func TestCheckUnavailable(t *testing.T) {
+	tests := []struct {
+		name      string
+		platform  string
+		keypath   string
+		platforms []string
+		check     string
+		want      bool
+		wantAt    string
+	}{
+		{"no platforms", "linux/amd64", "one-alias", nil, "one-alias.two-alias", false, ""},
+		{"os match", "linux/amd64", "one-alias", []string{"darwin", "linux"}, "one-alias", false, ""},
+		{"os mismatch", "windows/amd64", "one-alias", []string{"darwin", "linux"}, "one-alias", true, "one-alias"},
+		{"arch match", "linux/arm64", "one-alias", []string{"linux/arm64"}, "one-alias", false, ""},
+		{"arch mismatch", "linux/amd64", "one-alias", []string{"linux/arm64"}, "one-alias", true, "one-alias"},
+		{"override without arch", "linux", "one-alias", []string{"linux/arm64"}, "one-alias", false, ""},
+		{"inherited from parent", "windows/amd64", "one-alias", []string{"darwin"}, "one-alias.two-alias.three-alias", true, "one-alias"},
+		{"leaf restricted", "windows/amd64", "one-alias.two-alias.three-alias", []string{"darwin"}, "one-alias.two-alias.three-alias", true, "one-alias.two-alias.three-alias"},
+		{"sibling unaffected", "windows/amd64", "one-alias.two-alias.three-alias", []string{"darwin"}, "one-alias.two-alias", false, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv(PlatformEnv, tt.platform)
+			root := fakeCommand(3)
+			root.find(tt.keypath).Platforms = tt.platforms
+			c := root.find(tt.check)
+			got, at := c.checkUnavailable()
+			if got != tt.want {
+				t.Errorf("checkUnavailable() = %v, want %v", got, tt.want)
+			}
+			if got && at.KeyPath != tt.wantAt {
+				t.Errorf("checkUnavailable() at %s, want %s", at.KeyPath, tt.wantAt)
+			}
+			if c.IsAvailable() != !tt.want {
+				t.Errorf("IsAvailable() = %v, want %v", c.IsAvailable(), !tt.want)
+			}
+		})
+	}
+}
+
+func TestCobraCommandSkipsUnavailable(t *testing.T) {
+	t.Setenv(PlatformEnv, "windows/amd64")
+	root := fakeCommand(3)
+	root.find("one-alias.two-alias").Platforms = []string{"linux"}
+	root.addCommand(newCommand("other", "other", "", nil, false, ConcatenateMode.String(), nil))
+
+	cmd := root.CobraCommand()
+	if len(cmd.Commands()) != 1 || cmd.Commands()[0].Use != "other" {
+		t.Errorf("CobraCommand() children = %v, want only other", cmd.Commands())
+	}
+	if !reflect.DeepEqual(cmd.ValidArgs, []string{"other\t"}) {
+		t.Errorf("CobraCommand() ValidArgs = %v, want only other", cmd.ValidArgs)
+	}
+	if got := root.find("one-alias.two-alias").Data(); got != "two-alias (unavailable)" {
+		t.Errorf("Data() = %v, want unavailable marker", got)
+	}
+}
+
 func fakeCommand(depth int) *Command {
 	return fakeCommandWithPrefix(depth, "")
 }
@@ -499,7 +584,7 @@ func fakeCommandWithPrefix(depth int, prefix string) *Command {
 	var cmd *Command
 	for i := 0; i < depth; i++ {
 		name := depthKeys[i+1]
-		cmd = newCommand(prefix+name, prefix+name+"-alias", "", nil, false, ConcatenateMode.String())
+		cmd = newCommand(prefix+name, prefix+name+"-alias", "", nil, false, ConcatenateMode.String(), nil)
 		cmd.addSubstitution(&Substitution{prefix + name, prefix + name + "-sub"})
 		if lastCmd != nil {
 			lastCmd.addCommand(cmd)

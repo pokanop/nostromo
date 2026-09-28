@@ -59,7 +59,7 @@ func setup(t *testing.T) *Server {
 
 func mustAdd(t *testing.T, m *model.Manifest, keyPath, name, description string) {
 	t.Helper()
-	if _, err := m.AddCommand(keyPath, name, description, &model.Code{}, false, ""); err != nil {
+	if _, err := m.AddCommand(keyPath, name, description, &model.Code{}, false, "", nil); err != nil {
 		t.Fatalf("add %s: %s", keyPath, err)
 	}
 }
