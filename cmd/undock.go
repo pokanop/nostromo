@@ -16,7 +16,9 @@ executable.
 
 A manifest added to nostromo using the dock command can be undocked. 
 This will delete the file from the local configuration and the commands
-will no longer be available to run.
+will no longer be available to run. Manifests only pulled in through the
+links of the undocked manifest are removed as well, while manifests still
+linked from another manifest are kept.
 
 Run:
 
