@@ -15,15 +15,15 @@ jobs:
           sudo script -qec "snapcraft export-login --snaps=nostromo --channels=stable,candidate,beta,edge /tmp/snap.login" /tmp/typescript.log || true
           echo "=== pty output ==="
           cat /tmp/typescript.log || true
+          test -s /tmp/snap.login
 
       - name: Set repo secret
-        if: file_exists('/tmp/snap.login') == 'success' && hashFiles('/tmp/snap.login') != ''
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
         run: |
-          test -s /tmp/snap.login
+          gh secret set SNAPCRAFT_STORE_CREDENTAILS -R pokanop/nostromo < /tmp/snap.login || \
           gh secret set SNAPCRAFT_STORE_CREDENTIALS -R pokanop/nostromo < /tmp/snap.login
 
       - name: Cleanup
         if: always()
-        run: sudo rm -f /tmp/snap.login /tmp/typescript.log
+        run: sudo rm -f /tmp/tmp/snap.login /tmp/typescript.log
