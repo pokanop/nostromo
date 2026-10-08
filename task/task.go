@@ -161,7 +161,7 @@ func ShowConfig(asJSON bool, asYAML bool, asTree bool) int {
 
 			if m.IsCore() {
 				log.Bold("\n[config]")
-				logFields(m.Config, verbose)
+				logFields(cfg.Spaceport().Config, verbose)
 			}
 
 			if len(m.Commands) > 0 {
