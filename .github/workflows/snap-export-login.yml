@@ -12,14 +12,18 @@ jobs:
 
       - name: Export login (waits for web approval)
         run: |
-          snapcraft export-login --snaps=nostromo --channels=stable,candidate,beta,edge /tmp/snap.login
+          sudo script -qec "snapcraft export-login --snaps=nostromo --channels=stable,candidate,beta,edge /tmp/snap.login" /tmp/typescript.log || true
+          echo "=== pty output ==="
+          cat /tmp/typescript.log || true
 
       - name: Set repo secret
+        if: file_exists('/tmp/snap.login') == 'success' && hashFiles('/tmp/snap.login') != ''
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
         run: |
+          test -s /tmp/snap.login
           gh secret set SNAPCRAFT_STORE_CREDENTIALS -R pokanop/nostromo < /tmp/snap.login
 
       - name: Cleanup
         if: always()
-        run: rm -f /tmp/snap.login
+        run: sudo rm -f /tmp/snap.login /tmp/typescript.log
