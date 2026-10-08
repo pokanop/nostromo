@@ -10,7 +10,7 @@ import (
 
 func stringWithDefault(prompt, def string) string {
 	var s string
-	log.Boldf(prompt + ": ")
+	log.Boldf("%s: ", prompt)
 	reader := bufio.NewReader(os.Stdin)
 	s, _ = reader.ReadString('\n')
 	s = strings.Trim(s, "\n")

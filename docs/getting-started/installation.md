@@ -14,7 +14,7 @@ The formula lives in the [pokanop/homebrew-pokanop](https://github.com/pokanop/h
 
 ## Go
 
-With Go 1.17 or newer:
+With Go 1.25 or newer:
 
 ```sh
 go install github.com/pokanop/nostromo@latest

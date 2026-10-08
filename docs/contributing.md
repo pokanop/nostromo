@@ -14,7 +14,7 @@ Contributions are what makes the open-source community such an amazing place to 
 
 ## Development setup
 
-`nostromo` is a Go module with no build steps beyond the Go toolchain (Go 1.21 or newer):
+`nostromo` is a Go module with no build steps beyond the Go toolchain (Go 1.25 or newer):
 
 ```sh
 git clone https://github.com/pokanop/nostromo.git

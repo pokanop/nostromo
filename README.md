@@ -125,7 +125,7 @@ winget install pokanop.nostromo
 
 #### From source
 
-Using `go install` (any platform with Go 1.21+):
+Using `go install` (any platform with Go 1.25+):
 
 ```sh
 go install github.com/pokanop/nostromo@latest
