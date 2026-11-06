@@ -54,7 +54,10 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: '~> v2'
+          # Pin to an exact version: the floating '~> v2' resolved to a release
+          # whose winget publisher still emitted the deprecated 1.12.0 manifest
+          # schema. v2.20.0 is the first release that emits 1.28.0.
+          version: 'v2.20.0'
           args: release --clean
         env:
           # GITHUB_TOKEN can only write to this repo; pushing the formula to
